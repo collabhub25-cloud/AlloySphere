@@ -16,7 +16,7 @@ export async function GET(
   try {
     const { userId: otherUserId } = await params;
     const token = extractTokenFromCookies(request);
-    
+
     if (!token) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -30,11 +30,25 @@ export async function GET(
 
     const conversationId = generateConversationId(decoded.userId, otherUserId);
 
-    // Get messages
-    const messages = await Message.find({ conversationId })
-      .sort({ createdAt: 1 })
-      .limit(100)
+    // Cursor-based pagination
+    const url = new URL(request.url);
+    const cursor = url.searchParams.get('cursor');
+    const limit = 20;
+
+    const query: Record<string, unknown> = { conversationId };
+    if (cursor) {
+      query.createdAt = { $lt: new Date(cursor) };
+    }
+
+    // Get messages (newest first for pagination, reverse for display)
+    const messages = await Message.find(query)
+      .sort({ createdAt: -1 })
+      .limit(limit + 1)
       .lean();
+
+    const hasMore = messages.length > limit;
+    const paginatedMessages = messages.slice(0, limit).reverse();
+    const nextCursor = hasMore ? messages[limit]?.createdAt?.toISOString() : null;
 
     // Get other user details
     const otherUser = await User.findById(otherUserId)
@@ -55,6 +69,7 @@ export async function GET(
 
     return NextResponse.json({
       conversationId,
+      nextCursor,
       otherUser: otherUser ? {
         _id: otherUser._id,
         name: otherUser.name,
@@ -63,7 +78,7 @@ export async function GET(
         trustScore: otherUser.trustScore,
         verificationLevel: otherUser.verificationLevel,
       } : null,
-      messages: messages.map(m => ({
+      messages: paginatedMessages.map(m => ({
         _id: m._id,
         senderId: m.senderId,
         receiverId: m.receiverId,

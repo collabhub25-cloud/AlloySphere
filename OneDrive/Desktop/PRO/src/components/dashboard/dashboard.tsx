@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useAuthStore, useUIStore } from '@/store';
+import { AssistantPanel } from '@/components/ai/assistant-panel';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -373,6 +374,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
             </ErrorBoundary>
           </main>
         </div>
+        <AssistantPanel />
       </div>
     </TooltipProvider>
   );
