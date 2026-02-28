@@ -1,6 +1,6 @@
 /**
  * Production Security Middleware
- * Global auth enforcement, security headers, CORS, and rate limiting
+ * Global auth enforcement, security headers, CORS, rate limiting, and role-based page guards
  */
 
 import { NextResponse } from 'next/server';
@@ -20,6 +20,10 @@ const PUBLIC_ROUTES = new Set([
   '/api/auth/register',
   '/api/auth/refresh',
   '/api/auth/logout',
+  '/api/auth/verify-email',
+  '/api/auth/resend-verification',
+  '/api/auth/forgot-password',
+  '/api/auth/reset-password',
   '/api/health',
 ]);
 
@@ -32,6 +36,26 @@ const PUBLIC_PREFIXES = [
 const ADMIN_ROUTES = [
   '/api/admin/',
 ];
+
+/** Public page routes (no auth needed) */
+const PUBLIC_PAGES = new Set([
+  '/',
+  '/login',
+  '/founders',
+  '/investors',
+  '/talent',
+  '/signup/founder',
+  '/signup/investor',
+  '/signup/talent',
+  '/forgot-password',
+]);
+
+/** Dashboard role mapping */
+const DASHBOARD_ROLE_MAP: Record<string, string> = {
+  '/dashboard/founder': 'founder',
+  '/dashboard/investor': 'investor',
+  '/dashboard/talent': 'talent',
+};
 
 // ============================================
 // SECURITY HEADERS
@@ -115,6 +139,19 @@ function isApiRoute(pathname: string): boolean {
   return pathname.startsWith('/api/');
 }
 
+function isPublicPage(pathname: string): boolean {
+  return PUBLIC_PAGES.has(pathname);
+}
+
+function getDashboardRole(pathname: string): string | null {
+  for (const [prefix, role] of Object.entries(DASHBOARD_ROLE_MAP)) {
+    if (pathname === prefix || pathname.startsWith(prefix + '/')) {
+      return role;
+    }
+  }
+  return null;
+}
+
 // ============================================
 // MAIN MIDDLEWARE
 // ============================================
@@ -128,8 +165,31 @@ export async function middleware(request: NextRequest) {
     response.headers.set(key, value);
   }
 
-  // --- Static / non-API routes pass through ---
-  if (!isApiRoute(pathname)) {
+  // --- Static / public pages pass through ---
+  if (!isApiRoute(pathname) && !pathname.startsWith('/dashboard')) {
+    return response;
+  }
+
+  // --- Dashboard Page Guards ---
+  if (pathname.startsWith('/dashboard')) {
+    const accessToken = request.cookies.get('accessToken')?.value;
+
+    if (!accessToken) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+
+    try {
+      const decoded = jwt.verify(accessToken, JWT_SECRET) as { userId: string; email: string; role: string };
+      const requiredRole = getDashboardRole(pathname);
+
+      if (requiredRole && decoded.role !== requiredRole) {
+        // Redirect to their correct dashboard
+        return NextResponse.redirect(new URL(`/dashboard/${decoded.role}`, request.url));
+      }
+    } catch {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+
     return response;
   }
 
@@ -209,6 +269,8 @@ export const config = {
   matcher: [
     // Apply to all API routes
     '/api/:path*',
+    // Apply to dashboard routes for role guards
+    '/dashboard/:path*',
     // Apply security headers to all pages too
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],

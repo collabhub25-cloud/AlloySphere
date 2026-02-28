@@ -140,6 +140,16 @@ export function Dashboard({ onLogout }: DashboardProps) {
 
   if (!user) return null;
 
+  // Inject role accent CSS variable
+  const roleAccentMap: Record<string, string> = {
+    founder: 'var(--accent-founder)',
+    investor: 'var(--accent-investor)',
+    talent: 'var(--accent-talent)',
+  };
+  if (typeof document !== 'undefined') {
+    document.documentElement.style.setProperty('--role-accent', roleAccentMap[user.role] || roleAccentMap.founder);
+  }
+
   const navItems = navigation[user.role] || navigation.founder;
 
   const getVerificationBadge = (level: number) => {
@@ -223,8 +233,8 @@ export function Dashboard({ onLogout }: DashboardProps) {
           <div className="flex flex-col h-full">
             {/* Logo */}
             <div className="flex items-center gap-2 p-4 border-b">
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center flex-shrink-0">
-                <Building2 className="h-5 w-5 text-primary-foreground" />
+              <div className="h-8 w-8 rounded-lg role-accent-bg flex items-center justify-center flex-shrink-0">
+                <Building2 className="h-5 w-5 text-white" />
               </div>
               {sidebarOpen && <span className="text-xl font-bold">CollabHub</span>}
             </div>
