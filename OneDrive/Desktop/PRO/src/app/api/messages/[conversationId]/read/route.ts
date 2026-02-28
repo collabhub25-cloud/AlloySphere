@@ -5,16 +5,16 @@ import { Message, Conversation } from '@/lib/models';
 
 export async function POST(
     request: NextRequest,
-    { params }: { params: { conversationId: string } }
+    { params }: { params: Promise<{ conversationId: string }> }
 ) {
     try {
+        const { conversationId } = await params;
         const authResult = await requireAuth(request);
         if (!authResult.success) {
             return NextResponse.json({ error: authResult.error }, { status: authResult.status });
         }
 
         const { userId } = authResult.user;
-        const conversationId = params.conversationId;
 
         await connectDB();
 

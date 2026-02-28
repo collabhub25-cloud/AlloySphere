@@ -5,9 +5,10 @@ import { Agreement } from '@/lib/models';
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const authResult = await requireAuth(request);
         if (!authResult.success) {
             return NextResponse.json({ error: authResult.error }, { status: authResult.status });
@@ -15,7 +16,7 @@ export async function GET(
 
         await connectDB();
 
-        const agreement = await Agreement.findById(params.id)
+        const agreement = await Agreement.findById(id)
             .populate('parties', 'name email role avatar')
             .populate('startupId', 'name logo industry');
 
