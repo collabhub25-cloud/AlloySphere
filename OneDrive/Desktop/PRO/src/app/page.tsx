@@ -47,7 +47,23 @@ export default function Home() {
           </div>
         </header>
 
-        <main className="flex-1 flex flex-col justify-center px-6">
+        <main className="flex-1 flex flex-col justify-center px-6 relative overflow-hidden">
+          {/* Cinematic background */}
+          <div
+            className="absolute inset-0 -z-10"
+            style={{
+              background: `radial-gradient(circle at 20% 30%, rgba(176,90,79,0.06), transparent 40%),
+                           radial-gradient(circle at 80% 70%, rgba(46,64,87,0.05), transparent 40%)`,
+              animation: 'subtleFloat 12s ease-in-out infinite alternate',
+            }}
+          />
+          <style>{`
+            @keyframes subtleFloat {
+              from { transform: translateY(0px); }
+              to { transform: translateY(-20px); }
+            }
+          `}</style>
+
           <div className="max-w-5xl mx-auto w-full" style={{ paddingTop: '96px', paddingBottom: '80px' }}>
             <h1 className="mb-4">Verified startup<br />collaboration.</h1>
             <p className="max-w-md mb-20" style={{ color: '#6C635C', fontSize: '16px', lineHeight: '1.7' }}>

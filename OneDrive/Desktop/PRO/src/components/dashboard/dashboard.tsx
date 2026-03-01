@@ -48,44 +48,28 @@ const navigation = {
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'startups', label: 'My Startups', icon: Building2 },
     { id: 'applications', label: 'Applications', icon: Users },
-    { id: 'milestones', label: 'Milestones', icon: CheckCircle2 },
-    { id: 'agreements', label: 'Agreements', icon: FileText },
-    { id: 'funding', label: 'Funding', icon: DollarSign },
     { id: 'search', label: 'Search', icon: Search },
     { id: 'alliances', label: 'Alliances', icon: Handshake },
     { id: 'messages', label: 'Messages', icon: MessageSquare },
-    { id: 'kyc', label: 'KYC & Compliance', icon: ShieldCheck },
-    { id: 'verification', label: 'Verification', icon: Shield },
-    { id: 'subscription', label: 'Subscription', icon: CreditCard },
     { id: 'profile', label: 'My Profile', icon: User },
     { id: 'settings', label: 'Settings', icon: Settings },
   ],
-  // Talent - No subscription menu item (free account)
   talent: [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'profile', label: 'My Profile', icon: UserCheck },
-    { id: 'applications', label: 'My Applications', icon: Users },
-    { id: 'milestones', label: 'Active Tasks', icon: CheckCircle2 },
-    { id: 'agreements', label: 'Agreements', icon: FileText },
-    { id: 'earnings', label: 'Earnings', icon: DollarSign },
-    { id: 'search', label: 'Find Work', icon: Search },
-    { id: 'alliances', label: 'Alliances', icon: Handshake },
+    { id: 'search', label: 'Discover', icon: Search },
+    { id: 'applications', label: 'Applications', icon: Users },
+    { id: 'projects', label: 'Projects', icon: Building2 },
     { id: 'messages', label: 'Messages', icon: MessageSquare },
-    { id: 'verification', label: 'Verification', icon: Shield },
+    { id: 'profile', label: 'My Profile', icon: User },
     { id: 'settings', label: 'Settings', icon: Settings },
   ],
-  // Investor - No subscription menu item (free account)
   investor: [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'dealflow', label: 'Deal Flow', icon: DollarSign },
     { id: 'portfolio', label: 'Portfolio', icon: Building2 },
-    { id: 'investments', label: 'Investments', icon: CreditCard },
-    { id: 'agreements', label: 'Agreements', icon: FileText },
     { id: 'search', label: 'Discover', icon: Search },
     { id: 'alliances', label: 'Alliances', icon: Handshake },
     { id: 'messages', label: 'Messages', icon: MessageSquare },
-    { id: 'kyc', label: 'KYC & Compliance', icon: ShieldCheck },
-    { id: 'verification', label: 'Verification', icon: Shield },
     { id: 'profile', label: 'My Profile', icon: User },
     { id: 'settings', label: 'Settings', icon: Settings },
   ],
@@ -167,34 +151,12 @@ export function Dashboard({ onLogout }: DashboardProps) {
   const verificationBadge = getVerificationBadge(user.verificationLevel);
 
   const renderContent = () => {
-    // Handle new pages
-    if (activeTab === 'search') {
-      return <SearchPage />;
-    }
-    if (activeTab === 'verification') {
-      return <VerificationProgress />;
-    }
-    if (activeTab === 'kyc') {
-      return <KycDashboard />;
-    }
-    if (activeTab === 'agreements') {
-      return <AgreementsDashboardWithBoundary />;
-    }
-    if (activeTab === 'subscription') {
-      return <PricingPage />;
-    }
-    if (activeTab === 'messages') {
-      return <MessagingPage />;
-    }
-    if (activeTab === 'profile') {
-      return <ProfilePage />;
-    }
-    if (activeTab === 'alliances') {
-      return <AlliancePage />;
-    }
-    if (activeTab === 'settings') {
-      return <SettingsPage />;
-    }
+    if (activeTab === 'search') return <SearchPage />;
+    if (activeTab === 'messages') return <MessagingPage />;
+    if (activeTab === 'profile') return <ProfilePage />;
+    if (activeTab === 'alliances') return <AlliancePage />;
+    if (activeTab === 'settings') return <SettingsPage />;
+    if (activeTab === 'subscription') return <PricingPage />;
 
     // Handle role-specific dashboards
     // SECURITY FIX: Return AccessDenied for unknown roles instead of defaulting to Founder
@@ -343,13 +305,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
                   {navItems.find(item => item.id === activeTab)?.label || 'Dashboard'}
                 </h1>
 
-                {/* Quick Actions */}
-                {user.role === 'founder' && (activeTab === 'startups' || activeTab === 'dashboard') && (
-                  <CreateStartupModal onSuccess={() => setKey(k => k + 1)} />
-                )}
-                {user.role === 'founder' && activeTab === 'milestones' && (
-                  <CreateMilestoneModal onSuccess={() => setKey(k => k + 1)} />
-                )}
+                {/* Quick Actions removed — startup creation lives inside My Startups */}
               </div>
               <div className="flex items-center gap-4">
                 {/* Notification Dropdown */}
