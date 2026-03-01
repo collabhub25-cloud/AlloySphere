@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuthStore, useUIStore } from '@/store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,7 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { safeLocalStorage, STORAGE_KEYS, getInitials } from '@/lib/client-utils';
 import {
   Users, UserPlus, Clock, Check, X, MessageSquare, Loader2, UserCheck,
-  Building2, Briefcase, TrendingUp
+  Building2, Briefcase, TrendingUp, ExternalLink
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
@@ -57,6 +58,7 @@ const roleIcons: Record<string, React.ReactNode> = {
 
 export function AlliancePage() {
   const { user } = useAuthStore();
+  const router = useRouter();
   const { setActiveTab: setGlobalTab } = useUIStore();
   const [activeTab, setActiveTab] = useState('accepted');
   const [alliances, setAlliances] = useState<Alliance[]>([]);
@@ -292,7 +294,10 @@ export function AlliancePage() {
                             </Avatar>
                             <div>
                               <div className="flex items-center gap-2">
-                                <p className="font-medium">{partner.name}</p>
+                                <p
+                                  className="font-medium cursor-pointer hover:underline"
+                                  onClick={() => router.push(`/profile/${partner._id}`)}
+                                >{partner.name}</p>
                                 <Badge variant="outline" className="gap-1 text-xs">
                                   {roleIcons[partner.role]}
                                   {partner.role}
@@ -328,6 +333,15 @@ export function AlliancePage() {
                                 >
                                   <MessageSquare className="h-4 w-4" />
                                   Message
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="gap-2"
+                                  onClick={() => router.push(`/profile/${partner._id}`)}
+                                >
+                                  <ExternalLink className="h-4 w-4" />
+                                  Profile
                                 </Button>
                                 <Button
                                   variant="ghost"
