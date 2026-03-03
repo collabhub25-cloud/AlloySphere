@@ -7,6 +7,7 @@ import { ThemeProvider } from '@/components/layout/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import Link from 'next/link';
 import { HeroCinematicBackground } from '@/components/landing/hero-cinematic-bg';
+import { InteractiveGlobe } from '@/components/ui/interactive-globe';
 
 export default function Home() {
   const { isAuthenticated, user, isLoading, fetchUser, setLoading } = useAuthStore();
@@ -66,12 +67,46 @@ export default function Home() {
           {/* ——— Cinematic 3D Background Effects ——— */}
           <HeroCinematicBackground mouseX={mousePos.x} mouseY={mousePos.y} />
 
-          <div className="max-w-5xl mx-auto w-full relative" style={{ paddingTop: '96px', paddingBottom: '80px', zIndex: 10 }}>
-            <h1 className="mb-4">Verified startup<br />collaboration.</h1>
-            <p className="max-w-md mb-20" style={{ color: '#6C635C', fontSize: '16px', lineHeight: '1.7' }}>
-              A platform for founders, investors, and talent to work together through trust scores, legal agreements, and milestone payments.
-            </p>
+          <div className="max-w-6xl mx-auto w-full relative" style={{ paddingTop: '64px', paddingBottom: '64px', zIndex: 10 }}>
+            {/* Hero split: Text left, Globe right */}
+            <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-4 mb-16">
+              {/* Left — Text content */}
+              <div className="flex-1">
+                <h1 className="mb-4">Verified startup<br />collaboration.</h1>
+                <p className="max-w-md mb-8" style={{ color: '#6C635C', fontSize: '16px', lineHeight: '1.7' }}>
+                  A platform for founders, investors, and talent to work together through trust scores, legal agreements, and milestone payments.
+                </p>
+                <div className="flex items-center gap-6 text-sm">
+                  <div>
+                    <p className="text-xl font-semibold" style={{ color: '#2A2623' }}>500+</p>
+                    <p style={{ color: '#6C635C' }}>Verified Users</p>
+                  </div>
+                  <div className="w-px h-8" style={{ background: '#D8D2C8' }} />
+                  <div>
+                    <p className="text-xl font-semibold" style={{ color: '#2A2623' }}>50+</p>
+                    <p style={{ color: '#6C635C' }}>Startups</p>
+                  </div>
+                  <div className="w-px h-8" style={{ background: '#D8D2C8' }} />
+                  <div>
+                    <p className="text-xl font-semibold" style={{ color: '#2A2623' }}>Global</p>
+                    <p style={{ color: '#6C635C' }}>Network</p>
+                  </div>
+                </div>
+              </div>
 
+              {/* Right — Interactive Globe */}
+              <div className="hidden lg:flex items-center justify-center flex-shrink-0">
+                <InteractiveGlobe
+                  size={420}
+                  dotColor="rgba(176, 90, 79, ALPHA)"
+                  arcColor="rgba(176, 90, 79, 0.35)"
+                  markerColor="rgba(196, 147, 90, 1)"
+                  autoRotateSpeed={0.0015}
+                />
+              </div>
+            </div>
+
+            {/* Role cards */}
             <div className="grid md:grid-cols-3" style={{ gap: '1px', background: '#D8D2C8', borderRadius: '4px', overflow: 'hidden' }}>
               <Link href="/founders" className="group p-8 transition-colors" style={{ background: '#FBF9F6' }}>
                 <p className="text-sm mb-1" style={{ color: '#6C635C' }}>Founders</p>
