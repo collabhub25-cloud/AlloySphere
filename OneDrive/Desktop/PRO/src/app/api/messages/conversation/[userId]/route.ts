@@ -28,14 +28,27 @@ export async function GET(
 
     await connectDB();
 
-    const conversationId = generateConversationId(decoded.userId, otherUserId);
+    const generatedConversationId = generateConversationId(decoded.userId, otherUserId);
+
+    // Look up the actual Conversation to get its _id (which is what /api/messages/create stores)
+    const conversation = await Conversation.findOne({
+      participants: { $all: [decoded.userId, otherUserId] },
+    }).lean();
+
+    // Query messages by both possible conversationId formats to find all messages
+    const conversationIds: string[] = [generatedConversationId];
+    if (conversation) {
+      conversationIds.push(conversation._id.toString());
+    }
 
     // Cursor-based pagination
     const url = new URL(request.url);
     const cursor = url.searchParams.get('cursor');
     const limit = 20;
 
-    const query: Record<string, unknown> = { conversationId };
+    const query: Record<string, unknown> = {
+      conversationId: { $in: conversationIds }
+    };
     if (cursor) {
       query.createdAt = { $lt: new Date(cursor) };
     }
@@ -57,7 +70,7 @@ export async function GET(
 
     // Mark messages as read
     await Message.updateMany(
-      { conversationId, receiverId: decoded.userId, read: false },
+      { conversationId: { $in: conversationIds }, receiverId: decoded.userId, read: false },
       { $set: { read: true, readAt: new Date() } }
     );
 
@@ -68,7 +81,7 @@ export async function GET(
     );
 
     return NextResponse.json({
-      conversationId,
+      conversationId: conversation?._id?.toString() || generatedConversationId,
       nextCursor,
       otherUser: otherUser ? {
         _id: otherUser._id,

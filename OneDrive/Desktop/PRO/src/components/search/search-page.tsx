@@ -119,6 +119,7 @@ export function SearchPage() {
   const viewProfile = (profileId: string) => {
     safeLocalStorage.setItem(STORAGE_KEYS.VIEW_PROFILE, profileId);
     setActiveTab('profile');
+    window.dispatchEvent(new CustomEvent('viewProfile'));
   };
 
   const searchResults = useCallback(async (pageNum: number = 1) => {

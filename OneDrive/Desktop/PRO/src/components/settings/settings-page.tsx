@@ -56,8 +56,9 @@ export function SettingsPage() {
         setLoading(true);
         try {
             const skillsArray = profile.skills.split(',').map(s => s.trim()).filter(s => s);
-            const res = await fetch('/api/auth/me', {
+            const res = await fetch('/api/users/me', {
                 method: 'PATCH',
+                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     name: profile.name,

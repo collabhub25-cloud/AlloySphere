@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore, useUIStore } from '@/store';
+import { safeLocalStorage, STORAGE_KEYS } from '@/lib/client-utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -37,7 +38,6 @@ import {
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
-import { safeLocalStorage, STORAGE_KEYS } from '@/lib/client-utils';
 import { apiFetch } from '@/lib/api-client';
 
 interface FundingRound {
@@ -299,43 +299,18 @@ export function InvestorDashboard({ activeTab }: InvestorDashboardProps) {
     setSubmitting(false);
   };
 
-  // Handle invest
-  const handleInvest = async () => {
-    if (!selectedRound || !investAmount) return;
-
-    const amount = parseFloat(investAmount);
-    if (isNaN(amount) || amount < selectedRound.minInvestment) {
-      toast.error(`Minimum investment is $${selectedRound.minInvestment.toLocaleString()}`);
+  // Handle contact founder for investment
+  const handleContactFounder = (founderId?: { _id: string; name: string }, startupName?: string) => {
+    if (!founderId) {
+      toast.error('Founder information not available');
       return;
     }
-
-    setSubmitting(true);
-
-    try {
-      const res = await fetch('/api/funding/invest', {
-        credentials: 'include',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          roundId: selectedRound._id,
-          amount,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok && data.checkoutUrl) {
-        window.location.href = data.checkoutUrl;
-      } else {
-        toast.error(data.error || 'Failed to initiate investment');
-      }
-    } catch {
-      toast.error('Failed to initiate investment');
-    }
-
-    setSubmitting(false);
+    // Navigate to messages with this founder
+    safeLocalStorage.setItem(STORAGE_KEYS.MESSAGE_USER, founderId._id);
+    setGlobalTab('messages');
+    window.dispatchEvent(new CustomEvent('navigateToMessages'));
+    setShowInvestModal(false);
+    toast.success(`Opening conversation with ${founderId.name} about ${startupName || 'investment'}`);
   };
 
   // Handle profile update
@@ -583,20 +558,23 @@ export function InvestorDashboard({ activeTab }: InvestorDashboardProps) {
                               <Button
                                 size="sm"
                                 onClick={() => {
-                                  setSelectedRound(round);
-                                  setInvestAmount(round.minInvestment.toString());
-                                  setShowInvestModal(true);
+                                  if (round.startupId.founderId) {
+                                    handleContactFounder(round.startupId.founderId, round.startupId.name);
+                                  } else {
+                                    setSelectedRound(round);
+                                    setShowInvestModal(true);
+                                  }
                                 }}
                                 disabled={(user?.verificationLevel || 0) < 3}
                               >
-                                {(user?.verificationLevel || 0) < 3 ? <Lock className="h-4 w-4 mr-1" /> : null}
-                                Invest
+                                {(user?.verificationLevel || 0) < 3 ? <Lock className="h-4 w-4 mr-1" /> : <Send className="h-4 w-4 mr-1" />}
+                                Contact Founder
                               </Button>
                             </div>
                           </TooltipTrigger>
                           {(user?.verificationLevel || 0) < 3 && (
                             <TooltipContent>
-                              <p>Complete Level 3 verification to invest.</p>
+                              <p>Complete Level 3 verification to contact founders.</p>
                             </TooltipContent>
                           )}
                         </Tooltip>
@@ -609,13 +587,13 @@ export function InvestorDashboard({ activeTab }: InvestorDashboardProps) {
           </CardContent>
         </Card>
 
-        {/* Invest Modal */}
+        {/* Contact Founder Modal (fallback when founder info is missing from the round) */}
         <Dialog open={showInvestModal} onOpenChange={setShowInvestModal}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Invest in {selectedRound?.startupId.name}</DialogTitle>
+              <DialogTitle>Contact {selectedRound?.startupId.name} Founder</DialogTitle>
               <DialogDescription>
-                {selectedRound?.roundName} - Min: ${selectedRound?.minInvestment.toLocaleString()}
+                {selectedRound?.roundName} — Request a pitch and discuss investment terms directly.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
@@ -637,27 +615,26 @@ export function InvestorDashboard({ activeTab }: InvestorDashboardProps) {
                   <span className="ml-2 font-medium">${selectedRound?.valuation.toLocaleString()}</span>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label>Investment Amount ($)</Label>
-                <Input
-                  type="number"
-                  value={investAmount}
-                  onChange={(e) => setInvestAmount(e.target.value)}
-                  placeholder={`Min: $${selectedRound?.minInvestment.toLocaleString()}`}
-                />
-                {investAmount && selectedRound && (
-                  <p className="text-xs text-muted-foreground">
-                    Estimated equity: {((parseFloat(investAmount) / selectedRound.valuation) * 100).toFixed(4)}%
-                  </p>
-                )}
+              <div className="rounded-md border p-3 bg-muted/50">
+                <p className="text-sm text-muted-foreground">
+                  <strong>How it works:</strong> Message the founder to request a pitch. All payments are handled off-platform between you and the startup. Agreements and terms will be managed here on CollabHub.
+                </p>
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowInvestModal(false)}>
                   Cancel
                 </Button>
-                <Button onClick={handleInvest} disabled={submitting}>
-                  {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                  Proceed to Payment
+                <Button
+                  onClick={() => {
+                    if (selectedRound?.startupId.founderId) {
+                      handleContactFounder(selectedRound.startupId.founderId, selectedRound.startupId.name);
+                    } else {
+                      toast.error('Founder information not available for this startup');
+                    }
+                  }}
+                >
+                  <Send className="h-4 w-4 mr-2" />
+                  Message Founder
                 </Button>
               </div>
             </div>
@@ -1066,13 +1043,13 @@ export function InvestorDashboard({ activeTab }: InvestorDashboardProps) {
           </TabsContent>
         </Tabs>
 
-        {/* Invest Modal */}
+        {/* Contact Founder Modal */}
         <Dialog open={showInvestModal} onOpenChange={setShowInvestModal}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Invest in {selectedRound?.startupId.name}</DialogTitle>
+              <DialogTitle>Contact {selectedRound?.startupId.name} Founder</DialogTitle>
               <DialogDescription>
-                {selectedRound?.roundName} - Min: ${selectedRound?.minInvestment.toLocaleString()}
+                {selectedRound?.roundName} — Request a pitch and discuss investment terms directly.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
@@ -1094,27 +1071,26 @@ export function InvestorDashboard({ activeTab }: InvestorDashboardProps) {
                   <span className="ml-2 font-medium">${selectedRound?.valuation.toLocaleString()}</span>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label>Investment Amount ($)</Label>
-                <Input
-                  type="number"
-                  value={investAmount}
-                  onChange={(e) => setInvestAmount(e.target.value)}
-                  placeholder={`Min: $${selectedRound?.minInvestment.toLocaleString()}`}
-                />
-                {investAmount && selectedRound && (
-                  <p className="text-xs text-muted-foreground">
-                    Estimated equity: {((parseFloat(investAmount) / selectedRound.valuation) * 100).toFixed(4)}%
-                  </p>
-                )}
+              <div className="rounded-md border p-3 bg-muted/50">
+                <p className="text-sm text-muted-foreground">
+                  <strong>How it works:</strong> Message the founder to request a pitch. All payments are handled off-platform between you and the startup. Agreements and terms will be managed here on CollabHub.
+                </p>
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowInvestModal(false)}>
                   Cancel
                 </Button>
-                <Button onClick={handleInvest} disabled={submitting}>
-                  {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                  Proceed to Payment
+                <Button
+                  onClick={() => {
+                    if (selectedRound?.startupId.founderId) {
+                      handleContactFounder(selectedRound.startupId.founderId, selectedRound.startupId.name);
+                    } else {
+                      toast.error('Founder information not available for this startup');
+                    }
+                  }}
+                >
+                  <Send className="h-4 w-4 mr-2" />
+                  Message Founder
                 </Button>
               </div>
             </div>

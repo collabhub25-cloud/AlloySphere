@@ -89,14 +89,30 @@ export function Dashboard({ onLogout }: DashboardProps) {
   const { sidebarOpen, toggleSidebar, setActiveTab, activeTab } = useUIStore();
   const [key, setKey] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [viewProfileId, setViewProfileId] = useState<string | undefined>(undefined);
 
   // Check for profile view from localStorage (safe client-side only)
   useEffect(() => {
     const viewProfile = safeLocalStorage.getItem(STORAGE_KEYS.VIEW_PROFILE);
     if (viewProfile) {
+      setViewProfileId(viewProfile);
       setActiveTab('profile');
       safeLocalStorage.removeItem(STORAGE_KEYS.VIEW_PROFILE);
     }
+  }, [setActiveTab]);
+
+  // Also listen for VIEW_PROFILE changes when already on profile tab
+  useEffect(() => {
+    const handleViewProfile = () => {
+      const viewProfile = safeLocalStorage.getItem(STORAGE_KEYS.VIEW_PROFILE);
+      if (viewProfile) {
+        setViewProfileId(viewProfile);
+        setActiveTab('profile');
+        safeLocalStorage.removeItem(STORAGE_KEYS.VIEW_PROFILE);
+      }
+    };
+    window.addEventListener('viewProfile', handleViewProfile);
+    return () => window.removeEventListener('viewProfile', handleViewProfile);
   }, [setActiveTab]);
 
   // Refresh user data using Zustand token with proper error handling
@@ -152,7 +168,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
   const renderContent = () => {
     if (activeTab === 'search') return <SearchPage />;
     if (activeTab === 'messages') return <MessagingPage />;
-    if (activeTab === 'profile') return <ProfilePage />;
+    if (activeTab === 'profile') return <ProfilePage profileId={viewProfileId} />;
     if (activeTab === 'alliances') return <AlliancePage />;
     if (activeTab === 'settings') return <SettingsPage />;
     if (activeTab === 'subscription') return <PricingPage />;
@@ -174,6 +190,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
   };
 
   const handleProfileClick = () => {
+    setViewProfileId(undefined); // Reset to show own profile
     setActiveTab('profile');
   };
 

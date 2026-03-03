@@ -1,15 +1,27 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store';
 import { ThemeProvider } from '@/components/layout/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import Link from 'next/link';
+import { HeroCinematicBackground } from '@/components/landing/hero-cinematic-bg';
 
 export default function Home() {
   const { isAuthenticated, user, isLoading, fetchUser, setLoading } = useAuthStore();
   const router = useRouter();
+
+  /* ── Parallax mouse tracking state ── */
+  const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setMousePos({
+      x: (e.clientX - rect.left) / rect.width,
+      y: (e.clientY - rect.top) / rect.height,
+    });
+  }, []);
 
   useEffect(() => {
     const check = async () => {
@@ -47,24 +59,14 @@ export default function Home() {
           </div>
         </header>
 
-        <main className="flex-1 flex flex-col justify-center px-6 relative overflow-hidden">
-          {/* Cinematic background */}
-          <div
-            className="absolute inset-0 -z-10"
-            style={{
-              background: `radial-gradient(circle at 20% 30%, rgba(176,90,79,0.06), transparent 40%),
-                           radial-gradient(circle at 80% 70%, rgba(46,64,87,0.05), transparent 40%)`,
-              animation: 'subtleFloat 12s ease-in-out infinite alternate',
-            }}
-          />
-          <style>{`
-            @keyframes subtleFloat {
-              from { transform: translateY(0px); }
-              to { transform: translateY(-20px); }
-            }
-          `}</style>
+        <main
+          className="flex-1 flex flex-col justify-center px-6 relative overflow-hidden"
+          onMouseMove={handleMouseMove}
+        >
+          {/* ——— Cinematic 3D Background Effects ——— */}
+          <HeroCinematicBackground mouseX={mousePos.x} mouseY={mousePos.y} />
 
-          <div className="max-w-5xl mx-auto w-full" style={{ paddingTop: '96px', paddingBottom: '80px' }}>
+          <div className="max-w-5xl mx-auto w-full relative" style={{ paddingTop: '96px', paddingBottom: '80px', zIndex: 10 }}>
             <h1 className="mb-4">Verified startup<br />collaboration.</h1>
             <p className="max-w-md mb-20" style={{ color: '#6C635C', fontSize: '16px', lineHeight: '1.7' }}>
               A platform for founders, investors, and talent to work together through trust scores, legal agreements, and milestone payments.
