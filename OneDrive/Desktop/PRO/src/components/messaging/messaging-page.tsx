@@ -17,7 +17,7 @@ import { useAuthStore, useUIStore } from '@/store';
 import { safeLocalStorage, STORAGE_KEYS, getInitials } from '@/lib/client-utils';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
-
+import { StatusBadge, UserActionsMenu, MessageActions } from '@/components/ui/messaging-conversation';
 interface Conversation {
   _id: string;
   otherUser: {
@@ -429,27 +429,35 @@ export function MessagingPage() {
                     {getInitials(otherUser?.name)}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1">
-                  <p className="font-medium">{otherUser?.name || 'Loading...'}</p>
+                <div className="flex-1 flex flex-col justify-center">
+                  <div className="flex items-center gap-2 font-medium">
+                    {otherUser?.name || 'Loading...'}
+                  </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-xs capitalize">
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground mr-1">
+                      <StatusBadge status="online" /> Online
+                    </div>
+                    <Badge variant="outline" className="text-xs capitalize h-5 px-1.5">
                       {otherUser?.role}
                     </Badge>
                     {otherUser && (
-                      <Badge className={`text-xs ${getVerificationBadge(otherUser.verificationLevel)} text-white`}>
+                      <Badge className={`h-5 px-1.5 text-xs ${getVerificationBadge(otherUser.verificationLevel)} text-white`}>
                         Lv.{otherUser.verificationLevel}
                       </Badge>
                     )}
                   </div>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => {
-                  if (otherUser) {
-                    setActiveTab('profile');
-                    safeLocalStorage.setItem(STORAGE_KEYS.VIEW_PROFILE, otherUser._id);
-                  }
-                }}>
-                  <User className="h-5 w-5" />
-                </Button>
+                <div className="flex items-center gap-1">
+                  <Button variant="ghost" size="icon" onClick={() => {
+                    if (otherUser) {
+                      setActiveTab('profile');
+                      safeLocalStorage.setItem(STORAGE_KEYS.VIEW_PROFILE, otherUser._id);
+                    }
+                  }}>
+                    <User className="h-5 w-5 text-muted-foreground" />
+                  </Button>
+                  <UserActionsMenu />
+                </div>
               </div>
 
               {/* Messages */}
@@ -487,34 +495,55 @@ export function MessagingPage() {
                         {dateMessages.map((message) => (
                           <div
                             key={message._id}
-                            className={`flex ${message.isMine ? 'justify-end' : 'justify-start'}`}
+                            className={`flex group my-1 ${message.isMine ? 'justify-end' : 'justify-start'}`}
                           >
-                            <div
-                              className={`max-w-[65%] px-4 py-2.5 rounded-2xl ${message.isMine
-                                ? 'bg-primary text-primary-foreground rounded-tr-sm'
-                                : 'bg-muted rounded-tl-sm'
-                                }`}
-                            >
-                              {message.attachments && message.attachments.length > 0 && (
-                                <div className="flex gap-2 mb-2 flex-wrap">
-                                  {message.attachments.map((url, i) => (
-                                    <img key={i} src={url} alt="attachment" className="max-w-[200px] h-auto rounded-lg border border-primary-foreground/20" />
-                                  ))}
-                                </div>
+                            <div className={`flex items-start gap-2 max-w-[80%] ${message.isMine ? 'flex-row-reverse' : ''}`}>
+                              {!message.isMine && (
+                                <Avatar className="h-8 w-8 shrink-0 mt-1">
+                                  <AvatarImage src={otherUser?.avatar} />
+                                  <AvatarFallback>{getInitials(otherUser?.name)}</AvatarFallback>
+                                </Avatar>
                               )}
-                              <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                              <div className={`flex items-center gap-1.5 mt-1.5 ${message.isMine ? 'justify-end' : 'justify-start'
-                                }`}>
-                                <span className={`text-[10px] ${message.isMine ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
-                                  {new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                </span>
-                                {message.isMine && (
-                                  message.read ? (
-                                    <CheckCheck className="h-3 w-3 text-primary-foreground/70" />
-                                  ) : (
-                                    <Check className="h-3 w-3 text-primary-foreground/70" />
-                                  )
-                                )}
+
+                              <div>
+                                <div
+                                  className={`px-4 py-2.5 rounded-2xl ${message.isMine
+                                    ? 'bg-[#2A2623] text-[#FBF9F6] rounded-tr-sm'
+                                    : 'bg-muted rounded-tl-sm'
+                                    }`}
+                                >
+                                  {message.attachments && message.attachments.length > 0 && (
+                                    <div className="flex gap-2 mb-2 flex-wrap">
+                                      {message.attachments.map((url, i) => (
+                                        <img key={i} src={url} alt="attachment" className="max-w-[200px] h-auto rounded-lg border border-primary-foreground/20" />
+                                      ))}
+                                    </div>
+                                  )}
+                                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                                </div>
+                                <div className={`flex items-center gap-2 mt-1 ${message.isMine ? 'justify-end' : 'justify-start'
+                                  }`}>
+                                  {message.isMine && (
+                                    <div className="opacity-0 transition-opacity group-hover:opacity-100">
+                                      <MessageActions isMe={true} />
+                                    </div>
+                                  )}
+                                  <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                    {new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    {message.isMine && (
+                                      message.read ? (
+                                        <CheckCheck className="h-3 w-3" />
+                                      ) : (
+                                        <Check className="h-3 w-3" />
+                                      )
+                                    )}
+                                  </span>
+                                  {!message.isMine && (
+                                    <div className="opacity-0 transition-opacity group-hover:opacity-100">
+                                      <MessageActions isMe={false} />
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           </div>
