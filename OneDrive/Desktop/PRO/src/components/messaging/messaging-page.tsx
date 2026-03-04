@@ -351,9 +351,9 @@ export function MessagingPage() {
   return (
     <div className="h-[calc(100vh-160px)] min-h-[500px]">
       <Card className="h-full">
-        <div className="grid h-full" style={{ gridTemplateColumns: selectedConversation ? '280px 1fr 280px' : '1fr' }}>
+        <div className="grid h-full" style={{ gridTemplateColumns: selectedConversation ? '300px 1fr 260px' : '1fr' }}>
           {/* Conversations List */}
-          <div className={`border-r ${selectedConversation ? 'hidden md:block md:w-80' : 'w-full'}`}>
+          <div className={`border-r overflow-hidden ${selectedConversation ? 'hidden md:block' : 'w-full'}`}>
             <CardHeader className="border-b">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg">Messages</CardTitle>
@@ -417,7 +417,7 @@ export function MessagingPage() {
 
           {/* Chat Window */}
           {selectedConversation ? (
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col overflow-hidden">
               {/* Chat Header */}
               <div className="flex items-center gap-3 p-4 border-b">
                 <Button variant="ghost" size="icon" className="md:hidden" onClick={handleBack}>
@@ -429,7 +429,7 @@ export function MessagingPage() {
                     {getInitials(otherUser?.name)}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1 flex flex-col justify-center">
+                <div className="flex-1 flex flex-col justify-center min-w-0">
                   <div className="flex items-center gap-2 font-medium">
                     {otherUser?.name || 'Loading...'}
                   </div>
@@ -605,7 +605,7 @@ export function MessagingPage() {
 
           {/* Right Info Panel */}
           {selectedConversation && otherUser && (
-            <div className="hidden md:block border-l overflow-y-auto">
+            <div className="hidden md:block border-l overflow-y-auto overflow-x-hidden">
               <div className="p-4 text-center">
                 <Avatar className="h-16 w-16 mx-auto mb-3">
                   <AvatarImage src={otherUser.avatar} />

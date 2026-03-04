@@ -1,11 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Check, Zap, Building2, Loader2, Crown } from 'lucide-react';
+import { Check, Loader2, Crown } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { useAuthStore } from '@/store';
 import { toast } from 'sonner';
-import { apiFetch } from '@/lib/api-client';
+import { Pricing } from '@/components/ui/pricing';
 
 // Load Razorpay Script dynamically
 const loadRazorpayScript = () => {
@@ -18,80 +17,74 @@ const loadRazorpayScript = () => {
   });
 };
 
-interface Plan {
-  name: string;
-  price: number;
-  priceId?: string;
-  features: {
-    maxProjects: number;
-    maxTeamMembers: number;
-    profileBoost: boolean;
-    advancedAnalytics: boolean;
-    earlyDealAccess: boolean;
-    prioritySupport: boolean;
-  };
-}
-
 interface Subscription {
   plan: string;
   status: string;
   currentPeriodEnd?: string;
 }
 
-// Founder-only plans
-const founderPlans: Record<string, Plan> = {
-  free_founder: {
-    name: 'Free',
-    price: 0,
-    features: {
-      maxProjects: 1,
-      maxTeamMembers: 5,
-      profileBoost: false,
-      advancedAnalytics: false,
-      earlyDealAccess: false,
-      prioritySupport: false,
-    },
+// Map founder plans to PricingPlan format for the new Pricing component
+const founderPricingPlans = [
+  {
+    name: "PRO",
+    price: "29",
+    yearlyPrice: "23",
+    period: "per month",
+    features: [
+      "5 active projects",
+      "15 team members",
+      "Profile boost",
+      "Advanced analytics",
+      "Email support",
+    ],
+    description: "Great for early-stage founders building their first startup",
+    buttonText: "Upgrade to Pro",
+    href: "/sign-up",
+    isPopular: false,
+    planKey: "pro_founder",
   },
-  pro_founder: {
-    name: 'Pro',
-    price: 2900, // $29 -> will display properly format wise. Real charge is ₹499 in INR
-    priceId: 'price_pro_founder_monthly',
-    features: {
-      maxProjects: 5,
-      maxTeamMembers: 15,
-      profileBoost: true,
-      advancedAnalytics: true,
-      earlyDealAccess: false,
-      prioritySupport: false,
-    },
+  {
+    name: "SCALE",
+    price: "99",
+    yearlyPrice: "79",
+    period: "per month",
+    features: [
+      "20 active projects",
+      "50 team members",
+      "Profile boost",
+      "Advanced analytics",
+      "Early deal access",
+      "Priority support",
+      "Team collaboration",
+    ],
+    description: "Ideal for growing teams and scaling startups",
+    buttonText: "Get Started",
+    href: "/sign-up",
+    isPopular: true,
+    planKey: "scale_founder",
   },
-  scale_founder: {
-    name: 'Scale',
-    price: 9900, // $99
-    priceId: 'price_scale_founder_monthly',
-    features: {
-      maxProjects: 20,
-      maxTeamMembers: 50,
-      profileBoost: true,
-      advancedAnalytics: true,
-      earlyDealAccess: true,
-      prioritySupport: true,
-    },
+  {
+    name: "ENTERPRISE",
+    price: "299",
+    yearlyPrice: "239",
+    period: "per month",
+    features: [
+      "Unlimited projects",
+      "Unlimited team members",
+      "Profile boost",
+      "Advanced analytics",
+      "Early deal access",
+      "Priority support",
+      "Custom integrations",
+      "Dedicated account manager",
+    ],
+    description: "For large organizations with specific needs",
+    buttonText: "Contact Sales",
+    href: "/contact",
+    isPopular: false,
+    planKey: "enterprise_founder",
   },
-  enterprise_founder: {
-    name: 'Enterprise',
-    price: 29900, // $299
-    priceId: 'price_enterprise_founder_monthly',
-    features: {
-      maxProjects: -1,
-      maxTeamMembers: -1,
-      profileBoost: true,
-      advancedAnalytics: true,
-      earlyDealAccess: true,
-      prioritySupport: true,
-    },
-  },
-};
+];
 
 export function PricingPage() {
   const { user } = useAuthStore();
@@ -100,7 +93,6 @@ export function PricingPage() {
   const [processing, setProcessing] = useState<string | null>(null);
 
   const fetchSubscription = useCallback(async () => {
-
     try {
       const response = await fetch('/api/subscriptions', {
         credentials: 'include',
@@ -122,6 +114,9 @@ export function PricingPage() {
   }, [fetchSubscription]);
 
   const handleUpgrade = async (planKey: string) => {
+    // The new Pricing component doesn't offer a 'free_founder' option for upgrade,
+    // so this check might be less relevant if only paid plans are presented.
+    // However, keeping it for robustness.
     if (planKey === 'free_founder') return;
     setProcessing(planKey);
 
@@ -133,6 +128,10 @@ export function PricingPage() {
     }
 
     try {
+      // The create-order endpoint should ideally take the planKey to create an order for that specific plan.
+      // Assuming the backend handles which plan to subscribe to based on context or a default PRO plan.
+      // If the backend needs the planKey, it should be passed in the body:
+      // body: JSON.stringify({ planKey }),
       const orderResp = await fetch('/api/payments/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -150,7 +149,7 @@ export function PricingPage() {
         amount: orderData.amount,
         currency: orderData.currency,
         name: "CollabHub",
-        description: "PRO Subscription",
+        description: "PRO Subscription", // This description might need to be dynamic based on planKey
         order_id: orderData.orderId,
         handler: async function (response: any) {
           try {
@@ -197,8 +196,13 @@ export function PricingPage() {
     toast.error('Account portal management is currently being migrated.');
   };
 
-  const formatPrice = (cents: number) => {
-    return '$' + (cents / 100).toFixed(0);
+  // Handle plan selection from the new Pricing component
+  const handlePlanSelect = (plan: { name: string; href: string }, _isMonthly: boolean) => {
+    // Map plan name back to plan key
+    const selected = founderPricingPlans.find(p => p.name === plan.name);
+    if (selected) {
+      handleUpgrade(selected.planKey);
+    }
   };
 
   // Non-founders see a free account message
@@ -279,17 +283,9 @@ export function PricingPage() {
     );
   }
 
-  // Founder view - show pricing plans
+  // Founder view - show animated pricing plans
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div className="text-center space-y-4">
-        <h1 className="text-3xl font-bold">Choose Your Plan</h1>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
-          Select the perfect plan for your startup. Upgrade anytime to unlock more features.
-        </p>
-      </div>
-
       {/* Current Subscription Status */}
       {subscription && subscription.plan !== 'free_founder' && (
         <Card className="bg-primary/5 border-primary/20">
@@ -319,96 +315,13 @@ export function PricingPage() {
         </Card>
       )}
 
-      {/* Plan Cards */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {Object.entries(founderPlans).map(([key, plan]) => {
-          const isCurrentPlan = subscription?.plan === key || subscription?.plan === 'pro';
-          const isPopular = key === 'pro_founder';
-
-          return (
-            <Card
-              key={key}
-              className={`relative const isCurrentPlan = subscription?.plan === key || (subscription?.plan === \'pro\' && key === \'pro_founder\');${isPopular ? 'border-primary shadow-lg' : ''} const isCurrentPlan = subscription?.plan === key || (subscription?.plan === \'pro\' && key === \'pro_founder\');${isCurrentPlan ? 'ring-2 ring-primary' : ''}`}
-            >
-        {isPopular && (
-          <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">
-            Most Popular
-          </Badge>
-        )}
-        {isCurrentPlan && (
-          <Badge variant="secondary" className="absolute -top-3 right-4">
-            Current Plan
-          </Badge>
-        )}
-        <CardHeader>
-          <CardTitle>{plan.name}</CardTitle>
-          <CardDescription>
-            <span className="text-3xl font-bold">{formatPrice(plan.price)}</span>
-            <span className="text-muted-foreground">/month</span>
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Check className={`h-4 w-4 const isCurrentPlan = subscription?.plan === key || (subscription?.plan === \'pro\' && key === \'pro_founder\');${plan.features.maxProjects > 0 ? 'text-green-500' : 'text-muted-foreground'}`} />
-              <span className="text-sm">
-                {plan.features.maxProjects === -1 ? 'Unlimited' : plan.features.maxProjects} active projects
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Check className={`h-4 w-4 const isCurrentPlan = subscription?.plan === key || (subscription?.plan === \'pro\' && key === \'pro_founder\');${plan.features.maxTeamMembers > 0 ? 'text-green-500' : 'text-muted-foreground'}`} />
-              <span className="text-sm">
-                {plan.features.maxTeamMembers === -1 ? 'Unlimited' : plan.features.maxTeamMembers} team members
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Check className={`h-4 w-4 const isCurrentPlan = subscription?.plan === key || (subscription?.plan === \'pro\' && key === \'pro_founder\');${plan.features.profileBoost ? 'text-green-500' : 'text-muted-foreground'}`} />
-              <span className="text-sm">Profile boost</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Check className={`h-4 w-4 const isCurrentPlan = subscription?.plan === key || (subscription?.plan === \'pro\' && key === \'pro_founder\');${plan.features.advancedAnalytics ? 'text-green-500' : 'text-muted-foreground'}`} />
-              <span className="text-sm">Advanced analytics</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Check className={`h-4 w-4 const isCurrentPlan = subscription?.plan === key || (subscription?.plan === \'pro\' && key === \'pro_founder\');${plan.features.earlyDealAccess ? 'text-green-500' : 'text-muted-foreground'}`} />
-              <span className="text-sm">Early deal access</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Check className={`h-4 w-4 const isCurrentPlan = subscription?.plan === key || (subscription?.plan === \'pro\' && key === \'pro_founder\');${plan.features.prioritySupport ? 'text-green-500' : 'text-muted-foreground'}`} />
-              <span className="text-sm">Priority support</span>
-            </div>
-          </div>
-        </CardContent>
-        <CardFooter>
-          {isCurrentPlan ? (
-            <Button variant="outline" className="w-full" disabled>
-              Current Plan
-            </Button>
-          ) : key === 'free_founder' ? (
-            <Button variant="outline" className="w-full" disabled={subscription?.plan !== 'free_founder' && subscription?.plan !== 'pro'}>
-              {subscription?.plan === 'free_founder' ? 'Current Plan' : 'Downgrade'}
-            </Button>
-          ) : (
-            <Button
-              className="w-full"
-              onClick={() => handleUpgrade(key)}
-              disabled={processing === key}
-            >
-              {processing === key ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <>
-                  <Zap className="h-4 w-4 mr-2" />
-                  Upgrade
-                </>
-              )}
-            </Button>
-          )}
-        </CardFooter>
-      </Card>
-      );
-        })}
+      {/* Animated Pricing Component */}
+      <Pricing
+        plans={founderPricingPlans}
+        title="Choose Your Plan"
+        description={`Select the perfect plan for your startup.\nUpgrade anytime to unlock more features and scale your team.`}
+        onPlanSelect={handlePlanSelect}
+      />
     </div>
-    </div >
   );
 }

@@ -6,6 +6,7 @@ import { useAuthStore, useUIStore } from '@/store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -458,10 +459,7 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
             <Tooltip>
               <TooltipTrigger asChild>
                 <div>
-                  <Button onClick={() => setShowCreateStartup(true)} disabled={(user?.verificationLevel || 0) < 2}>
-                    {(user?.verificationLevel || 0) < 2 ? <Lock className="h-4 w-4 mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
-                    New Startup
-                  </Button>
+                  <InteractiveHoverButton text="New Startup" onClick={() => setShowCreateStartup(true)} disabled={(user?.verificationLevel || 0) < 2} className="w-36" />
                 </div>
               </TooltipTrigger>
               {(user?.verificationLevel || 0) < 2 && (
@@ -683,10 +681,7 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
                 <Button type="button" variant="outline" onClick={() => setShowCreateStartup(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={submitting}>
-                  {submitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
-                  Create Startup
-                </Button>
+                <InteractiveHoverButton type="submit" disabled={submitting} text={submitting ? 'Creating...' : 'Create Startup'} className="w-40" />
               </DialogFooter>
             </form>
           </DialogContent>
@@ -705,10 +700,7 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
             <Tooltip>
               <TooltipTrigger asChild>
                 <div>
-                  <Button onClick={() => setShowCreateStartup(true)} disabled={(user?.verificationLevel || 0) < 2}>
-                    {(user?.verificationLevel || 0) < 2 ? <Lock className="h-4 w-4 mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
-                    Create Startup
-                  </Button>
+                  <InteractiveHoverButton text="Create Startup" onClick={() => setShowCreateStartup(true)} disabled={(user?.verificationLevel || 0) < 2} className="w-40" />
                 </div>
               </TooltipTrigger>
               {(user?.verificationLevel || 0) < 2 && (
@@ -732,10 +724,7 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
               <p className="text-muted-foreground text-center mb-4">
                 Create your first startup to start building your team
               </p>
-              <Button onClick={() => setShowCreateStartup(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Create Startup
-              </Button>
+              <InteractiveHoverButton text="Create Startup" onClick={() => setShowCreateStartup(true)} className="w-40" />
             </CardContent>
           </Card>
         ) : (
@@ -874,10 +863,7 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
                 <Button type="button" variant="outline" onClick={() => setShowCreateStartup(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={submitting}>
-                  {submitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
-                  Create Startup
-                </Button>
+                <InteractiveHoverButton type="submit" disabled={submitting} text={submitting ? 'Creating...' : 'Create Startup'} className="w-40" />
               </DialogFooter>
             </form>
           </DialogContent>
@@ -965,10 +951,7 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
                 <Button type="button" variant="outline" onClick={() => setShowEditStartup(null)}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={submitting}>
-                  {submitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
-                  Save Changes
-                </Button>
+                <InteractiveHoverButton type="submit" disabled={submitting} text={submitting ? 'Saving...' : 'Save Changes'} className="w-40" />
               </DialogFooter>
             </form>
           </DialogContent>
@@ -1105,10 +1088,7 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
             <Tooltip>
               <TooltipTrigger asChild>
                 <div>
-                  <Button onClick={() => setShowCreateFundingRound(true)} disabled={(user?.verificationLevel || 0) < 3}>
-                    {(user?.verificationLevel || 0) < 3 ? <Lock className="h-4 w-4 mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
-                    Create Funding Round
-                  </Button>
+                  <InteractiveHoverButton text="Create Funding Round" onClick={() => setShowCreateFundingRound(true)} disabled={(user?.verificationLevel || 0) < 3} className="w-52" />
                 </div>
               </TooltipTrigger>
               {(user?.verificationLevel || 0) < 3 && (
@@ -1221,10 +1201,7 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
                 <Button type="button" variant="outline" onClick={() => setShowCreateFundingRound(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={submitting}>
-                  {submitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
-                  Create Round
-                </Button>
+                <InteractiveHoverButton type="submit" disabled={submitting} text={submitting ? 'Creating...' : 'Create Round'} className="w-40" />
               </DialogFooter>
             </form>
           </DialogContent>

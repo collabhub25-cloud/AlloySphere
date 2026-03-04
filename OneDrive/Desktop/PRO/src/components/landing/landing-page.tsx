@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Rocket, Users, Shield, Zap, ChevronRight, Check, Star, 
-  TrendingUp, Handshake, FileCheck, Award, Building2, 
+import {
+  Rocket, Users, Shield, Zap, ChevronRight, Check, Star,
+  TrendingUp, Handshake, FileCheck, Award, Building2,
   Lightbulb, Target, Globe, Menu, X
 } from 'lucide-react';
 
@@ -130,7 +131,7 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
 
           <div className="hidden md:flex items-center gap-3">
             <Button variant="ghost" onClick={onLogin}>Log In</Button>
-            <Button onClick={onRegister}>Get Started</Button>
+            <InteractiveHoverButton text="Get Started" onClick={onRegister} className="w-36" />
           </div>
 
           {/* Mobile Menu Button */}
@@ -152,7 +153,7 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
               <a href="#about" className="block text-sm font-medium hover:text-primary">About</a>
               <div className="flex gap-2 pt-4 border-t">
                 <Button variant="outline" className="flex-1" onClick={onLogin}>Log In</Button>
-                <Button className="flex-1" onClick={onRegister}>Get Started</Button>
+                <InteractiveHoverButton text="Get Started" onClick={onRegister} className="flex-1" />
               </div>
             </div>
           </div>
@@ -174,15 +175,12 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
               & Investors
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              The all-in-one platform connecting founders, talents, and investors. 
-              Verified collaborations, automated agreements, milestone-based payments, 
+              The all-in-one platform connecting founders, talents, and investors.
+              Verified collaborations, automated agreements, milestone-based payments,
               and trust scoring.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="text-lg px-8" onClick={onRegister}>
-                Start Building Free
-                <ChevronRight className="ml-2 h-5 w-5" />
-              </Button>
+              <InteractiveHoverButton text="Start Building Free" onClick={onRegister} className="w-52 p-3 text-lg" />
               <Button size="lg" variant="outline" className="text-lg px-8" onClick={onLogin}>
                 Watch Demo
               </Button>
@@ -210,7 +208,7 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
               Everything You Need to Build
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Comprehensive tools for founders, talents, and investors to collaborate 
+              Comprehensive tools for founders, talents, and investors to collaborate
               effectively and build successful startups.
             </p>
           </div>
@@ -322,8 +320,8 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
 
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {pricingPlans.map((plan, index) => (
-              <Card 
-                key={index} 
+              <Card
+                key={index}
                 className={`relative ${plan.popular ? 'border-primary shadow-lg scale-105' : 'border-border/50'}`}
               >
                 {plan.popular && (
@@ -350,13 +348,17 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
                   </ul>
                 </CardContent>
                 <CardFooter>
-                  <Button 
-                    className="w-full" 
-                    variant={plan.popular ? 'default' : 'outline'}
-                    onClick={onRegister}
-                  >
-                    {plan.cta}
-                  </Button>
+                  {plan.popular ? (
+                    <InteractiveHoverButton text={plan.cta} onClick={onRegister} className="w-full" />
+                  ) : (
+                    <Button
+                      className="w-full"
+                      variant="outline"
+                      onClick={onRegister}
+                    >
+                      {plan.cta}
+                    </Button>
+                  )}
                 </CardFooter>
               </Card>
             ))}
@@ -409,10 +411,7 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
           <p className="text-lg opacity-90 mb-8 max-w-2xl mx-auto">
             Join thousands of founders, talents, and investors building the future together.
           </p>
-          <Button size="lg" variant="secondary" className="text-lg px-8" onClick={onRegister}>
-            Get Started Free
-            <ChevronRight className="ml-2 h-5 w-5" />
-          </Button>
+          <InteractiveHoverButton text="Get Started Free" onClick={onRegister} className="w-52 p-3 text-lg border-primary-foreground" />
         </div>
       </section>
 
@@ -428,7 +427,7 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
                 <span className="text-xl font-bold">CollabHub</span>
               </div>
               <p className="text-sm text-muted-foreground">
-                The AI-powered startup collaboration platform connecting verified talents, 
+                The AI-powered startup collaboration platform connecting verified talents,
                 founders, and investors.
               </p>
             </div>

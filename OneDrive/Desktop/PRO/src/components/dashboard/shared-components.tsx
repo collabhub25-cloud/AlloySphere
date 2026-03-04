@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { LucideIcon, ArrowUpRight, Sparkles } from 'lucide-react';
 import { PlanType, getPlanDisplayName, FOUNDER_PLAN_FEATURES, FounderPlanType } from '@/lib/subscription/features';
@@ -166,10 +167,7 @@ export function EmptyState({ icon: Icon, title, description, action }: EmptyStat
         <h3 className="text-lg font-semibold mb-2">{title}</h3>
         <p className="text-muted-foreground max-w-sm mb-4">{description}</p>
         {action && (
-          <Button onClick={action.onClick} className="gap-2">
-            <Sparkles className="h-4 w-4" />
-            {action.label}
-          </Button>
+          <InteractiveHoverButton text={action.label} onClick={action.onClick} className="w-44" />
         )}
       </CardContent>
     </Card>
@@ -201,7 +199,7 @@ export function SubscriptionBadge({ plan, role, showUpgrade = false, onUpgrade }
       </Badge>
     );
   }
-  
+
   // Founders with no plan show "Free"
   if (!plan || plan === 'free' || plan === 'free_founder') {
     return (
@@ -210,9 +208,9 @@ export function SubscriptionBadge({ plan, role, showUpgrade = false, onUpgrade }
           Free
         </Badge>
         {showUpgrade && onUpgrade && (
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             className="h-6 text-xs text-primary"
             onClick={onUpgrade}
           >
@@ -222,9 +220,9 @@ export function SubscriptionBadge({ plan, role, showUpgrade = false, onUpgrade }
       </div>
     );
   }
-  
+
   const colorClass = PLAN_COLORS[plan] || PLAN_COLORS.free_founder;
-  
+
   return (
     <div className="flex items-center gap-2">
       <Badge className={`${colorClass} font-medium`}>
@@ -238,13 +236,13 @@ export function SubscriptionBadge({ plan, role, showUpgrade = false, onUpgrade }
 // PLAN LIMIT DISPLAY COMPONENT
 // ============================================
 
-export function PlanLimitDisplay({ 
-  plan, 
+export function PlanLimitDisplay({
+  plan,
   role,
-  feature, 
-  currentCount, 
+  feature,
+  currentCount,
   showUpgradeCTA = true,
-  onUpgrade 
+  onUpgrade
 }: PlanLimitDisplayProps) {
   // Non-founders have no limits
   if (role && role !== 'founder') {
@@ -258,7 +256,7 @@ export function PlanLimitDisplay({
       </div>
     );
   }
-  
+
   // Get features for founder plan
   const founderPlan = (plan?.includes('_founder') ? plan : 'free_founder') as FounderPlanType;
   const features = FOUNDER_PLAN_FEATURES[founderPlan] || FOUNDER_PLAN_FEATURES.free_founder;
@@ -282,8 +280,8 @@ export function PlanLimitDisplay({
         </span>
       </div>
       {!isUnlimited && (
-        <Progress 
-          value={percentage} 
+        <Progress
+          value={percentage}
           className={`h-2 ${isExceeded ? '[&>div]:bg-red-500' : percentage >= 80 ? '[&>div]:bg-yellow-500' : ''}`}
         />
       )}
@@ -382,13 +380,13 @@ export function TableSkeleton({ rows = 5, columns = 4 }: { rows?: number; column
 // DASHBOARD HEADER COMPONENT
 // ============================================
 
-export function DashboardHeader({ 
-  title, 
-  description, 
+export function DashboardHeader({
+  title,
+  description,
   action,
   subscription,
-}: { 
-  title: string; 
+}: {
+  title: string;
   description?: string;
   action?: React.ReactNode;
   subscription?: {
@@ -407,7 +405,7 @@ export function DashboardHeader({
           )}
         </div>
         {subscription && (
-          <SubscriptionBadge 
+          <SubscriptionBadge
             plan={subscription.plan}
             role={subscription.role}
             showUpgrade={!subscription.plan || subscription.plan === 'free' || subscription.plan === 'free_founder'}

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore, useUIStore } from '@/store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -523,14 +524,7 @@ export function TalentDashboard({ activeTab }: TalentDashboardProps) {
 
                 {isEditing && (
                   <div className="flex gap-2 pt-4">
-                    <Button type="submit" disabled={saving}>
-                      {saving ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      ) : (
-                        <Save className="h-4 w-4 mr-2" />
-                      )}
-                      Save Changes
-                    </Button>
+                    <InteractiveHoverButton type="submit" disabled={saving} text={saving ? 'Saving...' : 'Save Changes'} className="w-40" />
                     <Button type="button" variant="outline" onClick={handleCancelEdit}>
                       <X className="h-4 w-4 mr-2" />
                       Cancel
@@ -555,10 +549,7 @@ export function TalentDashboard({ activeTab }: TalentDashboardProps) {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">My Applications</h1>
-          <Button onClick={() => setGlobalTab('search')}>
-            <Search className="h-4 w-4 mr-2" />
-            Browse Opportunities
-          </Button>
+          <InteractiveHoverButton text="Browse Opportunities" onClick={() => setGlobalTab('search')} className="w-52" />
         </div>
         <Tabs defaultValue="active">
           <TabsList>
@@ -576,9 +567,7 @@ export function TalentDashboard({ activeTab }: TalentDashboardProps) {
                 <CardContent className="flex flex-col items-center justify-center py-8">
                   <Briefcase className="h-12 w-12 text-muted-foreground mb-4" />
                   <p className="text-muted-foreground">No active applications</p>
-                  <Button className="mt-4" onClick={() => setGlobalTab('search')}>
-                    Find Opportunities
-                  </Button>
+                  <InteractiveHoverButton text="Find Opportunities" onClick={() => setGlobalTab('search')} className="w-44" />
                 </CardContent>
               </Card>
             ) : (

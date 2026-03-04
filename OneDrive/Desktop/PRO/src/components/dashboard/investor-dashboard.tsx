@@ -6,6 +6,7 @@ import { useAuthStore, useUIStore } from '@/store';
 import { safeLocalStorage, STORAGE_KEYS } from '@/lib/client-utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -624,7 +625,8 @@ export function InvestorDashboard({ activeTab }: InvestorDashboardProps) {
                 <Button variant="outline" onClick={() => setShowInvestModal(false)}>
                   Cancel
                 </Button>
-                <Button
+                <InteractiveHoverButton
+                  text="Message Founder"
                   onClick={() => {
                     if (selectedRound?.startupId.founderId) {
                       handleContactFounder(selectedRound.startupId.founderId, selectedRound.startupId.name);
@@ -632,10 +634,8 @@ export function InvestorDashboard({ activeTab }: InvestorDashboardProps) {
                       toast.error('Founder information not available for this startup');
                     }
                   }}
-                >
-                  <Send className="h-4 w-4 mr-2" />
-                  Message Founder
-                </Button>
+                  className="w-44"
+                />
               </div>
             </div>
           </DialogContent>
@@ -795,15 +795,12 @@ export function InvestorDashboard({ activeTab }: InvestorDashboardProps) {
                 <Button variant="outline" onClick={() => setShowAccessModal(false)}>
                   Cancel
                 </Button>
-                <Button onClick={handleRequestAccess} disabled={submitting}>
-                  {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
-                  Send Request
-                </Button>
+                <InteractiveHoverButton onClick={handleRequestAccess} disabled={submitting} text={submitting ? 'Sending...' : 'Send Request'} className="w-40" />
               </div>
             </div>
           </DialogContent>
         </Dialog>
-      </div>
+      </div >
     );
   }
 
@@ -1080,7 +1077,8 @@ export function InvestorDashboard({ activeTab }: InvestorDashboardProps) {
                 <Button variant="outline" onClick={() => setShowInvestModal(false)}>
                   Cancel
                 </Button>
-                <Button
+                <InteractiveHoverButton
+                  text="Message Founder"
                   onClick={() => {
                     if (selectedRound?.startupId.founderId) {
                       handleContactFounder(selectedRound.startupId.founderId, selectedRound.startupId.name);
@@ -1088,10 +1086,8 @@ export function InvestorDashboard({ activeTab }: InvestorDashboardProps) {
                       toast.error('Founder information not available for this startup');
                     }
                   }}
-                >
-                  <Send className="h-4 w-4 mr-2" />
-                  Message Founder
-                </Button>
+                  className="w-44"
+                />
               </div>
             </div>
           </DialogContent>
@@ -1276,14 +1272,7 @@ export function InvestorDashboard({ activeTab }: InvestorDashboardProps) {
 
                 {isEditing && (
                   <div className="flex gap-2 pt-4">
-                    <Button type="submit" disabled={saving}>
-                      {saving ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      ) : (
-                        <Save className="h-4 w-4 mr-2" />
-                      )}
-                      Save Changes
-                    </Button>
+                    <InteractiveHoverButton type="submit" disabled={saving} text={saving ? 'Saving...' : 'Save Changes'} className="w-40" />
                     <Button type="button" variant="outline" onClick={handleCancelEdit}>
                       <X className="h-4 w-4 mr-2" />
                       Cancel

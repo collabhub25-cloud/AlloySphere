@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -192,13 +193,7 @@ export function AuthModal({ open, onClose, mode, onSwitchMode }: AuthModalProps)
                   />
                 </div>
               </div>
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : null}
-                Sign In
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              <InteractiveHoverButton type="submit" className="w-full" disabled={isLoading} text={isLoading ? 'Signing In...' : 'Sign In'} />
             </form>
           </TabsContent>
 
@@ -290,13 +285,7 @@ export function AuthModal({ open, onClose, mode, onSwitchMode }: AuthModalProps)
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : null}
-                Create Account
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              <InteractiveHoverButton type="submit" className="w-full" disabled={isLoading} text={isLoading ? 'Creating...' : 'Create Account'} />
 
               <p className="text-xs text-center text-muted-foreground">
                 By signing up, you agree to our Terms of Service and Privacy Policy.
