@@ -1,10 +1,15 @@
 'use client';
 
-import { use, useState, useEffect } from 'react';
+import { use, useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/store';
-import { ArrowLeft, Building2, Users, Globe, Loader2, Briefcase, TrendingUp, FileText, Target, DollarSign, Settings, Edit3, Check, X, BadgeCheck } from 'lucide-react';
+import {
+    ArrowLeft, Building2, Users, Globe, Loader2, Briefcase,
+    TrendingUp, FileText, Target, DollarSign, Settings, Edit3,
+    Check, X, BadgeCheck, Heart, Send, Clock, CheckCircle2, Lock
+} from 'lucide-react';
 import { CollabhubVerifiedBadge } from '@/components/ui/collabhub-verified-badge';
+import { toast } from 'sonner';
 
 interface StartupData {
     _id: string;
@@ -81,8 +86,16 @@ export default function StartupPage({
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
+    // Investor action states
+    const [isFavorite, setIsFavorite] = useState(false);
+    const [accessStatus, setAccessStatus] = useState<string | null>(null);
+    const [showAccessModal, setShowAccessModal] = useState(false);
+    const [accessMessage, setAccessMessage] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+
     const activeTab = searchParams.get('tab') || 'overview';
     const isFounder = user?._id === (startup?.founderId as any)?._id;
+    const isInvestor = user?.role === 'investor';
     const tabs = isFounder ? TABS : READONLY_TABS;
 
     useEffect(() => {
@@ -103,6 +116,33 @@ export default function StartupPage({
         };
         fetchStartup();
     }, [id]);
+
+    // Fetch investor-specific data (favorite status + access request status)
+    useEffect(() => {
+        if (!isInvestor || !user) return;
+        const fetchInvestorData = async () => {
+            try {
+                // Check favorites
+                const favRes = await fetch('/api/favorites', { credentials: 'include' });
+                if (favRes.ok) {
+                    const favData = await favRes.json();
+                    setIsFavorite((favData.favoriteIds || []).includes(id));
+                }
+                // Check access requests
+                const accessRes = await fetch(`/api/funding/request-access?startupId=${id}`, { credentials: 'include' });
+                if (accessRes.ok) {
+                    const accessData = await accessRes.json();
+                    const myRequest = (accessData.requests || []).find((r: any) =>
+                        r.startupId?._id === id || r.startupId === id
+                    );
+                    setAccessStatus(myRequest?.status || null);
+                }
+            } catch (err) {
+                console.error('Error fetching investor data:', err);
+            }
+        };
+        fetchInvestorData();
+    }, [isInvestor, user, id]);
 
     const setTab = (tab: string) => {
         router.replace(`/startup/${id}?tab=${tab}`, { scroll: false });
@@ -167,86 +207,167 @@ export default function StartupPage({
         }
     };
 
+    // Investor actions
+    const toggleFavorite = async () => {
+        try {
+            const res = await fetch('/api/favorites', {
+                credentials: 'include',
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ startupId: id }),
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setIsFavorite(data.isFavorite);
+                toast.success(data.isFavorite ? 'Added to watchlist' : 'Removed from watchlist');
+            }
+        } catch {
+            toast.error('Failed to update watchlist');
+        }
+    };
+
+    const handleRequestAccess = async () => {
+        setSubmitting(true);
+        try {
+            const res = await fetch('/api/funding/request-access', {
+                credentials: 'include',
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ startupId: id, message: accessMessage }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setAccessStatus('pending');
+                setShowAccessModal(false);
+                setAccessMessage('');
+                toast.success('Access request sent to founder!');
+            } else {
+                toast.error(data.error || 'Failed to send request');
+            }
+        } catch {
+            toast.error('Failed to send request');
+        }
+        setSubmitting(false);
+    };
+
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center" style={{ background: '#F4F2ED' }}>
-                <Loader2 className="h-8 w-8 animate-spin" style={{ color: '#B05A4F' }} />
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
+                <div className="flex flex-col items-center gap-3">
+                    <Loader2 className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400" />
+                    <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">Loading startup...</span>
+                </div>
             </div>
         );
     }
 
     if (error || !startup) {
         return (
-            <div className="min-h-screen" style={{ background: '#F4F2ED', color: '#2A2623' }}>
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
                 <div className="max-w-5xl mx-auto px-6 py-12">
-                    <button onClick={() => router.back()} className="flex items-center gap-2 text-sm mb-6" style={{ color: '#6C635C' }}>
+                    <button onClick={() => router.back()} className="flex items-center gap-2 text-sm mb-6 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
                         <ArrowLeft className="h-4 w-4" /> Back
                     </button>
-                    <p className="text-lg">{error || 'Startup not found.'}</p>
+                    <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl border border-gray-200 dark:border-gray-800 text-center shadow-sm">
+                        <Building2 className="h-10 w-10 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+                        <p className="text-lg font-medium text-gray-700 dark:text-gray-300">{error || 'Startup not found.'}</p>
+                    </div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen" style={{ background: '#F4F2ED', color: '#2A2623' }}>
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 page-enter">
             <div className="max-w-5xl mx-auto px-6 py-8">
                 {/* Back */}
-                <button onClick={() => router.back()} className="flex items-center gap-2 text-sm mb-6" style={{ color: '#6C635C' }}>
-                    <ArrowLeft className="h-4 w-4" /> Back
+                <button onClick={() => router.back()} className="flex items-center gap-2 text-sm mb-6 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors group">
+                    <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" /> Back
                 </button>
 
                 {/* Header */}
-                <div className="flex items-start justify-between mb-6">
-                    <div className="flex items-start gap-4">
+                <div className="flex items-start justify-between mb-8 bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+                    <div className="flex items-start gap-5">
                         {startup.logo ? (
-                            <img src={startup.logo} alt={startup.name} className="h-14 w-14 rounded object-cover" />
+                            <img src={startup.logo} alt={startup.name} className="h-16 w-16 rounded-2xl object-cover shadow-sm bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800" />
                         ) : (
-                            <div className="h-14 w-14 rounded flex items-center justify-center" style={{ background: '#EDE9E3' }}>
-                                <Building2 className="h-6 w-6" style={{ color: '#6C635C' }} />
+                            <div className="h-16 w-16 rounded-2xl flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/20 shadow-sm border border-gray-200 dark:border-gray-800">
+                                <Building2 className="h-7 w-7 text-blue-500 dark:text-blue-400" />
                             </div>
                         )}
                         <div>
                             <div className="flex items-center gap-3 flex-wrap">
-                                <h1 className="text-2xl font-medium">{startup.name}</h1>
+                                <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">{startup.name}</h1>
                                 <CollabhubVerifiedBadge
                                     verified={startup.collabhubVerified || false}
                                     verifiedAt={startup.collabhubVerifiedAt}
                                     variant="full"
                                 />
                             </div>
-                            <p className="text-sm mt-1" style={{ color: '#6C635C' }}>
+                            <p className="text-sm mt-1.5 text-gray-600 dark:text-gray-400 font-medium">
                                 {startup.industry} · {startup.stage} · {startup.fundingStage}
                             </p>
-                            <div className="flex gap-3 mt-2">
-                                <span className="text-xs px-2 py-0.5 rounded" style={{ background: '#EDE9E3', color: '#6C635C' }}>
+                            <div className="flex gap-3 mt-3">
+                                <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200/50 dark:border-blue-800/30 shadow-sm">
                                     Trust: {startup.trustScore ?? 0}/100
                                 </span>
-                                <span className="text-xs px-2 py-0.5 rounded" style={{ background: startup.isActive ? '#e6f4ea' : '#EDE9E3', color: startup.isActive ? '#1a7f37' : '#6C635C' }}>
-                                    {startup.isActive ? 'Active' : 'Inactive'}
+                                <span className={`text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm border ${startup.isActive ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800/30' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700'}`}>
+                                    {startup.isActive ? '● Active' : 'Inactive'}
                                 </span>
                             </div>
                         </div>
                     </div>
-                    {isFounder && (
-                        <button onClick={() => router.push(`/startup/${id}/edit`)} className="flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors" style={{ background: '#2A2623', color: '#FBF9F6' }}>
-                            <Edit3 className="h-3.5 w-3.5" /> Edit
-                        </button>
-                    )}
+                    <div className="flex items-center gap-2 shrink-0">
+                        {/* Investor Actions */}
+                        {isInvestor && !isFounder && (
+                            <>
+                                <button
+                                    onClick={toggleFavorite}
+                                    className={`flex items-center justify-center h-10 w-10 rounded-xl border transition-all duration-200 ${isFavorite
+                                            ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800/30 text-red-500 shadow-sm'
+                                            : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-400 hover:text-red-500 hover:border-red-200 dark:hover:border-red-800/30 hover:bg-red-50 dark:hover:bg-red-900/20'
+                                        }`}
+                                    title={isFavorite ? 'Remove from watchlist' : 'Add to watchlist'}
+                                >
+                                    <Heart className={`h-4 w-4 transition-all ${isFavorite ? 'fill-current scale-110' : ''}`} />
+                                </button>
+                                {accessStatus === 'approved' ? (
+                                    <div className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800/30">
+                                        <CheckCircle2 className="h-4 w-4" /> Access Granted
+                                    </div>
+                                ) : accessStatus === 'pending' ? (
+                                    <div className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-800/30">
+                                        <Clock className="h-4 w-4" /> Pending
+                                    </div>
+                                ) : (
+                                    <button
+                                        onClick={() => setShowAccessModal(true)}
+                                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow-md"
+                                    >
+                                        <Send className="h-4 w-4" /> Request Access
+                                    </button>
+                                )}
+                            </>
+                        )}
+                        {/* Founder Edit */}
+                        {isFounder && (
+                            <button onClick={() => router.push(`/startup/${id}/edit`)} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 bg-gray-900 text-white hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100 shadow-sm hover:shadow-md">
+                                <Edit3 className="h-4 w-4" /> Edit
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 {/* Tabs */}
-                <div className="flex gap-0 border-b mb-8" style={{ borderColor: '#D8D2C8' }}>
+                <div className="flex gap-1 bg-gray-100 dark:bg-gray-900 p-1 rounded-xl mb-8 overflow-x-auto custom-scrollbar">
                     {tabs.map(tab => (
                         <button
                             key={tab.id}
                             onClick={() => setTab(tab.id)}
-                            className="flex items-center gap-2 px-4 py-2.5 text-sm transition-colors"
-                            style={{
-                                borderBottom: activeTab === tab.id ? '2px solid #2A2623' : '2px solid transparent',
-                                color: activeTab === tab.id ? '#2A2623' : '#6C635C',
-                                fontWeight: activeTab === tab.id ? 500 : 400,
-                            }}
+                            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-all duration-200 whitespace-nowrap rounded-lg ${activeTab === tab.id
+                                ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm'
+                                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-800/50'
+                                }`}
                         >
                             <tab.icon className="h-4 w-4" />
                             {tab.label}
@@ -256,77 +377,71 @@ export default function StartupPage({
 
                 {/* Tab Content */}
                 {activeTab === 'overview' && (
-                    <div className="space-y-8">
+                    <div className="space-y-6">
                         {/* Stats */}
                         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                             {[
-                                ['Trust Score', `${startup.trustScore ?? 0}/100`],
-                                ['Stage', startup.stage],
-                                ['Agreements', `${agreementCount}`],
-                                ['Funding', startup.fundingStage],
-                            ].map(([label, value]) => (
-                                <div key={label} className="px-4 py-3 rounded" style={{ background: '#FBF9F6', border: '1px solid #D8D2C8' }}>
-                                    <p className="text-xs" style={{ color: '#6C635C' }}>{label}</p>
-                                    <p className="text-sm font-medium mt-1 capitalize">{value}</p>
+                                ['Trust Score', `${startup.trustScore ?? 0}/100`, 'bg-blue-50 dark:bg-blue-900/10 border-blue-200/50 dark:border-blue-800/30'],
+                                ['Stage', startup.stage, 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800'],
+                                ['Agreements', `${agreementCount}`, 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800'],
+                                ['Funding', startup.fundingStage, 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800'],
+                            ].map(([label, value, className]) => (
+                                <div key={label as string} className={`px-4 py-4 rounded-xl border shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 ${className}`}>
+                                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{label}</p>
+                                    <p className="text-lg font-bold mt-1 text-gray-900 dark:text-gray-100 capitalize">{value}</p>
                                 </div>
                             ))}
                             {/* CollabHub Verified stat card */}
                             <div
-                                className="px-4 py-3 rounded"
-                                style={{
-                                    background: startup.collabhubVerified
-                                        ? 'linear-gradient(135deg, rgba(46, 139, 87, 0.08) 0%, rgba(0, 71, 171, 0.06) 100%)'
-                                        : '#FBF9F6',
-                                    border: startup.collabhubVerified
-                                        ? '1px solid rgba(46, 139, 87, 0.25)'
-                                        : '1px solid #D8D2C8',
-                                }}
+                                className={`px-4 py-4 rounded-xl border shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${startup.collabhubVerified
+                                    ? 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-200/50 dark:border-blue-800/30'
+                                    : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800'
+                                    }`}
                             >
-                                <p className="text-xs" style={{ color: '#6C635C' }}>Verified</p>
-                                <div className="flex items-center gap-1.5 mt-1">
+                                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Verified</p>
+                                <div className="flex items-center gap-1.5 mt-1.5">
                                     {startup.collabhubVerified ? (
                                         <>
                                             <BadgeCheck className="h-4 w-4" style={{ color: 'var(--sea-green)' }} />
                                             <span className="text-sm font-medium" style={{ color: 'var(--sea-green)' }}>Yes</span>
                                         </>
                                     ) : (
-                                        <span className="text-sm font-medium" style={{ color: '#6C635C' }}>No</span>
+                                        <span className="text-sm font-medium text-gray-400 dark:text-gray-500">No</span>
                                     )}
                                 </div>
                             </div>
                         </div>
 
-                        <section>
-                            <h2 className="text-base font-medium mb-3">Vision</h2>
-                            <p className="text-sm leading-relaxed" style={{ color: '#6C635C' }}>{startup.vision}</p>
+                        <section className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow duration-200">
+                            <h2 className="text-lg font-bold mb-3 text-gray-900 dark:text-gray-100">Vision</h2>
+                            <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-400">{startup.vision}</p>
                         </section>
 
-                        <section>
-                            <h2 className="text-base font-medium mb-3">Description</h2>
-                            <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: '#6C635C' }}>{startup.description}</p>
+                        <section className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow duration-200">
+                            <h2 className="text-lg font-bold mb-3 text-gray-900 dark:text-gray-100">Description</h2>
+                            <p className="text-sm leading-relaxed whitespace-pre-wrap text-gray-600 dark:text-gray-400">{startup.description}</p>
                         </section>
 
                         {startup.founderId && (
-                            <section>
-                                <h2 className="text-base font-medium mb-3">Founder</h2>
+                            <section className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow duration-200">
+                                <h2 className="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">Founder</h2>
                                 <button
                                     onClick={() => router.push(`/profile/${(startup.founderId as any)._id}`)}
-                                    className="flex items-center gap-3 px-4 py-3 rounded transition-colors w-full text-left"
-                                    style={{ background: '#FBF9F6', border: '1px solid #D8D2C8' }}
+                                    className="flex items-center gap-4 px-4 py-4 rounded-xl transition-all duration-200 w-full text-left bg-gray-50 hover:bg-gray-100 dark:bg-gray-800/50 dark:hover:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700 hover:shadow-sm"
                                 >
-                                    <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-medium" style={{ background: '#EDE9E3' }}>
+                                    <div className="h-12 w-12 rounded-full flex items-center justify-center text-sm font-bold bg-gradient-to-br from-blue-100 to-blue-200 text-blue-700 dark:from-blue-900/50 dark:to-blue-800/30 dark:text-blue-300">
                                         {(startup.founderId as any).name?.charAt(0) || '?'}
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium">{(startup.founderId as any).name}</p>
-                                        <p className="text-xs" style={{ color: '#6C635C' }}>Trust: {(startup.founderId as any).trustScore}/100</p>
+                                        <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{(startup.founderId as any).name}</p>
+                                        <p className="text-xs mt-0.5 text-gray-500 dark:text-gray-400 font-medium">Trust Score: <span className="text-blue-600 dark:text-blue-400">{(startup.founderId as any).trustScore}/100</span></p>
                                     </div>
                                 </button>
                             </section>
                         )}
 
                         {startup.website && (
-                            <a href={startup.website} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm" style={{ color: '#B05A4F' }}>
+                            <a href={startup.website} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline">
                                 <Globe className="h-4 w-4" /> {startup.website}
                             </a>
                         )}
@@ -335,42 +450,44 @@ export default function StartupPage({
 
                 {activeTab === 'team' && (
                     <div className="space-y-6">
-                        <h2 className="text-base font-medium">Team ({startup.team?.length || 0} members)</h2>
+                        <h2 className="text-xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Team ({startup.team?.length || 0})</h2>
                         {startup.team && startup.team.length > 0 ? (
-                            <div className="space-y-2">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {startup.team.map((member: any) => (
                                     <button
                                         key={member._id}
                                         onClick={() => router.push(`/profile/${member._id}`)}
-                                        className="flex items-center gap-3 px-4 py-3 rounded w-full text-left"
-                                        style={{ background: '#FBF9F6', border: '1px solid #D8D2C8' }}
+                                        className="flex items-center gap-4 px-4 py-4 rounded-xl w-full text-left bg-white hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-800/80 border border-gray-200 dark:border-gray-800 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
                                     >
-                                        <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-medium" style={{ background: '#EDE9E3' }}>
+                                        <div className="h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold bg-gradient-to-br from-blue-100 to-blue-200 text-blue-700 dark:from-blue-900/50 dark:to-blue-800/30 dark:text-blue-300">
                                             {member.name?.charAt(0) || '?'}
                                         </div>
                                         <div>
-                                            <p className="text-sm font-medium">{member.name}</p>
-                                            <p className="text-xs capitalize" style={{ color: '#6C635C' }}>{member.role}</p>
+                                            <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{member.name}</p>
+                                            <p className="text-xs uppercase tracking-wider font-semibold mt-0.5 text-gray-500 dark:text-gray-400">{member.role}</p>
                                         </div>
                                     </button>
                                 ))}
                             </div>
                         ) : (
-                            <p className="text-sm" style={{ color: '#6C635C' }}>No team members yet.</p>
+                            <div className="bg-white dark:bg-gray-900 p-8 rounded-xl border border-gray-200 dark:border-gray-800 text-center shadow-sm">
+                                <Users className="h-8 w-8 mx-auto text-gray-400 mb-3" />
+                                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">No team members yet.</p>
+                            </div>
                         )}
 
                         {/* Open Roles */}
                         {startup.rolesNeeded && startup.rolesNeeded.filter(r => r.status === 'open').length > 0 && (
-                            <div>
-                                <h3 className="text-sm font-medium mb-3">Open Roles</h3>
-                                <div className="space-y-3">
+                            <div className="mt-8">
+                                <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">Open Roles</h3>
+                                <div className="space-y-4">
                                     {startup.rolesNeeded.filter(r => r.status === 'open').map((role, i) => (
-                                        <div key={i} className="px-4 py-3 rounded" style={{ background: '#FBF9F6', border: '1px solid #D8D2C8' }}>
-                                            <p className="text-sm font-medium">{role.title}</p>
-                                            <p className="text-xs mt-1" style={{ color: '#6C635C' }}>{role.description}</p>
-                                            <div className="flex gap-2 mt-2 flex-wrap">
+                                        <div key={i} className="p-5 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow duration-200">
+                                            <p className="text-base font-bold text-gray-900 dark:text-gray-100">{role.title}</p>
+                                            <p className="text-sm mt-2 text-gray-600 dark:text-gray-400 leading-relaxed">{role.description}</p>
+                                            <div className="flex gap-2 mt-4 flex-wrap">
                                                 {role.skills.map(s => (
-                                                    <span key={s} className="text-xs px-2 py-0.5 rounded" style={{ background: '#EDE9E3', color: '#6C635C' }}>{s}</span>
+                                                    <span key={s} className="text-xs font-medium px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700">{s}</span>
                                                 ))}
                                             </div>
                                         </div>
@@ -385,52 +502,55 @@ export default function StartupPage({
                     <div className="space-y-8">
                         {/* Talent Applications */}
                         <section>
-                            <h2 className="text-base font-medium mb-4">Talent Applications</h2>
+                            <h2 className="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">Talent Applications</h2>
                             {appsLoading ? (
                                 <div className="flex justify-center py-8">
-                                    <Loader2 className="h-6 w-6 animate-spin" style={{ color: '#B05A4F' }} />
+                                    <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
                                 </div>
                             ) : applications.length === 0 ? (
-                                <p className="text-sm" style={{ color: '#6C635C' }}>No applications received for this startup.</p>
+                                <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 text-center shadow-sm">
+                                    <Briefcase className="h-8 w-8 mx-auto text-gray-300 dark:text-gray-600 mb-2" />
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">No applications received for this startup.</p>
+                                </div>
                             ) : (
                                 <div className="space-y-3">
                                     {applications.map((app: any) => (
-                                        <div key={app._id} className="flex items-center justify-between px-4 py-3 rounded" style={{ background: '#FBF9F6', border: '1px solid #D8D2C8' }}>
+                                        <div key={app._id} className="flex items-center justify-between px-4 py-3.5 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow duration-200">
                                             <div className="flex items-center gap-3">
-                                                <div className="h-9 w-9 rounded-full flex items-center justify-center text-xs font-medium" style={{ background: '#EDE9E3' }}>
+                                                <div className="h-9 w-9 rounded-full flex items-center justify-center text-xs font-bold bg-gradient-to-br from-blue-100 to-blue-200 text-blue-700 dark:from-blue-900/50 dark:to-blue-800/30 dark:text-blue-300">
                                                     {app.talentId?.name?.charAt(0) || '?'}
                                                 </div>
                                                 <div>
-                                                    <button onClick={() => router.push(`/profile/${app.talentId?._id}`)} className="text-sm font-medium hover:underline">
+                                                    <button onClick={() => router.push(`/profile/${app.talentId?._id}`)} className="text-sm font-bold hover:underline text-gray-900 dark:text-gray-100">
                                                         {app.talentId?.name || 'Unknown'}
                                                     </button>
                                                     {app.talentId?.skills && (
                                                         <div className="flex gap-1 mt-1 flex-wrap">
                                                             {app.talentId.skills.slice(0, 3).map((s: string) => (
-                                                                <span key={s} className="text-xs px-1.5 py-0.5 rounded" style={{ background: '#EDE9E3', color: '#6C635C' }}>{s}</span>
+                                                                <span key={s} className="text-xs px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">{s}</span>
                                                             ))}
                                                         </div>
                                                     )}
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                <span className={`text-xs px-2 py-0.5 rounded capitalize ${app.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                                    app.status === 'accepted' ? 'bg-green-100 text-green-800' :
-                                                        app.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                                                            'bg-gray-100 text-gray-800'
+                                                <span className={`text-xs px-2.5 py-1 rounded-lg capitalize font-semibold ${app.status === 'pending' ? 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400' :
+                                                    app.status === 'accepted' ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400' :
+                                                        app.status === 'rejected' ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400' :
+                                                            'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
                                                     }`}>{app.status}</span>
                                                 {app.status === 'pending' && (
                                                     <>
                                                         <button
                                                             onClick={() => handleUpdateApplication(app._id, 'accepted')}
-                                                            className="p-1.5 rounded transition-colors hover:bg-green-100"
+                                                            className="p-1.5 rounded-lg transition-colors hover:bg-green-50 dark:hover:bg-green-900/20"
                                                             title="Accept"
                                                         >
                                                             <Check className="h-4 w-4 text-green-600" />
                                                         </button>
                                                         <button
                                                             onClick={() => handleUpdateApplication(app._id, 'rejected')}
-                                                            className="p-1.5 rounded transition-colors hover:bg-red-100"
+                                                            className="p-1.5 rounded-lg transition-colors hover:bg-red-50 dark:hover:bg-red-900/20"
                                                             title="Reject"
                                                         >
                                                             <X className="h-4 w-4 text-red-600" />
@@ -446,47 +566,50 @@ export default function StartupPage({
 
                         {/* Investor Access Requests */}
                         <section>
-                            <h2 className="text-base font-medium mb-4">Investor Access Requests</h2>
+                            <h2 className="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">Investor Access Requests</h2>
                             {appsLoading ? (
                                 <div className="flex justify-center py-8">
-                                    <Loader2 className="h-6 w-6 animate-spin" style={{ color: '#B05A4F' }} />
+                                    <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
                                 </div>
                             ) : accessRequests.length === 0 ? (
-                                <p className="text-sm" style={{ color: '#6C635C' }}>No investor access requests.</p>
+                                <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 text-center shadow-sm">
+                                    <Send className="h-8 w-8 mx-auto text-gray-300 dark:text-gray-600 mb-2" />
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">No investor access requests.</p>
+                                </div>
                             ) : (
                                 <div className="space-y-3">
                                     {accessRequests.map((req: any) => (
-                                        <div key={req._id} className="flex items-center justify-between px-4 py-3 rounded" style={{ background: '#FBF9F6', border: '1px solid #D8D2C8' }}>
+                                        <div key={req._id} className="flex items-center justify-between px-4 py-3.5 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow duration-200">
                                             <div className="flex items-center gap-3">
-                                                <div className="h-9 w-9 rounded-full flex items-center justify-center text-xs font-medium" style={{ background: '#EDE9E3' }}>
+                                                <div className="h-9 w-9 rounded-full flex items-center justify-center text-xs font-bold bg-gradient-to-br from-green-100 to-green-200 text-green-700 dark:from-green-900/50 dark:to-green-800/30 dark:text-green-300">
                                                     {req.investorId?.name?.charAt(0) || '?'}
                                                 </div>
                                                 <div>
-                                                    <button onClick={() => router.push(`/profile/${req.investorId?._id}`)} className="text-sm font-medium hover:underline">
+                                                    <button onClick={() => router.push(`/profile/${req.investorId?._id}`)} className="text-sm font-bold hover:underline text-gray-900 dark:text-gray-100">
                                                         {req.investorId?.name || 'Unknown Investor'}
                                                     </button>
-                                                    <p className="text-xs" style={{ color: '#6C635C' }}>
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400">
                                                         Trust: {req.investorId?.trustScore ?? 0}/100
                                                     </p>
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                <span className={`text-xs px-2 py-0.5 rounded capitalize ${req.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                                    req.status === 'approved' ? 'bg-green-100 text-green-800' :
-                                                        'bg-red-100 text-red-800'
+                                                <span className={`text-xs px-2.5 py-1 rounded-lg capitalize font-semibold ${req.status === 'pending' ? 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400' :
+                                                    req.status === 'approved' ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400' :
+                                                        'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400'
                                                     }`}>{req.status}</span>
                                                 {req.status === 'pending' && (
                                                     <>
                                                         <button
                                                             onClick={() => handleRespondAccess(req._id, 'approved')}
-                                                            className="p-1.5 rounded transition-colors hover:bg-green-100"
+                                                            className="p-1.5 rounded-lg transition-colors hover:bg-green-50 dark:hover:bg-green-900/20"
                                                             title="Approve"
                                                         >
                                                             <Check className="h-4 w-4 text-green-600" />
                                                         </button>
                                                         <button
                                                             onClick={() => handleRespondAccess(req._id, 'rejected')}
-                                                            className="p-1.5 rounded transition-colors hover:bg-red-100"
+                                                            className="p-1.5 rounded-lg transition-colors hover:bg-red-50 dark:hover:bg-red-900/20"
                                                             title="Reject"
                                                         >
                                                             <X className="h-4 w-4 text-red-600" />
@@ -504,51 +627,117 @@ export default function StartupPage({
 
                 {activeTab === 'milestones' && isFounder && (
                     <div className="space-y-4">
-                        <h2 className="text-base font-medium">Milestones</h2>
-                        <p className="text-sm" style={{ color: '#6C635C' }}>Milestones for this startup will appear here. Create milestones to track deliverables.</p>
+                        <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Milestones</h2>
+                        <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 text-center shadow-sm">
+                            <Target className="h-8 w-8 mx-auto text-gray-300 dark:text-gray-600 mb-2" />
+                            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Milestones for this startup will appear here. Create milestones to track deliverables.</p>
+                        </div>
                     </div>
                 )}
 
                 {activeTab === 'agreements' && isFounder && (
                     <div className="space-y-4">
-                        <h2 className="text-base font-medium">Agreements ({agreementCount})</h2>
-                        <p className="text-sm" style={{ color: '#6C635C' }}>Agreements scoped to this startup will appear here.</p>
+                        <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Agreements ({agreementCount})</h2>
+                        <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 text-center shadow-sm">
+                            <FileText className="h-8 w-8 mx-auto text-gray-300 dark:text-gray-600 mb-2" />
+                            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Agreements scoped to this startup will appear here.</p>
+                        </div>
                     </div>
                 )}
 
                 {activeTab === 'funding' && (
                     <div className="space-y-4">
-                        <h2 className="text-base font-medium">Funding Rounds</h2>
+                        <h2 className="text-xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Funding Rounds</h2>
                         {fundingRounds.length > 0 ? (
-                            <div className="space-y-2">
+                            <div className="space-y-3">
                                 {fundingRounds.map((round: any) => (
-                                    <div key={round._id} className="flex items-center justify-between px-4 py-3 rounded" style={{ background: '#FBF9F6', border: '1px solid #D8D2C8' }}>
+                                    <div key={round._id} className="flex items-center justify-between px-5 py-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
                                         <div>
-                                            <p className="text-sm font-medium capitalize">{round.roundType || round.type}</p>
-                                            <p className="text-xs" style={{ color: '#6C635C' }}>
+                                            <p className="text-sm font-bold capitalize text-gray-900 dark:text-gray-100">{round.roundType || round.type}</p>
+                                            <p className="text-xs mt-1 text-gray-500 dark:text-gray-400 font-medium">
                                                 {new Date(round.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
                                             </p>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-sm font-medium font-mono">${(round.targetAmount || 0).toLocaleString()}</p>
-                                            <p className="text-xs capitalize" style={{ color: '#6C635C' }}>{round.status}</p>
+                                            <p className="text-lg font-bold font-mono text-gray-900 dark:text-gray-100">${(round.targetAmount || 0).toLocaleString()}</p>
+                                            <p className={`text-xs mt-1 font-bold uppercase tracking-wider ${round.status === 'active' ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}>{round.status}</p>
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         ) : (
-                            <p className="text-sm" style={{ color: '#6C635C' }}>No funding rounds yet.</p>
+                            <div className="bg-white dark:bg-gray-900 p-8 rounded-xl border border-gray-200 dark:border-gray-800 text-center shadow-sm">
+                                <DollarSign className="h-8 w-8 mx-auto text-gray-400 mb-3" />
+                                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">No funding rounds yet.</p>
+                            </div>
                         )}
                     </div>
                 )}
 
                 {activeTab === 'settings' && isFounder && (
                     <div className="space-y-4">
-                        <h2 className="text-base font-medium">Startup Settings</h2>
-                        <p className="text-sm" style={{ color: '#6C635C' }}>Manage startup details, visibility, and team permissions.</p>
+                        <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Startup Settings</h2>
+                        <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 text-center shadow-sm">
+                            <Settings className="h-8 w-8 mx-auto text-gray-300 dark:text-gray-600 mb-2" />
+                            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Manage startup details, visibility, and team permissions.</p>
+                        </div>
                     </div>
                 )}
             </div>
+
+            {/* Access Request Modal */}
+            {showAccessModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => !submitting && setShowAccessModal(false)}>
+                    <div
+                        className="bg-white dark:bg-gray-900 w-full max-w-md mx-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-2xl"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Request Access</h3>
+                            <p className="text-sm mt-1 text-gray-500 dark:text-gray-400">
+                                Send an access request to view detailed information about <span className="font-semibold text-gray-700 dark:text-gray-300">{startup.name}</span>
+                            </p>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Message (optional)</label>
+                                <textarea
+                                    value={accessMessage}
+                                    onChange={(e) => setAccessMessage(e.target.value)}
+                                    placeholder="Introduce yourself and explain your interest in this startup..."
+                                    rows={4}
+                                    maxLength={500}
+                                    className="w-full px-4 py-3 rounded-xl text-sm border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all resize-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                                />
+                                <p className="text-xs mt-1 text-gray-400 dark:text-gray-500 text-right">{accessMessage.length}/500</p>
+                            </div>
+                            <div className="flex gap-3 pt-2">
+                                <button
+                                    onClick={() => setShowAccessModal(false)}
+                                    disabled={submitting}
+                                    className="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleRequestAccess}
+                                    disabled={submitting}
+                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white transition-all disabled:opacity-50 shadow-sm hover:shadow-md"
+                                >
+                                    {submitting ? (
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                        <>
+                                            <Send className="h-4 w-4" />
+                                            Send Request
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

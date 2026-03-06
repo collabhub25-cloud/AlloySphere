@@ -78,10 +78,14 @@ const InvestmentSchema = new Schema<IInvestment>(
 );
 export const Investment = mongoose.models.Investment || mongoose.model<IInvestment>('Investment', InvestmentSchema);
 
+export type AccessRequestStatus = 'pending' | 'approved' | 'rejected' | 'revoked';
+
 export interface IAccessRequest extends Document {
     startupId: mongoose.Types.ObjectId;
-    reqUserId: mongoose.Types.ObjectId;
-    status: 'pending' | 'approved' | 'rejected';
+    investorId: mongoose.Types.ObjectId;
+    founderId: mongoose.Types.ObjectId;
+    status: AccessRequestStatus;
+    message?: string;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -89,13 +93,22 @@ export interface IAccessRequest extends Document {
 const AccessRequestSchema = new Schema<IAccessRequest>(
     {
         startupId: { type: Schema.Types.ObjectId, ref: 'Startup', required: true },
-        reqUserId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-        status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
+        investorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+        founderId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+        status: { type: String, enum: ['pending', 'approved', 'rejected', 'revoked'], default: 'pending' },
+        message: { type: String, maxlength: 500 },
     },
     { timestamps: true }
 );
 
-AccessRequestSchema.index({ startupId: 1, reqUserId: 1 }, { unique: true });
+AccessRequestSchema.index({ startupId: 1, investorId: 1 });
+AccessRequestSchema.index({ founderId: 1 });
+AccessRequestSchema.index({ status: 1 });
+
+// Force recompile during development so HMR picks up the new schema
+if (mongoose.models.AccessRequest) {
+    delete mongoose.models.AccessRequest;
+}
 export const AccessRequest = mongoose.models.AccessRequest || mongoose.model<IAccessRequest>('AccessRequest', AccessRequestSchema);
 
 // ============================================

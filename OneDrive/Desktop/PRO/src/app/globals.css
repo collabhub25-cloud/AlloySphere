@@ -44,84 +44,94 @@
 }
 
 /* ==========================================
-   WARM EDITORIAL PALETTE
+   WARM CHOCOLATE & CREAM PALETTE
    ========================================== */
 :root {
   --radius: 0.25rem;
-  --background: #F4F2ED;
-  --foreground: #2A2623;
-  --card: #FBF9F6;
-  --card-foreground: #2A2623;
-  --popover: #FBF9F6;
-  --popover-foreground: #2A2623;
-  --primary: #B05A4F;
-  --primary-foreground: #FBF9F6;
-  --secondary: #EDE9E3;
-  --secondary-foreground: #2A2623;
-  --muted: #EDE9E3;
-  --muted-foreground: #6C635C;
-  --accent: #EDE9E3;
-  --accent-foreground: #2A2623;
-  --destructive: #A63D2F;
-  --border: #D8D2C8;
-  --input: #D8D2C8;
-  --ring: #B05A4F;
-  --chart-1: #B05A4F;
-  --chart-2: #2E4057;
-  --chart-3: #8A6C8F;
-  --chart-4: #C4935A;
-  --chart-5: #A63D2F;
-  --sidebar: #FBF9F6;
-  --sidebar-foreground: #2A2623;
-  --sidebar-primary: #B05A4F;
-  --sidebar-primary-foreground: #FBF9F6;
-  --sidebar-accent: #EDE9E3;
-  --sidebar-accent-foreground: #2A2623;
-  --sidebar-border: #D8D2C8;
-  --sidebar-ring: #B05A4F;
+  /* Light mode: Clean Soft Pearl background, pure white cards, extremely dark teal text */
+  --background: #F4F6F6;
+  --foreground: #0B1315;
+  --card: #FFFFFF;
+  --card-foreground: #0B1315;
+  --popover: #FFFFFF;
+  --popover-foreground: #0B1315;
+  --primary: #0F8C79;
+  /* A slightly darker teal for light mode contrast so text is readable */
+  --primary-foreground: #FFFFFF;
+  --secondary: #E2E8E8;
+  --secondary-foreground: #0B1315;
+  --muted: #E2E8E8;
+  --muted-foreground: #4B6368;
+  --accent: #E2E8E8;
+  --accent-foreground: #0B1315;
+  --destructive: #E74C3C;
+  --border: #CEDAD9;
+  --input: #CEDAD9;
+  --ring: #0F8C79;
+  --chart-1: #0F8C79;
+  --chart-2: #FF7A59;
+  --chart-3: #111A1D;
+  --chart-4: #48E5C2;
+  --chart-5: #0B1315;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #0B1315;
+  --sidebar-primary: #0F8C79;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #E2E8E8;
+  --sidebar-accent-foreground: #0B1315;
+  --sidebar-border: #CEDAD9;
+  --sidebar-ring: #0F8C79;
 
-  --accent-founder: #B05A4F;
-  --accent-investor: #2E4057;
-  --accent-talent: #8A6C8F;
+  --accent-founder: #FF7A59;
+  /* Coral */
+  --accent-investor: #4DB8FF;
+  /* Electric Blue */
+  --accent-talent: #B873E8;
+  /* Purple */
   --role-accent: var(--accent-founder);
 }
 
 .dark {
-  --background: #1C1917;
-  --foreground: #E7E0D8;
-  --card: #262220;
-  --card-foreground: #E7E0D8;
-  --popover: #262220;
-  --popover-foreground: #E7E0D8;
-  --primary: #C4715F;
-  --primary-foreground: #FBF9F6;
-  --secondary: #33302C;
-  --secondary-foreground: #E7E0D8;
-  --muted: #33302C;
-  --muted-foreground: #9B928A;
-  --accent: #33302C;
-  --accent-foreground: #E7E0D8;
-  --destructive: #C0453A;
-  --border: #3D3834;
-  --input: #3D3834;
-  --ring: #C4715F;
-  --chart-1: #C4715F;
-  --chart-2: #4A6A8A;
-  --chart-3: #A889AE;
-  --chart-4: #D4A76A;
-  --chart-5: #C0453A;
-  --sidebar: #262220;
-  --sidebar-foreground: #E7E0D8;
-  --sidebar-primary: #C4715F;
-  --sidebar-primary-foreground: #FBF9F6;
-  --sidebar-accent: #33302C;
-  --sidebar-accent-foreground: #E7E0D8;
-  --sidebar-border: #3D3834;
-  --sidebar-ring: #C4715F;
+  /* Dark mode: Very dark Midnight Teal background with striking Mint/Coral accents */
+  --background: #0B1315;
+  --foreground: #F4F6F6;
+  --card: #111A1D;
+  --card-foreground: #F4F6F6;
+  --popover: #111A1D;
+  --popover-foreground: #F4F6F6;
+  --primary: #48E5C2;
+  /* Striking Mint Accent */
+  --primary-foreground: #0B1315;
+  --secondary: #1C292E;
+  --secondary-foreground: #F4F6F6;
+  --muted: #1C292E;
+  --muted-foreground: #849CA3;
+  --accent: #1C292E;
+  --accent-foreground: #F4F6F6;
+  --destructive: #FF7A59;
+  --border: #233339;
+  --input: #233339;
+  --ring: #48E5C2;
+  --chart-1: #48E5C2;
+  --chart-2: #FF7A59;
+  --chart-3: #F4F6F6;
+  --chart-4: #4DB8FF;
+  --chart-5: #FF7A59;
+  --sidebar: #0D171A;
+  --sidebar-foreground: #F4F6F6;
+  --sidebar-primary: #48E5C2;
+  --sidebar-primary-foreground: #0B1315;
+  --sidebar-accent: #1C292E;
+  --sidebar-accent-foreground: #F4F6F6;
+  --sidebar-border: #233339;
+  --sidebar-ring: #48E5C2;
 
-  --accent-founder: #C4715F;
-  --accent-investor: #4A6A8A;
-  --accent-talent: #A889AE;
+  --accent-founder: #FF7A59;
+  /* Coral */
+  --accent-investor: #4DB8FF;
+  /* Electric Blue */
+  --accent-talent: #B873E8;
+  /* Purple */
   --role-accent: var(--accent-founder);
 }
 
@@ -403,4 +413,64 @@
   background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: shimmer 3s linear infinite;
+}
+
+/* ==========================================
+   ADDITIONAL UI UTILITIES
+   ========================================== */
+
+/* Card hover lift — consistent hover effect across pages */
+.card-hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px -8px rgba(0, 0, 0, 0.1);
+}
+
+/* Fade-up entrance — staggered content reveals */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-up {
+  animation: fadeUp 0.4s ease-out forwards;
+}
+
+.fade-up-delay-1 {
+  animation: fadeUp 0.4s ease-out 0.05s forwards;
+  opacity: 0;
+}
+
+.fade-up-delay-2 {
+  animation: fadeUp 0.4s ease-out 0.1s forwards;
+  opacity: 0;
+}
+
+.fade-up-delay-3 {
+  animation: fadeUp 0.4s ease-out 0.15s forwards;
+  opacity: 0;
+}
+
+/* Custom scrollbar helper */
+.custom-scrollbar::-webkit-scrollbar {
+  height: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 9999px;
 }

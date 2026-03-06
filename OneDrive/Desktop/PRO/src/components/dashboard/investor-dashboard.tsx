@@ -383,7 +383,7 @@ export function InvestorDashboard({ activeTab }: InvestorDashboardProps) {
     const dueDiligenceCount = accessRequests.filter(r => r.status === 'approved' || r.status === 'pending').length;
 
     return (
-      <div className="space-y-6 page-enter">
+      <div className="space-y-6 page-enter fade-up">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">Investor Dashboard</h1>
@@ -647,7 +647,7 @@ export function InvestorDashboard({ activeTab }: InvestorDashboardProps) {
   // Deal Flow
   if (activeTab === 'dealflow') {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 page-enter">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">Deal Flow</h1>
@@ -688,12 +688,12 @@ export function InvestorDashboard({ activeTab }: InvestorDashboardProps) {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3" style={{ animationDelay: '0.1s' }}>
             {startups.map((startup) => {
               const accessStatus = getAccessStatus(startup._id);
 
               return (
-                <Card key={startup._id} className="hover:border-primary/50 transition-colors">
+                <Card key={startup._id} className="hover:border-primary/50 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
@@ -774,11 +774,11 @@ export function InvestorDashboard({ activeTab }: InvestorDashboardProps) {
 
         {/* Access Request Modal */}
         <Dialog open={showAccessModal} onOpenChange={setShowAccessModal}>
-          <DialogContent>
+          <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Request Access</DialogTitle>
               <DialogDescription>
-                Request access to view detailed information about {selectedStartup?.name}
+                Send a request to the founder of <span className="font-semibold">{selectedStartup?.name}</span> to view detailed startup information.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
@@ -787,15 +787,23 @@ export function InvestorDashboard({ activeTab }: InvestorDashboardProps) {
                 <Textarea
                   value={accessMessage}
                   onChange={(e) => setAccessMessage(e.target.value)}
-                  placeholder="Introduce yourself and explain your interest..."
-                  rows={3}
+                  placeholder="Introduce yourself and explain your interest in this startup..."
+                  rows={4}
+                  maxLength={500}
+                  className="resize-none"
                 />
+                <p className="text-xs text-muted-foreground text-right">{accessMessage.length}/500</p>
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowAccessModal(false)}>
                   Cancel
                 </Button>
-                <InteractiveHoverButton onClick={handleRequestAccess} disabled={submitting} text={submitting ? 'Sending...' : 'Send Request'} className="w-40" />
+                <InteractiveHoverButton
+                  onClick={handleRequestAccess}
+                  disabled={submitting}
+                  text={submitting ? 'Sending...' : 'Send Request'}
+                  className="w-40"
+                />
               </div>
             </div>
           </DialogContent>

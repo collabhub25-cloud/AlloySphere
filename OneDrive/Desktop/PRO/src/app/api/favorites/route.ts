@@ -28,10 +28,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if favorite exists
+    // Check if favorite exists — use targetId + targetType to match the Favorite model schema
     const existing = await Favorite.findOne({
       userId: decoded.userId,
-      startupId,
+      targetId: startupId,
+      targetType: 'startup',
     });
 
     if (existing) {
@@ -46,7 +47,8 @@ export async function POST(request: NextRequest) {
       // Add favorite
       await Favorite.create({
         userId: decoded.userId,
-        startupId,
+        targetId: startupId,
+        targetType: 'startup',
       });
       return NextResponse.json({
         success: true,
@@ -78,16 +80,16 @@ export async function GET(request: NextRequest) {
 
     await connectDB();
 
-    const favorites = await Favorite.find({ userId: decoded.userId })
+    const favorites = await Favorite.find({ userId: decoded.userId, targetType: 'startup' })
       .populate({
-        path: 'startupId',
+        path: 'targetId',
         populate: { path: 'founderId', select: 'name email avatar' },
       })
       .sort({ createdAt: -1 })
       .lean();
 
     // Also get list of favorited startup IDs for quick lookup
-    const favoriteIds = favorites.map((f: any) => f.startupId?._id?.toString()).filter(Boolean);
+    const favoriteIds = favorites.map((f: any) => f.targetId?._id?.toString()).filter(Boolean);
 
     return NextResponse.json({
       favorites,
@@ -130,7 +132,8 @@ export async function DELETE(request: NextRequest) {
 
     await Favorite.findOneAndDelete({
       userId: decoded.userId,
-      startupId,
+      targetId: startupId,
+      targetType: 'startup',
     });
 
     return NextResponse.json({

@@ -33,7 +33,7 @@ export default function TalentDashboardPage() {
 
     if (isLoading || !isAuthenticated || user?.role !== 'talent') {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-background">
+            <div className="min-h-screen flex items-center justify-center bg-transparent">
                 <div className="animate-spin rounded-full h-10 w-10 border-2 border-primary border-t-transparent" />
             </div>
         );

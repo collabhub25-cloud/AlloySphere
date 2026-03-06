@@ -13,8 +13,11 @@ import {
   Settings, LogOut, Menu, ChevronLeft, Award, BarChart3,
   UserCheck, DollarSign, AlertTriangle, CheckCircle2,
   Search, Shield, CreditCard as SubscriptionIcon, MessageSquare,
-  User, Handshake, Sparkles, ShieldCheck
+  User, Handshake, Sparkles, ShieldCheck, ChevronDown,
+  ChevronsRight, Moon, Sun, Bell, HelpCircle
 } from 'lucide-react';
+import { useTheme } from 'next-themes';
+import Image from "next/image";
 import KycDashboard from '@/components/kyc/kyc-dashboard';
 import { FounderDashboard } from './founder-dashboard';
 import { TalentDashboard } from './talent-dashboard';
@@ -201,152 +204,229 @@ export function Dashboard({ onLogout }: DashboardProps) {
   // Only founders have subscription plans
   const userPlan = user.role === 'founder' ? (user.plan || 'free_founder') : 'free';
 
+  const { theme, setTheme } = useTheme();
+  const isDark = theme === 'dark';
+
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-background flex">
-        {/* Sidebar */}
-        <aside
-          className={`fixed left-0 top-0 z-40 h-screen bg-card border-r transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-16'
-            }`}
-        >
-          <div className="flex flex-col h-full">
-            {/* Logo */}
-            <div className="flex items-center gap-2 p-4 border-b">
-              {sidebarOpen ? (
-                <span className="text-base font-medium" style={{ letterSpacing: '0.3px' }}>
-                  Collab<span className="role-accent-text">·</span>Hub
-                </span>
-              ) : (
-                <span className="text-sm font-medium mx-auto">C<span className="role-accent-text">·</span>H</span>
-              )}
+      <div className={`flex min-h-screen w-full ${isDark ? 'dark' : ''}`}>
+        <div className="flex w-full bg-transparent text-foreground min-h-screen">
+
+          {/* Sidebar */}
+          <nav
+            className={`sticky top-0 h-screen shrink-0 border-r transition-all duration-300 ease-in-out ${sidebarOpen ? 'w-64' : 'w-16'
+              } border-border bg-sidebar p-2 shadow-sm flex flex-col`}
+          >
+            {/* Title Section */}
+            <div className="mb-6 border-b border-border pb-4">
+              <div className="flex cursor-pointer items-center justify-between rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground">
+                <div className="flex items-center gap-3">
+                  {/* Logo */}
+                  <div className="grid size-10 shrink-0 place-content-center rounded-lg bg-primary shadow-sm">
+                    <svg width="20" height="auto" viewBox="0 0 50 39" fill="none" xmlns="http://www.w3.org/2000/svg" className="fill-primary-foreground">
+                      <path d="M16.4992 2H37.5808L22.0816 24.9729H1L16.4992 2Z" />
+                      <path d="M17.4224 27.102L11.4192 36H33.5008L49 13.0271H32.7024L23.2064 27.102H17.4224Z" />
+                    </svg>
+                  </div>
+                  {sidebarOpen && (
+                    <div className={`transition-opacity duration-200 ${sidebarOpen ? 'opacity-100' : 'opacity-0'}`}>
+                      <div className="flex items-center gap-2">
+                        <div>
+                          <span className="block text-sm font-semibold text-sidebar-foreground" style={{ letterSpacing: '0.3px' }}>
+                            CollabHub
+                          </span>
+                          <span className="block text-xs text-muted-foreground capitalize">
+                            {user.role} Portal
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {sidebarOpen && (
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                )}
+              </div>
             </div>
 
-            {/* Navigation */}
-            <ScrollArea className="flex-1 py-4">
-              <nav className="space-y-0.5 px-2">
-                {navItems.map((item) => (
+            {/* Navigation Options */}
+            <div className="space-y-1 mb-8 flex-1 overflow-y-auto custom-scrollbar pr-1">
+              {navItems.map((item) => {
+                const isSelected = activeTab === item.id;
+                return (
                   <button
                     key={item.id}
                     onClick={() => setActiveTab(item.id)}
-                    className={`w-full flex items-center gap-3 px-3 py-2 transition-colors ${activeTab === item.id
-                      ? 'text-foreground'
-                      : 'text-muted-foreground hover:text-foreground'
+                    title={!sidebarOpen ? item.label : undefined}
+                    className={`relative flex h-11 w-full items-center rounded-md transition-all duration-200 ${isSelected
+                      ? "bg-primary/10 text-primary shadow-sm border-l-2 border-primary"
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                       }`}
-                    style={activeTab === item.id ? { borderLeft: '2px solid var(--role-accent)', paddingLeft: '10px' } : { borderLeft: '2px solid transparent', paddingLeft: '10px' }}
                   >
-                    <item.icon className="h-4 w-4 flex-shrink-0" />
-                    {sidebarOpen && <span className="text-sm">{item.label}</span>}
+                    <div className="grid h-full w-12 place-content-center shrink-0">
+                      <item.icon className="h-4 w-4" />
+                    </div>
+                    {sidebarOpen && (
+                      <span className={`text-sm font-medium transition-opacity duration-200 whitespace-nowrap ${sidebarOpen ? 'opacity-100' : 'opacity-0'}`}>
+                        {item.label}
+                      </span>
+                    )}
                   </button>
-                ))}
-              </nav>
-            </ScrollArea>
+                );
+              })}
+            </div>
 
-            {/* Subscription Upgrade CTA - ONLY FOR FOUNDERS */}
-            {sidebarOpen && user.role === 'founder' && (userPlan === 'free' || userPlan === 'free_founder') && (
-              <div className="mx-4 mb-2 p-3 rounded-md border border-border">
-                <div className="flex items-center gap-2 mb-2">
-                  <Sparkles className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">Upgrade plan</span>
+            {/* Bottom Actions */}
+            {sidebarOpen && (
+              <div className="border-t border-border pt-4 pb-12 space-y-1">
+                {user.role === 'founder' && (userPlan === 'free' || userPlan === 'free_founder') && (
+                  <div className="mb-2 p-3 rounded-md border border-border bg-background">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Sparkles className="h-4 w-4 text-primary" />
+                      <span className="text-sm font-medium">Upgrade plan</span>
+                    </div>
+                    <Button size="sm" variant="default" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" onClick={handleUpgradeClick}>
+                      View plans
+                    </Button>
+                  </div>
+                )}
+
+                <div className="px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Account
                 </div>
-                <p className="text-xs text-muted-foreground mb-2">
-                  Unlock more features
-                </p>
-                <Button size="sm" variant="outline" className="w-full" onClick={handleUpgradeClick}>
-                  View plans
-                </Button>
+
+                <button
+                  onClick={handleProfileClick}
+                  className={`relative flex h-11 w-full items-center rounded-md transition-all duration-200 ${activeTab === 'profile'
+                    ? "bg-primary/10 text-primary shadow-sm border-l-2 border-primary"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                    }`}
+                >
+                  <div className="grid h-full w-12 place-content-center shrink-0">
+                    <Avatar className="h-5 w-5">
+                      <AvatarImage src={user.avatar} />
+                      <AvatarFallback className="bg-primary/10 text-primary text-[10px]">
+                        {getInitials(user.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+                  <div className="flex-1 min-w-0 text-left">
+                    <span className="text-sm font-medium block truncate">{user.name}</span>
+                  </div>
+                </button>
+
+                <button
+                  onClick={onLogout}
+                  className="relative flex h-11 w-full items-center rounded-md transition-all duration-200 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                >
+                  <div className="grid h-full w-12 place-content-center shrink-0">
+                    <LogOut className="h-4 w-4" />
+                  </div>
+                  <span className="text-sm font-medium">Sign Out</span>
+                </button>
               </div>
             )}
 
-            {/* User Profile - Clickable */}
-            <div className="p-4 border-t">
-              <button
-                onClick={handleProfileClick}
-                className={`w-full flex items-center gap-3 rounded-lg transition-colors ${activeTab === 'profile' ? 'bg-muted' : 'hover:bg-muted'
-                  }`}
-              >
-                <Avatar className="h-9 w-9">
-                  <AvatarImage src={user.avatar} />
-                  <AvatarFallback className="bg-primary/10 text-primary">
-                    {getInitials(user.name)}
-                  </AvatarFallback>
-                </Avatar>
-                {sidebarOpen && (
-                  <div className="flex-1 min-w-0 text-left">
-                    <p className="text-sm font-medium truncate">{user.name}</p>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <Badge variant="secondary" className={`text-xs ${verificationBadge.color} text-white`}>
-                        L{user.verificationLevel}
-                      </Badge>
-                      {/* Only show plan badge for founders */}
-                      {user.role === 'founder' && (
-                        <Badge variant="outline" className="text-xs capitalize">
-                          {getPlanDisplayName(userPlan as import('@/lib/subscription/features').PlanType, user.role)}
-                        </Badge>
-                      )}
-                      {/* Show "Free" badge for non-founders */}
-                      {user.role !== 'founder' && user.role !== 'admin' && (
-                        <Badge variant="outline" className="text-xs">
-                          Free
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </button>
-              {/* Sign Out - Always visible, full width when expanded, icon only when collapsed */}
-              <Button
-                variant="ghost"
-                size={sidebarOpen ? 'sm' : 'icon'}
-                className={`w-full mt-3 text-muted-foreground hover:text-destructive ${!sidebarOpen ? 'p-2' : ''}`}
-                onClick={onLogout}
-                title="Sign Out"
-              >
-                <LogOut className="h-4 w-4" />
-                {sidebarOpen && <span className="ml-2">Sign Out</span>}
-              </Button>
-            </div>
-          </div>
-        </aside>
+            {!sidebarOpen && (
+              <div className="pb-12 space-y-1">
+                <button onClick={handleProfileClick} title="Profile" className="relative flex h-11 w-full items-center justify-center rounded-md transition-all duration-200 text-muted-foreground hover:bg-accent hover:text-accent-foreground">
+                  <Avatar className="h-5 w-5">
+                    <AvatarImage src={user.avatar} />
+                    <AvatarFallback className="bg-primary/10 text-primary text-[10px]">
+                      {getInitials(user.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                </button>
+                <button onClick={onLogout} title="Sign Out" className="relative flex h-11 w-full items-center justify-center rounded-md transition-all duration-200 text-muted-foreground hover:bg-destructive/10 hover:text-destructive">
+                  <LogOut className="h-4 w-4" />
+                </button>
+              </div>
+            )}
 
-        {/* Main Content */}
-        <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-16'}`}>
-          {/* Top Header */}
-          <header className="sticky top-0 z-30 h-16 bg-background/95 backdrop-blur border-b">
-            <div className="flex items-center justify-between h-full px-4">
-              <div className="flex items-center gap-4">
-                <Button variant="ghost" size="icon" onClick={toggleSidebar}>
-                  {sidebarOpen ? <ChevronLeft className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-                </Button>
-                <h1 className="text-lg font-semibold capitalize hidden md:block">
+            {/* Toggle Close */}
+            <button
+              onClick={toggleSidebar}
+              className="absolute bottom-0 left-0 right-0 border-t border-border transition-colors hover:bg-accent z-10 bg-sidebar"
+            >
+              <div className="flex items-center p-3">
+                <div className="grid size-10 place-content-center shrink-0">
+                  <ChevronsRight
+                    className={`h-4 w-4 transition-transform duration-300 text-muted-foreground ${sidebarOpen ? "rotate-180" : ""
+                      }`}
+                  />
+                </div>
+                {sidebarOpen && (
+                  <span className="text-sm font-medium text-muted-foreground transition-opacity duration-200 opacity-100">
+                    Collapse Sidebar
+                  </span>
+                )}
+              </div>
+            </button>
+          </nav>
+
+          {/* Main Content Area */}
+          <div className="flex-1 flex flex-col h-screen overflow-hidden">
+            <header className="flex items-center justify-between px-6 py-4 bg-background/80 backdrop-blur-md border-b border-border z-10 sticky top-0">
+              <div>
+                <h1 className="text-2xl font-bold text-foreground hidden md:block">
                   {navItems.find(item => item.id === activeTab)?.label || 'Dashboard'}
                 </h1>
-
-                {/* Quick Actions removed — startup creation lives inside My Startups */}
               </div>
               <div className="flex items-center gap-4">
-                {/* Notification Dropdown */}
-                <NotificationDropdown />
-
                 {/* Trust Score */}
                 <button
                   onClick={handleProfileClick}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-full hover:bg-primary/20 transition-colors"
+                  className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-full hover:bg-primary/20 transition-colors border border-primary/20 box-border"
                 >
                   <Award className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium">{user.trustScore}</span>
+                  <span className="text-sm font-medium text-primary">{user.trustScore} points</span>
+                </button>
+
+                {/* Notifications */}
+                <div className="relative">
+                  <NotificationDropdown />
+                </div>
+
+                {/* Theme Toggle */}
+                <button
+                  onClick={() => setTheme(isDark ? 'light' : 'dark')}
+                  className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                >
+                  {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                </button>
+
+                {/* Avatar Top Right */}
+                <button onClick={handleProfileClick} className="h-10 w-10 rounded-lg overflow-hidden border border-border shadow-sm ml-2 relative">
+                  {user.avatar ? (
+                    <Image
+                      src={user.avatar}
+                      alt={user.name || "User"}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <Avatar className="h-full w-full rounded-none">
+                      <AvatarFallback className="bg-primary/10 text-primary rounded-none h-full w-full">
+                        {getInitials(user.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                  )}
                 </button>
               </div>
-            </div>
-          </header>
+            </header>
 
-          {/* Page Content - Wrapped with ErrorBoundary */}
-          <main className="p-6" key={key}>
-            <ErrorBoundary>
-              {renderContent()}
-            </ErrorBoundary>
-          </main>
+            {/* Page Content */}
+            <main className="flex-1 overflow-auto p-6 bg-transparent" key={key}>
+              <ErrorBoundary>
+                <div className="max-w-7xl mx-auto">
+                  {renderContent()}
+                </div>
+              </ErrorBoundary>
+            </main>
+          </div>
+
+          <AssistantPanel />
         </div>
-        <AssistantPanel />
       </div>
     </TooltipProvider>
   );
