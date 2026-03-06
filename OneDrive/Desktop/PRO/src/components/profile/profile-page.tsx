@@ -6,7 +6,7 @@ import {
   ArrowLeft, Mail, MapPin, ExternalLink, Briefcase,
   Building2, TrendingUp, Star, Shield, FileText, ShieldCheck, CreditCard, DollarSign,
   MessageSquare, Loader2, Download, Github, Linkedin, Globe, Users,
-  Edit, Save, X, Plus
+  Edit, Save, X, Plus, BadgeCheck, Sparkles
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAuthStore, useUIStore } from '@/store';
 import { AllianceButton } from '@/components/alliances/alliance-button';
 import { TrustBadge } from '@/components/profile/trust-badge';
+import { CollabhubVerifiedBadge } from '@/components/ui/collabhub-verified-badge';
 import { VerificationProgress } from '@/components/verification/verification-progress';
 import { KycDashboard } from '@/components/kyc/kyc-dashboard';
 import { PricingPage } from '@/components/pricing/pricing-page';
@@ -52,6 +53,8 @@ interface ProfileData {
     industry: string;
     trustScore: number;
     logo?: string;
+    collabhubVerified?: boolean;
+    collabhubVerifiedAt?: string;
   }>;
   ticketSize?: { min: number; max: number };
   preferredIndustries?: string[];
@@ -253,16 +256,35 @@ export function ProfilePage({ profileId }: ProfilePageProps) {
         </Button>
       )}
 
-      {/* Profile Header */}
-      <Card>
-        <CardContent className="p-6">
+      {/* Profile Header — Enhanced with gradient mesh background */}
+      <Card className="overflow-hidden relative">
+        {/* Gradient mesh background */}
+        <div className="absolute inset-0 gradient-mesh-bg opacity-60 pointer-events-none" />
+        <div
+          className="absolute top-0 left-0 right-0 h-32 pointer-events-none"
+          style={{
+            background: 'linear-gradient(135deg, rgba(46, 139, 87, 0.08) 0%, rgba(0, 71, 171, 0.06) 50%, transparent 100%)',
+          }}
+        />
+
+        <CardContent className="p-6 relative z-10">
           <div className="flex flex-col md:flex-row items-start gap-6">
-            <Avatar className="h-24 w-24">
-              <AvatarImage src={profile.avatar} />
-              <AvatarFallback className="text-2xl bg-primary/10 text-primary">
-                {getInitials(profile.name)}
-              </AvatarFallback>
-            </Avatar>
+            {/* Avatar with 3D effect */}
+            <div className="relative group">
+              <div
+                className="absolute -inset-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                style={{
+                  background: 'var(--verified-gradient)',
+                  filter: 'blur(8px)',
+                }}
+              />
+              <Avatar className="h-24 w-24 relative ring-2 ring-white/50 dark:ring-white/10">
+                <AvatarImage src={profile.avatar} />
+                <AvatarFallback className="text-2xl bg-primary/10 text-primary">
+                  {getInitials(profile.name)}
+                </AvatarFallback>
+              </Avatar>
+            </div>
 
             <div className="flex-1 space-y-3">
               <div className="flex items-center gap-3 flex-wrap">
@@ -426,11 +448,11 @@ export function ProfilePage({ profileId }: ProfilePageProps) {
       {/* Overview Tab Content */}
       {(profileTab === 'overview' || !isOwnProfile) && (
         <>
-          {/* Recent Trust Activity */}
-          <Card>
+          {/* Recent Trust Activity — 3D hover */}
+          <Card className="card-3d-hover">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
-                <Shield className="h-5 w-5 text-primary" />
+                <Shield className="h-5 w-5 icon-float" style={{ color: 'var(--sea-green)' }} />
                 Recent Trust Activity
               </CardTitle>
               <CardDescription>What affects this trust score</CardDescription>
@@ -439,30 +461,30 @@ export function ProfilePage({ profileId }: ProfilePageProps) {
               <div className="space-y-3">
                 {profile.verificationLevel >= 1 && (
                   <div className="flex items-center gap-3 text-sm">
-                    <div className="h-2 w-2 rounded-full bg-green-500 shrink-0" />
+                    <div className="h-2 w-2 rounded-full shrink-0" style={{ background: 'var(--sea-green)' }} />
                     <span className="text-muted-foreground">Email verified</span>
-                    <span className="ml-auto text-green-600 font-medium">+5</span>
+                    <span className="ml-auto font-medium" style={{ color: 'var(--sea-green)' }}>+5</span>
                   </div>
                 )}
                 {profile.verificationLevel >= 2 && (
                   <div className="flex items-center gap-3 text-sm">
-                    <div className="h-2 w-2 rounded-full bg-green-500 shrink-0" />
+                    <div className="h-2 w-2 rounded-full shrink-0" style={{ background: 'var(--sea-green)' }} />
                     <span className="text-muted-foreground">Identity verified (Level 2)</span>
-                    <span className="ml-auto text-green-600 font-medium">+10</span>
+                    <span className="ml-auto font-medium" style={{ color: 'var(--sea-green)' }}>+10</span>
                   </div>
                 )}
                 {profile.verificationLevel >= 3 && (
                   <div className="flex items-center gap-3 text-sm">
-                    <div className="h-2 w-2 rounded-full bg-green-500 shrink-0" />
+                    <div className="h-2 w-2 rounded-full shrink-0" style={{ background: 'var(--sea-green)' }} />
                     <span className="text-muted-foreground">Full KYC cleared (Level 3+)</span>
-                    <span className="ml-auto text-green-600 font-medium">+15</span>
+                    <span className="ml-auto font-medium" style={{ color: 'var(--sea-green)' }}>+15</span>
                   </div>
                 )}
                 {(profile.allianceCount || 0) > 0 && (
                   <div className="flex items-center gap-3 text-sm">
-                    <div className="h-2 w-2 rounded-full bg-blue-500 shrink-0" />
+                    <div className="h-2 w-2 rounded-full shrink-0" style={{ background: 'var(--cobalt-blue)' }} />
                     <span className="text-muted-foreground">{profile.allianceCount} alliance{(profile.allianceCount || 0) > 1 ? 's' : ''} formed</span>
-                    <span className="ml-auto text-blue-600 font-medium">+{(profile.allianceCount || 0) * 2}</span>
+                    <span className="ml-auto font-medium" style={{ color: 'var(--cobalt-blue)' }}>+{(profile.allianceCount || 0) * 2}</span>
                   </div>
                 )}
                 {(profile.trustScore || 0) >= 50 && (
@@ -481,7 +503,7 @@ export function ProfilePage({ profileId }: ProfilePageProps) {
 
           {/* Social Links Section (Editable) */}
           {isOwnProfile && (
-            <Card>
+            <Card className="card-3d-hover">
               <CardHeader>
                 <CardTitle className="text-lg">Social Links</CardTitle>
                 <CardDescription>Add your social profiles to showcase your work</CardDescription>
@@ -534,7 +556,7 @@ export function ProfilePage({ profileId }: ProfilePageProps) {
 
           {/* Public Social Links View */}
           {!isOwnProfile && (profile.githubUrl || profile.linkedinUrl || profile.portfolioUrl) && (
-            <Card>
+            <Card className="card-3d-hover">
               <CardHeader>
                 <CardTitle>Links</CardTitle>
               </CardHeader>
@@ -574,7 +596,7 @@ export function ProfilePage({ profileId }: ProfilePageProps) {
             <>
               {/* Skills */}
               {(isOwnProfile || (profile.skills && profile.skills.length > 0)) && (
-                <Card>
+                <Card className="card-3d-hover">
                   <CardHeader>
                     <CardTitle>Skills</CardTitle>
                   </CardHeader>
@@ -603,7 +625,7 @@ export function ProfilePage({ profileId }: ProfilePageProps) {
 
               {/* Experience */}
               {(isOwnProfile || profile.experience) && (
-                <Card>
+                <Card className="card-3d-hover">
                   <CardHeader>
                     <CardTitle>Experience</CardTitle>
                   </CardHeader>
@@ -626,7 +648,7 @@ export function ProfilePage({ profileId }: ProfilePageProps) {
 
               {/* Resume */}
               {profile.hasResume && (
-                <Card>
+                <Card className="card-3d-hover">
                   <CardHeader>
                     <CardTitle>Resume</CardTitle>
                   </CardHeader>
@@ -647,17 +669,31 @@ export function ProfilePage({ profileId }: ProfilePageProps) {
             </>
           )}
 
-          {/* Founder-specific sections */}
+          {/* Founder-specific: Startups with CollabHub Verified badge */}
           {profile.role === 'founder' && profile.startups && profile.startups.length > 0 && (
-            <Card>
+            <Card className="card-3d-hover">
               <CardHeader>
-                <CardTitle>Startups</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Building2 className="h-5 w-5 icon-float" style={{ color: 'var(--cobalt-blue)' }} />
+                  Startups
+                </CardTitle>
                 <CardDescription>Companies founded by {profile.name}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {profile.startups.map((startup) => (
-                    <div key={startup._id} className="flex items-start gap-4 p-4 border rounded-lg">
+                    <div
+                      key={startup._id}
+                      className="flex items-start gap-4 p-4 rounded-lg border transition-all duration-300 hover:shadow-md"
+                      style={{
+                        borderColor: startup.collabhubVerified
+                          ? 'rgba(46, 139, 87, 0.3)'
+                          : undefined,
+                        background: startup.collabhubVerified
+                          ? 'linear-gradient(135deg, rgba(46, 139, 87, 0.04) 0%, rgba(0, 71, 171, 0.03) 100%)'
+                          : undefined,
+                      }}
+                    >
                       <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                         {startup.logo ? (
                           <img src={startup.logo} alt={startup.name} className="h-12 w-12 rounded-lg object-cover" />
@@ -666,7 +702,14 @@ export function ProfilePage({ profileId }: ProfilePageProps) {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold">{startup.name}</h3>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="font-semibold">{startup.name}</h3>
+                          <CollabhubVerifiedBadge
+                            verified={startup.collabhubVerified || false}
+                            verifiedAt={startup.collabhubVerifiedAt}
+                            variant="compact"
+                          />
+                        </div>
                         <p className="text-sm text-muted-foreground line-clamp-2">{startup.vision}</p>
                         <div className="flex flex-wrap gap-2 mt-2">
                           <Badge variant="outline">{startup.industry}</Badge>
@@ -682,7 +725,7 @@ export function ProfilePage({ profileId }: ProfilePageProps) {
 
           {/* Investor-specific sections */}
           {profile.role === 'investor' && (
-            <Card>
+            <Card className="card-3d-hover">
               <CardHeader>
                 <CardTitle>Investment Profile</CardTitle>
               </CardHeader>
@@ -777,7 +820,7 @@ function InvestmentProfileSection({ userId }: { userId: string }) {
           ['Avg Equity', `${(data.averageEquity || 0).toFixed(1)}%`],
           ['Active Rounds', `${data.activeRounds || 0}`],
         ].map(([label, value]) => (
-          <Card key={label}>
+          <Card key={label} className="card-3d-hover">
             <CardContent className="p-4">
               <p className="text-xs text-muted-foreground">{label}</p>
               <p className="text-lg font-semibold mt-1 font-mono">{value}</p>
@@ -787,7 +830,7 @@ function InvestmentProfileSection({ userId }: { userId: string }) {
       </div>
 
       {data.portfolio && data.portfolio.length > 0 && (
-        <Card>
+        <Card className="card-3d-hover">
           <CardHeader>
             <CardTitle>Portfolio</CardTitle>
           </CardHeader>
@@ -798,9 +841,14 @@ function InvestmentProfileSection({ userId }: { userId: string }) {
                 onClick={() => item.startup?._id && router.push(`/startup/${item.startup._id}`)}
                 className="flex items-center justify-between w-full px-4 py-3 rounded text-left border transition-colors hover:bg-muted/50"
               >
-                <div>
-                  <p className="text-sm font-medium">{item.startup?.name || 'Unknown'}</p>
-                  <p className="text-xs text-muted-foreground">{item.startup?.industry} · {item.roundType}</p>
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded flex items-center justify-center bg-muted">
+                    <Building2 className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">{item.startup?.name || 'Unknown Startup'}</p>
+                    <p className="text-xs text-muted-foreground capitalize">{item.startup?.industry}</p>
+                  </div>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-mono">${(item.amount || 0).toLocaleString()}</p>

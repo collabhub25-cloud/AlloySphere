@@ -246,3 +246,161 @@
   background: var(--border);
   border-radius: 9999px;
 }
+
+/* ==========================================
+   SEA GREEN / COBALT BLUE ACCENT PALETTE
+   ========================================== */
+:root {
+  --sea-green: #2E8B57;
+  --sea-green-light: #3CB371;
+  --sea-green-dark: #1F6B42;
+  --cobalt-blue: #0047AB;
+  --cobalt-blue-light: #2563EB;
+  --cobalt-blue-dark: #003087;
+  --verified-gradient: linear-gradient(135deg, #2E8B57 0%, #0047AB 100%);
+  --verified-gradient-light: linear-gradient(135deg, #3CB37140 0%, #2563EB40 100%);
+}
+
+.dark {
+  --sea-green: #3CB371;
+  --sea-green-light: #4ADE80;
+  --sea-green-dark: #2E8B57;
+  --cobalt-blue: #2563EB;
+  --cobalt-blue-light: #60A5FA;
+  --cobalt-blue-dark: #0047AB;
+  --verified-gradient: linear-gradient(135deg, #3CB371 0%, #2563EB 100%);
+  --verified-gradient-light: linear-gradient(135deg, #3CB37130 0%, #2563EB30 100%);
+}
+
+/* ==========================================
+   3D KEYFRAME ANIMATIONS
+   ========================================== */
+
+@keyframes float3d {
+
+  0%,
+  100% {
+    transform: translateY(0px) rotateX(0deg);
+  }
+
+  50% {
+    transform: translateY(-6px) rotateX(2deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+
+  100% {
+    background-position: 200% center;
+  }
+}
+
+@keyframes badge-rotate {
+  0% {
+    transform: perspective(600px) rotateY(0deg);
+  }
+
+  100% {
+    transform: perspective(600px) rotateY(360deg);
+  }
+}
+
+@keyframes glow-pulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(46, 139, 87, 0.3), 0 0 16px rgba(0, 71, 171, 0.15);
+  }
+
+  50% {
+    box-shadow: 0 0 16px rgba(46, 139, 87, 0.5), 0 0 32px rgba(0, 71, 171, 0.3);
+  }
+}
+
+@keyframes badge-spin-slow {
+  0% {
+    transform: perspective(600px) rotateY(0deg) scale(1);
+  }
+
+  50% {
+    transform: perspective(600px) rotateY(180deg) scale(1.05);
+  }
+
+  100% {
+    transform: perspective(600px) rotateY(360deg) scale(1);
+  }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* ==========================================
+   3D UTILITY CLASSES
+   ========================================== */
+
+.glassmorphic {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.dark .glassmorphic {
+  background: rgba(38, 34, 32, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.card-3d-hover {
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s ease;
+  transform-style: preserve-3d;
+}
+
+.card-3d-hover:hover {
+  transform: perspective(1000px) rotateX(2deg) rotateY(1deg) translateY(-4px);
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(46, 139, 87, 0.1);
+}
+
+.gradient-mesh-bg {
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(46, 139, 87, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(0, 71, 171, 0.10) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(60, 179, 113, 0.08) 0%, transparent 50%);
+}
+
+.dark .gradient-mesh-bg {
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(60, 179, 113, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(37, 99, 235, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(60, 179, 113, 0.04) 0%, transparent 50%);
+}
+
+.badge-glow {
+  animation: glow-pulse 2.5s ease-in-out infinite;
+}
+
+.icon-float {
+  animation: float3d 3s ease-in-out infinite;
+}
+
+.shimmer-text {
+  background: linear-gradient(90deg, var(--sea-green) 0%, var(--cobalt-blue) 50%, var(--sea-green) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
+}

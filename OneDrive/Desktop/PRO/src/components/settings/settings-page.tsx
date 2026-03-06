@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,11 @@ import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Shield, Settings as SettingsIcon, Bell, User as UserIcon, LogOut, Trash2 } from 'lucide-react';
+import {
+    Loader2, Shield, Settings as SettingsIcon, Bell,
+    User as UserIcon, LogOut, Trash2, BadgeCheck,
+    Building2, CheckCircle2, Clock, Send
+} from 'lucide-react';
 import { toast } from 'sonner';
 import {
     AlertDialog,
@@ -24,11 +28,14 @@ import {
     AlertDialogTrigger
 } from '@/components/ui/alert-dialog';
 import { getPlanDisplayName } from '@/lib/subscription/features';
+import { CollabhubVerifiedBadge } from '@/components/ui/collabhub-verified-badge';
 
 export function SettingsPage() {
     const { user, updateUser, logout } = useAuthStore();
     const [loading, setLoading] = useState(false);
     const [passwordLoading, setPasswordLoading] = useState(false);
+    const [startups, setStartups] = useState<any[]>([]);
+    const [startupsLoading, setStartupsLoading] = useState(false);
 
     // Profile settings state
     const [profile, setProfile] = useState({
@@ -50,6 +57,27 @@ export function SettingsPage() {
         marketingEmails: false,
         alertNotifications: true,
     });
+
+    // Fetch founder's startups for CollabHub verification section
+    useEffect(() => {
+        if (user?.role === 'founder') {
+            const fetchStartups = async () => {
+                setStartupsLoading(true);
+                try {
+                    const res = await fetch('/api/startups', { credentials: 'include' });
+                    if (res.ok) {
+                        const data = await res.json();
+                        setStartups(data.startups || []);
+                    }
+                } catch (err) {
+                    console.error('Error fetching startups:', err);
+                } finally {
+                    setStartupsLoading(false);
+                }
+            };
+            fetchStartups();
+        }
+    }, [user?.role]);
 
     const handleProfileUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -131,22 +159,43 @@ export function SettingsPage() {
             const res = await fetch('/api/auth/me', { method: 'DELETE' });
             if (!res.ok) throw new Error('Failed to delete account');
             logout();
-            // Redirect handled by logout state change
         } catch (err) {
             toast.error('Failed to delete account');
         }
     };
 
+    const handleRequestVerification = (startupId: string, startupName: string) => {
+        toast.success(`Verification request sent for "${startupName}". The CollabHub team will contact you to schedule an on-site visit.`, {
+            duration: 5000,
+        });
+    };
+
     return (
         <div className="space-y-6 max-w-5xl mx-auto pb-12">
-            <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+            {/* Page header with gradient */}
+            <div className="relative">
+                <div
+                    className="absolute inset-0 rounded-2xl pointer-events-none"
+                    style={{
+                        background: 'linear-gradient(135deg, rgba(46, 139, 87, 0.06) 0%, rgba(0, 71, 171, 0.04) 50%, transparent 100%)',
+                        filter: 'blur(20px)',
+                    }}
+                />
+                <div className="relative">
+                    <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+                        <SettingsIcon className="h-8 w-8 icon-float" style={{ color: 'var(--cobalt-blue)' }} />
+                        Settings
+                    </h1>
+                    <p className="text-muted-foreground mt-1">Manage your account, security, and preferences</p>
+                </div>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* PROFILE SETTINGS */}
-                <Card>
+                <Card className="card-3d-hover glassmorphic">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <UserIcon className="h-5 w-5" />
+                            <UserIcon className="h-5 w-5 icon-float" style={{ color: 'var(--sea-green)' }} />
                             Profile Settings
                         </CardTitle>
                         <CardDescription>Update your public profile information</CardDescription>
@@ -187,10 +236,10 @@ export function SettingsPage() {
                 </Card>
 
                 {/* ACCOUNT SETTINGS */}
-                <Card>
+                <Card className="card-3d-hover glassmorphic">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <SettingsIcon className="h-5 w-5" />
+                            <SettingsIcon className="h-5 w-5 icon-float" style={{ color: 'var(--cobalt-blue)' }} />
                             Account Settings
                         </CardTitle>
                         <CardDescription>Manage your account credentials</CardDescription>
@@ -244,10 +293,10 @@ export function SettingsPage() {
                 </Card>
 
                 {/* SECURITY SETTINGS */}
-                <Card className="col-span-1">
+                <Card className="col-span-1 card-3d-hover glassmorphic">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <Shield className="h-5 w-5" />
+                            <Shield className="h-5 w-5 icon-float" style={{ color: 'var(--sea-green)' }} />
                             Security
                         </CardTitle>
                         <CardDescription>Manage your active sessions and security features</CardDescription>
@@ -263,12 +312,27 @@ export function SettingsPage() {
                         <Separator />
                         <div className="space-y-3">
                             <h3 className="text-sm font-medium">Active Sessions</h3>
-                            <div className="flex items-center justify-between bg-muted/50 p-3 rounded-md border">
+                            <div
+                                className="flex items-center justify-between p-3 rounded-md border"
+                                style={{
+                                    background: 'linear-gradient(135deg, rgba(46, 139, 87, 0.04) 0%, rgba(0, 71, 171, 0.02) 100%)',
+                                    borderColor: 'rgba(46, 139, 87, 0.15)',
+                                }}
+                            >
                                 <div>
                                     <p className="text-sm font-medium">Current Session</p>
                                     <p className="text-xs text-muted-foreground">Windows • Chrome • This device</p>
                                 </div>
-                                <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">Active</Badge>
+                                <Badge
+                                    variant="outline"
+                                    style={{
+                                        background: 'rgba(46, 139, 87, 0.1)',
+                                        color: 'var(--sea-green)',
+                                        borderColor: 'rgba(46, 139, 87, 0.2)',
+                                    }}
+                                >
+                                    Active
+                                </Badge>
                             </div>
                             <Button onClick={handleLogoutAll} variant="outline" className="w-full sm:w-auto" type="button">
                                 <LogOut className="h-4 w-4 mr-2" />
@@ -279,10 +343,10 @@ export function SettingsPage() {
                 </Card>
 
                 {/* NOTIFICATIONS */}
-                <Card className="col-span-1">
+                <Card className="col-span-1 card-3d-hover glassmorphic">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <Bell className="h-5 w-5" />
+                            <Bell className="h-5 w-5 icon-float" style={{ color: 'var(--cobalt-blue)' }} />
                             Preferences
                         </CardTitle>
                         <CardDescription>Customize your notification settings</CardDescription>
@@ -323,12 +387,151 @@ export function SettingsPage() {
                     </CardContent>
                 </Card>
 
+                {/* COLLABHUB VERIFICATION PANEL (Founder only) */}
+                {user?.role === 'founder' && (
+                    <Card
+                        className="col-span-1 md:col-span-2 overflow-hidden relative"
+                        style={{
+                            border: '1px solid rgba(46, 139, 87, 0.2)',
+                        }}
+                    >
+                        {/* Gradient background */}
+                        <div
+                            className="absolute inset-0 pointer-events-none"
+                            style={{
+                                background: 'linear-gradient(135deg, rgba(46, 139, 87, 0.06) 0%, rgba(0, 71, 171, 0.04) 50%, rgba(46, 139, 87, 0.02) 100%)',
+                            }}
+                        />
+
+                        <CardHeader className="relative z-10">
+                            <CardTitle className="flex items-center gap-2">
+                                <div
+                                    className="flex items-center justify-center h-8 w-8 rounded-full badge-glow"
+                                    style={{ background: 'var(--verified-gradient)' }}
+                                >
+                                    <BadgeCheck className="h-4 w-4 text-white" />
+                                </div>
+                                <span className="shimmer-text font-bold">CollabHub Verification</span>
+                            </CardTitle>
+                            <CardDescription>
+                                Get your startups physically verified by the CollabHub team to earn investor trust
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="relative z-10 space-y-4">
+                            {/* How it works */}
+                            <div
+                                className="p-4 rounded-lg border"
+                                style={{
+                                    background: 'rgba(255, 255, 255, 0.5)',
+                                    borderColor: 'rgba(46, 139, 87, 0.12)',
+                                }}
+                            >
+                                <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
+                                    <Shield className="h-4 w-4" style={{ color: 'var(--sea-green)' }} />
+                                    How CollabHub Verification Works
+                                </h4>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    {[
+                                        { step: '1', title: 'Request', desc: 'Submit a verification request for your startup' },
+                                        { step: '2', title: 'On-Site Visit', desc: 'Our team visits your office for background checks' },
+                                        { step: '3', title: 'Badge Awarded', desc: 'Verified startups get a trusted badge for investors' },
+                                    ].map((item) => (
+                                        <div key={item.step} className="flex items-start gap-2">
+                                            <div
+                                                className="flex items-center justify-center h-6 w-6 rounded-full text-white text-xs font-bold flex-shrink-0"
+                                                style={{ background: 'var(--verified-gradient)' }}
+                                            >
+                                                {item.step}
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-medium">{item.title}</p>
+                                                <p className="text-xs text-muted-foreground">{item.desc}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Startups list */}
+                            {startupsLoading ? (
+                                <div className="flex items-center justify-center py-6">
+                                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                                </div>
+                            ) : startups.length === 0 ? (
+                                <p className="text-sm text-muted-foreground py-4 text-center">
+                                    No startups found. Create a startup first to request verification.
+                                </p>
+                            ) : (
+                                <div className="space-y-3">
+                                    <h4 className="text-sm font-medium">Your Startups</h4>
+                                    {startups.map((startup: any) => (
+                                        <div
+                                            key={startup._id}
+                                            className="flex items-center justify-between p-4 rounded-lg border transition-all duration-300 hover:shadow-md card-3d-hover"
+                                            style={{
+                                                borderColor: startup.collabhubVerified
+                                                    ? 'rgba(46, 139, 87, 0.3)'
+                                                    : undefined,
+                                                background: startup.collabhubVerified
+                                                    ? 'linear-gradient(135deg, rgba(46, 139, 87, 0.06) 0%, rgba(0, 71, 171, 0.03) 100%)'
+                                                    : 'rgba(255, 255, 255, 0.4)',
+                                            }}
+                                        >
+                                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                                    {startup.logo ? (
+                                                        <img src={startup.logo} alt={startup.name} className="h-10 w-10 rounded-lg object-cover" />
+                                                    ) : (
+                                                        <Building2 className="h-5 w-5 text-primary" />
+                                                    )}
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <p className="text-sm font-medium truncate">{startup.name}</p>
+                                                        <CollabhubVerifiedBadge
+                                                            verified={startup.collabhubVerified || false}
+                                                            verifiedAt={startup.collabhubVerifiedAt}
+                                                            variant="compact"
+                                                        />
+                                                    </div>
+                                                    <p className="text-xs text-muted-foreground capitalize">{startup.industry} · {startup.stage}</p>
+                                                </div>
+                                            </div>
+
+                                            {startup.collabhubVerified ? (
+                                                <div className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full" style={{ background: 'rgba(46, 139, 87, 0.1)', color: 'var(--sea-green)' }}>
+                                                    <CheckCircle2 className="h-3.5 w-3.5" />
+                                                    Verified
+                                                </div>
+                                            ) : (
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="flex-shrink-0"
+                                                    style={{
+                                                        borderColor: 'rgba(46, 139, 87, 0.3)',
+                                                        color: 'var(--sea-green)',
+                                                    }}
+                                                    onClick={() => handleRequestVerification(startup._id, startup.name)}
+                                                >
+                                                    <Send className="h-3.5 w-3.5 mr-1.5" />
+                                                    Request Verification
+                                                </Button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                )}
+
                 {/* FOUNDER SUBSCRIPTION PANEL */}
                 {user?.role === 'founder' && (
-                    <Card className="col-span-1 md:col-span-2 border-primary/20 bg-primary/5">
+                    <Card className="col-span-1 md:col-span-2 card-3d-hover" style={{ borderColor: 'rgba(0, 71, 171, 0.15)', background: 'linear-gradient(135deg, rgba(0, 71, 171, 0.03) 0%, rgba(46, 139, 87, 0.02) 100%)' }}>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
-                                <Shield className="h-5 w-5 text-primary" />
+                                <Shield className="h-5 w-5" style={{ color: 'var(--cobalt-blue)' }} />
                                 Subscription Plan
                             </CardTitle>
                             <CardDescription>Manage your CollabHub limits and billing</CardDescription>
@@ -345,7 +548,7 @@ export function SettingsPage() {
                                 </div>
                                 <div className="flex gap-3">
                                     <Button variant="outline" asChild>
-                                        <a href="#subscription" onClick={(e) => { e.preventDefault(); /* Hook up to dashboard activeTab navigation if needed */ }}>
+                                        <a href="#subscription" onClick={(e) => { e.preventDefault(); }}>
                                             View Features
                                         </a>
                                     </Button>

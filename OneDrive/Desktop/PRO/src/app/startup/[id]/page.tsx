@@ -3,7 +3,8 @@
 import { use, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/store';
-import { ArrowLeft, Building2, Users, Globe, Loader2, Briefcase, TrendingUp, FileText, Target, DollarSign, Settings, Edit3, Check, X } from 'lucide-react';
+import { ArrowLeft, Building2, Users, Globe, Loader2, Briefcase, TrendingUp, FileText, Target, DollarSign, Settings, Edit3, Check, X, BadgeCheck } from 'lucide-react';
+import { CollabhubVerifiedBadge } from '@/components/ui/collabhub-verified-badge';
 
 interface StartupData {
     _id: string;
@@ -19,6 +20,8 @@ interface StartupData {
     logo?: string;
     website?: string;
     isActive: boolean;
+    collabhubVerified?: boolean;
+    collabhubVerifiedAt?: string;
     createdAt: string;
     founderId?: {
         _id: string;
@@ -204,7 +207,14 @@ export default function StartupPage({
                             </div>
                         )}
                         <div>
-                            <h1 className="text-2xl font-medium">{startup.name}</h1>
+                            <div className="flex items-center gap-3 flex-wrap">
+                                <h1 className="text-2xl font-medium">{startup.name}</h1>
+                                <CollabhubVerifiedBadge
+                                    verified={startup.collabhubVerified || false}
+                                    verifiedAt={startup.collabhubVerifiedAt}
+                                    variant="full"
+                                />
+                            </div>
                             <p className="text-sm mt-1" style={{ color: '#6C635C' }}>
                                 {startup.industry} · {startup.stage} · {startup.fundingStage}
                             </p>
@@ -248,7 +258,7 @@ export default function StartupPage({
                 {activeTab === 'overview' && (
                     <div className="space-y-8">
                         {/* Stats */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                             {[
                                 ['Trust Score', `${startup.trustScore ?? 0}/100`],
                                 ['Stage', startup.stage],
@@ -260,6 +270,30 @@ export default function StartupPage({
                                     <p className="text-sm font-medium mt-1 capitalize">{value}</p>
                                 </div>
                             ))}
+                            {/* CollabHub Verified stat card */}
+                            <div
+                                className="px-4 py-3 rounded"
+                                style={{
+                                    background: startup.collabhubVerified
+                                        ? 'linear-gradient(135deg, rgba(46, 139, 87, 0.08) 0%, rgba(0, 71, 171, 0.06) 100%)'
+                                        : '#FBF9F6',
+                                    border: startup.collabhubVerified
+                                        ? '1px solid rgba(46, 139, 87, 0.25)'
+                                        : '1px solid #D8D2C8',
+                                }}
+                            >
+                                <p className="text-xs" style={{ color: '#6C635C' }}>Verified</p>
+                                <div className="flex items-center gap-1.5 mt-1">
+                                    {startup.collabhubVerified ? (
+                                        <>
+                                            <BadgeCheck className="h-4 w-4" style={{ color: 'var(--sea-green)' }} />
+                                            <span className="text-sm font-medium" style={{ color: 'var(--sea-green)' }}>Yes</span>
+                                        </>
+                                    ) : (
+                                        <span className="text-sm font-medium" style={{ color: '#6C635C' }}>No</span>
+                                    )}
+                                </div>
+                            </div>
                         </div>
 
                         <section>
