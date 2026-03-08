@@ -11,7 +11,7 @@ import jwt from 'jsonwebtoken';
 // CONFIGURATION
 // ============================================
 
-const JWT_SECRET = process.env.JWT_SECRET || 'collabhub-dev-secret-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET || 'AlloySphere-dev-secret-change-in-production';
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
 /** Routes that do NOT require authentication */

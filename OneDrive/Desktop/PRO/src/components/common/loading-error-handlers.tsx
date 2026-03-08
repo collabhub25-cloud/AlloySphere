@@ -287,8 +287,8 @@ export function useSessionExpired() {
 
   const handleExpired = useCallback(() => {
     // Clear auth state
-    localStorage.removeItem('collabhub-auth');
-    localStorage.removeItem('collabhub-ui');
+    localStorage.removeItem('AlloySphere-auth');
+    localStorage.removeItem('AlloySphere-ui');
     
     // Redirect to login with message
     window.location.href = '/?session=expired';

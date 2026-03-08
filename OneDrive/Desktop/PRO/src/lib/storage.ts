@@ -18,7 +18,7 @@ const config: StorageConfig = {
     // Toggle this flag when real keys are injected
     useMock: !process.env.AWS_ACCESS_KEY_ID || process.env.NODE_ENV !== 'production',
     region: process.env.AWS_REGION || 'us-east-1',
-    bucket: process.env.AWS_S3_BUCKET || 'collabhub-secure-docs',
+    bucket: process.env.AWS_S3_BUCKET || 'AlloySphere-secure-docs',
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
 };

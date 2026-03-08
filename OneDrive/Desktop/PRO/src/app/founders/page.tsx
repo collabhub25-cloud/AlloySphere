@@ -39,7 +39,7 @@ export default function FounderLanding() {
                 <hr style={{ borderColor: '#D8D2C8', maxWidth: '64rem', margin: '0 auto' }} />
 
                 <section className="max-w-5xl mx-auto px-6" style={{ paddingTop: '72px', paddingBottom: '64px' }}>
-                    <h2 className="mb-10">What founders use CollabHub for</h2>
+                    <h2 className="mb-10">What founders use AlloySphere for</h2>
                     <div className="grid md:grid-cols-2 gap-x-16 gap-y-8">
                         {[
                             ['Verified talent hiring', 'Every applicant passes identity and skill verification before they can apply to your startup.'],
@@ -69,7 +69,7 @@ export default function FounderLanding() {
             </main>
 
             <footer className="border-t py-5 text-center text-sm" style={{ borderColor: '#D8D2C8', color: '#6C635C' }}>
-                © {new Date().getFullYear()} CollabHub
+                © {new Date().getFullYear()} AlloySphere
             </footer>
         </div>
     );

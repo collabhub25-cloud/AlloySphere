@@ -44,98 +44,46 @@
 }
 
 /* ==========================================
-   WARM CHOCOLATE & CREAM PALETTE
+   MONOCHROME BLACK & WHITE PALETTE
    ========================================== */
 :root {
   --radius: 0.25rem;
-  /* Light mode: Warm background tints to match yellow background */
-  --background: #F9FAF9;
-  --foreground: #0D140E;
+  /* Light mode: Clean monochrome */
+  --background: #FAFAFA;
+  --foreground: #09090B;
   --card: #FFFFFF;
-  --card-foreground: #0D140E;
+  --card-foreground: #09090B;
   --popover: #FFFFFF;
-  --popover-foreground: #0D140E;
-  --primary: #597E5B;
-  /* Soft Sage Green for light mode contrast */
+  --popover-foreground: #09090B;
+  --primary: #111111;
   --primary-foreground: #FFFFFF;
-  --secondary: #E2E8E2;
-  --secondary-foreground: #0D140E;
-  --muted: #E2E8E2;
-  --muted-foreground: #4C6854;
-  --accent: #E2E8E2;
-  --accent-foreground: #0D140E;
-  --destructive: #E74C3C;
-  --border: #CDE0D4;
-  --input: #CDE0D4;
-  --ring: #597E5B;
-  --chart-1: #597E5B;
-  --chart-2: #C0A080;
-  /* Light Brown/Tan */
-  --chart-3: #8B6D55;
-  /* Deep Brown */
-  --chart-4: #4ADE80;
-  --chart-5: #0D140E;
+  --secondary: #F4F4F5;
+  --secondary-foreground: #09090B;
+  --muted: #F4F4F5;
+  --muted-foreground: #71717A;
+  --accent: #F4F4F5;
+  --accent-foreground: #09090B;
+  --destructive: #EF4444;
+  --border: #E4E4E7;
+  --input: #E4E4E7;
+  --ring: #111111;
+  --chart-1: #18181B;
+  --chart-2: #71717A;
+  --chart-3: #A1A1AA;
+  --chart-4: #3F3F46;
+  --chart-5: #D4D4D8;
   --sidebar: #FFFFFF;
-  --sidebar-foreground: #0D140E;
-  --sidebar-primary: #597E5B;
+  --sidebar-foreground: #09090B;
+  --sidebar-primary: #111111;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #E2E8E2;
-  --sidebar-accent-foreground: #0D140E;
-  --sidebar-border: #CDE0D4;
-  --sidebar-ring: #597E5B;
+  --sidebar-accent: #F4F4F5;
+  --sidebar-accent-foreground: #09090B;
+  --sidebar-border: #E4E4E7;
+  --sidebar-ring: #111111;
 
-  --accent-founder: #FF7A59;
-  /* Coral */
-  --accent-investor: #4DB8FF;
-  /* Electric Blue */
-  --accent-talent: #B873E8;
-  /* Purple */
-  --role-accent: var(--accent-founder);
-}
-
-.dark {
-  /* Dark mode: Very dark earthy Green background with warm Green accents */
-  --background: #0B140E;
-  --foreground: #F4F6F4;
-  --card: #111A13;
-  --card-foreground: #F4F6F4;
-  --popover: #111A13;
-  --popover-foreground: #F4F6F4;
-  --primary: #8BBD8E;
-  /* Soft Light Green Accent */
-  --primary-foreground: #0B140E;
-  --secondary: #1C2922;
-  --secondary-foreground: #F4F6F4;
-  --muted: #1C2922;
-  --muted-foreground: #84A38D;
-  --accent: #1C2922;
-  --accent-foreground: #F4F6F4;
-  --destructive: #FF7A59;
-  --border: #23332A;
-  --input: #23332A;
-  --ring: #8BBD8E;
-  --chart-1: #8BBD8E;
-  --chart-2: #D2B48C;
-  /* Light Brown */
-  --chart-3: #A08060;
-  /* Deep Brown */
-  --chart-4: #4DB8FF;
-  --chart-5: #FF7A59;
-  --sidebar: #0E1711;
-  --sidebar-foreground: #F4F6F4;
-  --sidebar-primary: #8BBD8E;
-  --sidebar-primary-foreground: #0B140E;
-  --sidebar-accent: #1C2922;
-  --sidebar-accent-foreground: #F4F6F4;
-  --sidebar-border: #23332A;
-  --sidebar-ring: #8BBD8E;
-
-  --accent-founder: #FF7A59;
-  /* Coral */
-  --accent-investor: #4DB8FF;
-  /* Electric Blue */
-  --accent-talent: #B873E8;
-  /* Purple */
+  --accent-founder: #18181B;
+  --accent-investor: #3F3F46;
+  --accent-talent: #52525B;
   --role-accent: var(--accent-founder);
 }
 
@@ -262,28 +210,17 @@
 }
 
 /* ==========================================
-   SEA GREEN / COBALT BLUE ACCENT PALETTE
+   MONOCHROME ACCENT PALETTE
    ========================================== */
 :root {
-  --sea-green: #2E8B57;
-  --sea-green-light: #3CB371;
-  --sea-green-dark: #1F6B42;
-  --cobalt-blue: #0047AB;
-  --cobalt-blue-light: #2563EB;
-  --cobalt-blue-dark: #003087;
-  --verified-gradient: linear-gradient(135deg, #2E8B57 0%, #0047AB 100%);
-  --verified-gradient-light: linear-gradient(135deg, #3CB37140 0%, #2563EB40 100%);
-}
-
-.dark {
-  --sea-green: #3CB371;
-  --sea-green-light: #4ADE80;
-  --sea-green-dark: #2E8B57;
-  --cobalt-blue: #2563EB;
-  --cobalt-blue-light: #60A5FA;
-  --cobalt-blue-dark: #0047AB;
-  --verified-gradient: linear-gradient(135deg, #3CB371 0%, #2563EB 100%);
-  --verified-gradient-light: linear-gradient(135deg, #3CB37130 0%, #2563EB30 100%);
+  --sea-green: #18181B;
+  --sea-green-light: #3F3F46;
+  --sea-green-dark: #09090B;
+  --cobalt-blue: #27272A;
+  --cobalt-blue-light: #52525B;
+  --cobalt-blue-dark: #18181B;
+  --verified-gradient: linear-gradient(135deg, #18181B 0%, #3F3F46 100%);
+  --verified-gradient-light: linear-gradient(135deg, #18181B40 0%, #3F3F4640 100%);
 }
 
 /* ==========================================
@@ -373,10 +310,7 @@
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.dark .glassmorphic {
-  background: rgba(38, 34, 32, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
+/* dark .glassmorphic removed — light mode only */
 
 .card-3d-hover {
   transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s ease;
@@ -385,22 +319,17 @@
 
 .card-3d-hover:hover {
   transform: perspective(1000px) rotateX(2deg) rotateY(1deg) translateY(-4px);
-  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(46, 139, 87, 0.1);
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.06);
 }
 
 .gradient-mesh-bg {
   background:
-    radial-gradient(ellipse at 20% 50%, rgba(46, 139, 87, 0.12) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, rgba(0, 71, 171, 0.10) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 80%, rgba(60, 179, 113, 0.08) 0%, transparent 50%);
+    radial-gradient(ellipse at 20% 50%, rgba(0, 0, 0, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(0, 0, 0, 0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(0, 0, 0, 0.02) 0%, transparent 50%);
 }
 
-.dark .gradient-mesh-bg {
-  background:
-    radial-gradient(ellipse at 20% 50%, rgba(60, 179, 113, 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, rgba(37, 99, 235, 0.06) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 80%, rgba(60, 179, 113, 0.04) 0%, transparent 50%);
-}
+/* dark .gradient-mesh-bg removed — light mode only */
 
 .badge-glow {
   animation: glow-pulse 2.5s ease-in-out infinite;
@@ -477,4 +406,52 @@
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: var(--border);
   border-radius: 9999px;
+}
+
+/* ==========================================
+   SIDEBAR 3D EFFECTS
+   ========================================== */
+
+@keyframes sidebar-logo-float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes sidebar-item-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Nav item 3D hover effect */
+.sidebar-nav-item {
+  transform-style: preserve-3d;
+  transition: transform 0.35s cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 0.35s ease,
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+
+.sidebar-nav-item:hover {
+  transform: perspective(600px) rotateX(2deg) translateY(-1px);
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.sidebar-nav-item:active {
+  transform: perspective(600px) rotateX(0deg) translateY(0px) scale(0.98);
+  box-shadow: none;
 }

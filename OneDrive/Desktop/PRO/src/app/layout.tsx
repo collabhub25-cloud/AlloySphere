@@ -15,22 +15,22 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CollabHub - Startup Collaboration Platform",
+  title: "AlloySphere - Startup Collaboration Platform",
   description: "Connect verified talents, founders, and investors. Build successful startups with trust-based collaboration, automated agreements, and milestone tracking.",
-  keywords: ["CollabHub", "Startup", "Collaboration", "Founders", "Talent", "Investors", "SaaS"],
-  authors: [{ name: "CollabHub Team" }],
+  keywords: ["AlloySphere", "Startup", "Collaboration", "Founders", "Talent", "Investors", "SaaS"],
+  authors: [{ name: "AlloySphere Team" }],
   icons: {
     icon: "/logo.svg",
     shortcut: "/favicon.svg",
   },
   openGraph: {
-    title: "CollabHub - Startup Collaboration Platform",
+    title: "AlloySphere - Startup Collaboration Platform",
     description: "Connect verified talents, founders, and investors",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "CollabHub - Startup Collaboration Platform",
+    title: "AlloySphere - Startup Collaboration Platform",
     description: "Connect verified talents, founders, and investors",
   },
 };

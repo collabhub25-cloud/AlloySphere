@@ -91,7 +91,7 @@ export function validateEnv(): { valid: boolean; errors: string[]; warnings: str
     }
     
     // Check for default insecure value
-    if (jwtSecret === 'collabhub-default-secret-change-in-production') {
+    if (jwtSecret === 'AlloySphere-default-secret-change-in-production') {
       validationErrors.push('JWT_SECRET is using the default insecure value. Please set a secure secret!');
     }
     
@@ -144,7 +144,7 @@ export const env = {
     return process.env.MONGODB_URI || process.env.DATABASE_URL || '';
   },
   get JWT_SECRET() {
-    return process.env.JWT_SECRET || 'collabhub-dev-secret-change-in-production';
+    return process.env.JWT_SECRET || 'AlloySphere-dev-secret-change-in-production';
   },
   get JWT_REFRESH_SECRET() {
     return process.env.JWT_REFRESH_SECRET || this.JWT_SECRET + '-refresh';

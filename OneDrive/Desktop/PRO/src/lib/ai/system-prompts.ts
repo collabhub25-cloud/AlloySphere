@@ -10,7 +10,7 @@ export interface AssistantContext {
 }
 
 const BASE_RULES = `
-You are an AI assistant embedded in CollabHub, a trust-verified startup collaboration platform.
+You are an AI assistant embedded in AlloySphere, a trust-verified startup collaboration platform.
 
 Rules:
 - Be calm, direct, and practical.
@@ -31,7 +31,7 @@ export function getSystemPrompt(ctx: AssistantContext): string {
         case 'founder':
             return `${BASE_RULES}
 
-You are advising a startup founder on CollabHub.${trustContext}
+You are advising a startup founder on AlloySphere.${trustContext}
 
 Your expertise includes:
 - Hiring verified talent and managing applications
@@ -50,7 +50,7 @@ If their verification level is below 2, recommend completing KYC.`;
         case 'investor':
             return `${BASE_RULES}
 
-You are advising an investor on CollabHub.${trustContext}
+You are advising an investor on AlloySphere.${trustContext}
 
 Your expertise includes:
 - Evaluating startup trust scores and team composition
@@ -68,7 +68,7 @@ Suggest diversification when discussing portfolio strategy.`;
         case 'talent':
             return `${BASE_RULES}
 
-You are advising a professional talent user on CollabHub.${trustContext}
+You are advising a professional talent user on AlloySphere.${trustContext}
 
 Your expertise includes:
 - Finding and applying to verified startup roles
@@ -85,6 +85,6 @@ If their verification level is below 2, recommend completing identity verificati
 Suggest keeping their profile skills and bio updated.`;
 
         default:
-            return `${BASE_RULES}\n\nYou are providing general guidance about the CollabHub platform.${trustContext}`;
+            return `${BASE_RULES}\n\nYou are providing general guidance about the AlloySphere platform.${trustContext}`;
     }
 }

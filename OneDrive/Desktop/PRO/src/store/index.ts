@@ -135,7 +135,7 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-      name: 'collabhub-auth',
+      name: 'AlloySphere-auth',
       storage: createJSONStorage(() => localStorage),
       // Only persist the non-sensitive user info for instant hydration
       partialize: (state) => ({
@@ -164,7 +164,7 @@ export const useUIStore = create<UIState>()(
       closeModal: () => set({ modalOpen: null }),
     }),
     {
-      name: 'collabhub-ui',
+      name: 'AlloySphere-ui',
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         sidebarOpen: state.sidebarOpen,

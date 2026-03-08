@@ -23,7 +23,7 @@ export function initializeSentry() {
   Sentry.init({
     dsn: SENTRY_DSN,
     environment: SENTRY_ENVIRONMENT,
-    release: `collabhub@${SENTRY_RELEASE}`,
+    release: `AlloySphere@${SENTRY_RELEASE}`,
 
     // Performance monitoring
     tracesSampleRate: SENTRY_ENVIRONMENT === 'production' ? 0.1 : 1.0,

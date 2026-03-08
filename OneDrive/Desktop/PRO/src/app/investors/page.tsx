@@ -39,7 +39,7 @@ export default function InvestorLanding() {
                 <hr style={{ borderColor: '#2A3545', maxWidth: '64rem', margin: '0 auto' }} />
 
                 <section className="max-w-5xl mx-auto px-6" style={{ paddingTop: '72px', paddingBottom: '64px' }}>
-                    <h2 className="text-white mb-10">What investors use CollabHub for</h2>
+                    <h2 className="text-white mb-10">What investors use AlloySphere for</h2>
                     <div className="grid md:grid-cols-2 gap-x-16 gap-y-8">
                         {[
                             ['Verified deal flow', 'Browse startups with verified founders, transparent trust scores, and documented team composition.'],
@@ -69,7 +69,7 @@ export default function InvestorLanding() {
             </main>
 
             <footer className="border-t py-5 text-center text-sm" style={{ borderColor: '#2A3545', color: '#5A6474' }}>
-                © {new Date().getFullYear()} CollabHub
+                © {new Date().getFullYear()} AlloySphere
             </footer>
         </div>
     );

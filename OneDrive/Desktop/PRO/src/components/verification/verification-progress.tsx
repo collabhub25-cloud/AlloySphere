@@ -585,7 +585,7 @@ export function VerificationProgress() {
                 <h4 className="font-medium mb-2">Non-Disclosure Agreement</h4>
                 <p className="text-muted-foreground">
                   By signing this NDA, you agree to keep all confidential information shared
-                  through the CollabHub platform private and not disclose it to any third parties.
+                  through the AlloySphere platform private and not disclose it to any third parties.
                 </p>
               </div>
               <div className="space-y-2">

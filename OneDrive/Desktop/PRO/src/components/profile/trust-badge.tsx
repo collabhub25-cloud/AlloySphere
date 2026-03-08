@@ -15,7 +15,7 @@ export function TrustBadge({ score }: { score: number }) {
     let color = "text-orange-600";
     let bg = "bg-orange-500/10";
     let Icon = Shield;
-    let description = "Starting your CollabHub journey. Build trust by verifying identity and completing milestones.";
+    let description = "Starting your AlloySphere journey. Build trust by verifying identity and completing milestones.";
     let glowColor = 'rgba(234, 88, 12, 0.15)';
 
     if (score >= 90) {
@@ -87,7 +87,7 @@ export function TrustBadge({ score }: { score: number }) {
                         {description}
                     </p>
                     <p className="text-xs text-muted-foreground/70 border-t pt-2">
-                        <strong>What affects trust score?</strong> Verification level, completed milestones, signed agreements, alliance count, CollabHub verification, and dispute history.
+                        <strong>What affects trust score?</strong> Verification level, completed milestones, signed agreements, alliance count, AlloySphere verification, and dispute history.
                     </p>
                 </TooltipContent>
             </Tooltip>

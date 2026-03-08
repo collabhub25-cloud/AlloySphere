@@ -42,7 +42,7 @@ export default function Home() {
       <div className="min-h-screen flex flex-col bg-transparent text-foreground">
         <header className="border-b border-border">
           <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-            <span className="text-base font-medium tracking-wide">Collab·Hub</span>
+            <span className="text-base font-medium tracking-wide">AlloySphere</span>
             <Link href="/login" className="text-sm hover:underline text-muted-foreground hover:text-foreground transition-colors">
               Sign in
             </Link>
@@ -114,7 +114,7 @@ export default function Home() {
         </main>
 
         <footer className="border-t border-border py-5 text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} CollabHub
+          © {new Date().getFullYear()} AlloySphere
         </footer>
       </div>
       <Toaster />

@@ -101,7 +101,7 @@ export function AuthModal({ open, onClose, mode, onSwitchMode }: AuthModalProps)
 
       if (response.ok) {
         login(data.user);
-        toast.success('Welcome to CollabHub!');
+        toast.success('Welcome to AlloySphere!');
         onClose();
       } else {
         if (data.details && Array.isArray(data.details) && data.details.length > 0) {
@@ -136,7 +136,7 @@ export function AuthModal({ open, onClose, mode, onSwitchMode }: AuthModalProps)
             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
               <Rocket className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold">CollabHub</span>
+            <span className="text-xl font-bold">AlloySphere</span>
           </div>
           <DialogDescription>
             {mode === 'login' ? 'Sign in to your account' : 'Create your account'}

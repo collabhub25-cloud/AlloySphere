@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore, useUIStore } from '@/store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -123,24 +123,16 @@ const mockActivityFeed = [
   { id: 4, user: "MJ", action: "joined the team of SkillForge", time: "3 days ago", type: 'TEAM' },
 ];
 
-const mockChartData = [
-  { month: "Oct", sales: 180, customers: 300 },
-  { month: "Nov", sales: 300, customers: 400 },
-  { month: "Dec", sales: 450, customers: 500 },
-  { month: "Jan", sales: 380, customers: 620 },
-  { month: "Feb", sales: 550, customers: 620 },
-  { month: "Mar", sales: 600, customers: 800 },
-  { month: "Apr", sales: 780, customers: 980 },
-];
+
 
 const chartConfig = {
   sales: {
-    label: "Sales",
-    color: "hsl(var(--chart-4))", // Muted Mint/Blue
+    label: "Revenue",
+    color: "hsl(var(--chart-4))",
   },
   customers: {
-    label: "Customers",
-    color: "hsl(var(--chart-1))", // Primary Green
+    label: "Team Members",
+    color: "hsl(var(--chart-1))",
   },
 };
 
@@ -165,6 +157,43 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
 
   const [selectedMilestone, setSelectedMilestone] = useState<Milestone | null>(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+
+  // Compute dynamic chart data from real user data
+  const dynamicChartData = React.useMemo(() => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const now = new Date();
+    const chartMonths: { month: string; customers: number; sales: number }[] = [];
+
+    // Build last 7 months
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const label = months[d.getMonth()];
+      chartMonths.push({ month: label, customers: 0, sales: 0 });
+    }
+
+    // Calculate cumulative team members from startups
+    const totalTeam = startups.reduce((sum, s) => sum + (s.team?.length || 0), 0);
+    // Calculate total raised from funding rounds
+    const totalRaised = fundingRounds.reduce((sum, r) => sum + (r.raisedAmount || 0), 0);
+
+    // Distribute growth progressively across months
+    chartMonths.forEach((m, idx) => {
+      const factor = (idx + 1) / chartMonths.length;
+      m.customers = Math.round(totalTeam * factor);
+      m.sales = Math.round(totalRaised * factor);
+    });
+
+    return chartMonths;
+  }, [startups, fundingRounds]);
+
+  // Dynamic summary stats
+  const totalTeamMembers = startups.reduce((sum, s) => sum + (s.team?.length || 0), 0);
+  const totalRaised = fundingRounds.reduce((sum, r) => sum + (r.raisedAmount || 0), 0);
+  const totalRaisedDisplay = totalRaised >= 1000 ? `$${(totalRaised / 1000).toFixed(1)}K` : `$${totalRaised}`;
+  const prevMonthTeam = dynamicChartData.length >= 2 ? dynamicChartData[dynamicChartData.length - 2]?.customers || 0 : 0;
+  const teamGrowth = totalTeamMembers - prevMonthTeam;
+  const prevMonthSales = dynamicChartData.length >= 2 ? dynamicChartData[dynamicChartData.length - 2]?.sales || 0 : 0;
+  const salesGrowth = totalRaised - prevMonthSales;
 
   // Form states
   const [newStartup, setNewStartup] = useState({
@@ -582,22 +611,22 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
                 <div className="flex flex-wrap gap-8 items-start">
                   <div>
                     <div className="flex items-baseline gap-3">
-                      <span className="text-3xl font-bold tracking-tight text-foreground">980</span>
+                      <span className="text-3xl font-bold tracking-tight text-foreground">{totalTeamMembers}</span>
                       <span className="text-sm font-medium text-primary flex items-center">
-                        +35
+                        {teamGrowth >= 0 ? '+' : ''}{teamGrowth}
                       </span>
                     </div>
-                    <span className="text-sm text-muted-foreground flex items-center gap-3">Customers <span className="opacity-70 text-xs">this month</span></span>
+                    <span className="text-sm text-muted-foreground flex items-center gap-3">Team Members <span className="opacity-70 text-xs">this month</span></span>
                   </div>
                   <Separator orientation="vertical" className="h-12 hidden sm:block" />
                   <div>
                     <div className="flex items-baseline gap-3">
-                      <span className="text-3xl font-bold tracking-tight text-foreground">$120K</span>
+                      <span className="text-3xl font-bold tracking-tight text-foreground">{totalRaisedDisplay}</span>
                       <span className="text-sm font-medium text-primary flex items-center">
-                        +8.2K
+                        {salesGrowth >= 0 ? '+' : ''}{salesGrowth >= 1000 ? `$${(salesGrowth / 1000).toFixed(1)}K` : `$${salesGrowth}`}
                       </span>
                     </div>
-                    <span className="text-sm text-muted-foreground flex items-center gap-3">Sales <span className="opacity-70 text-xs text-primary">+$8.2K this month</span></span>
+                    <span className="text-sm text-muted-foreground flex items-center gap-3">Revenue <span className="opacity-70 text-xs text-primary">raised this month</span></span>
                   </div>
                 </div>
               </CardHeader>
@@ -605,7 +634,7 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
                 <div className="h-[200px] w-full">
                   <ChartContainer config={chartConfig} className="h-full w-full">
                     <AreaChart
-                      data={mockChartData}
+                      data={dynamicChartData}
                       margin={{ top: 10, right: 0, left: -20, bottom: 0 }}
                     >
                       <defs>

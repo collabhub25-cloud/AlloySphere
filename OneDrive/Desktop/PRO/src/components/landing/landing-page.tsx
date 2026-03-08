@@ -90,7 +90,7 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
 
   const testimonials = [
     {
-      quote: "CollabHub transformed how we build our team. Found 3 amazing co-founders through the platform.",
+      quote: "AlloySphere transformed how we build our team. Found 3 amazing co-founders through the platform.",
       author: "Sarah Chen",
       role: "Founder, TechNova AI",
       avatar: "SC"
@@ -118,7 +118,7 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
               <Rocket className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold">CollabHub</span>
+            <span className="text-xl font-bold">AlloySphere</span>
           </div>
 
           {/* Desktop Navigation */}
@@ -424,7 +424,7 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
                 <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
                   <Rocket className="h-5 w-5 text-primary-foreground" />
                 </div>
-                <span className="text-xl font-bold">CollabHub</span>
+                <span className="text-xl font-bold">AlloySphere</span>
               </div>
               <p className="text-sm text-muted-foreground">
                 The AI-powered startup collaboration platform connecting verified talents,
@@ -459,7 +459,7 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
             </div>
           </div>
           <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
-            © 2025 CollabHub. All rights reserved.
+            © 2025 AlloySphere. All rights reserved.
           </div>
         </div>
       </footer>

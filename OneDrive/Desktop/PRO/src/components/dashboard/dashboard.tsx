@@ -14,7 +14,7 @@ import {
   UserCheck, DollarSign, AlertTriangle, CheckCircle2,
   Search, Shield, CreditCard as SubscriptionIcon, MessageSquare,
   User, Handshake, Sparkles, ShieldCheck, ChevronDown,
-  ChevronsRight, Moon, Sun, Bell, HelpCircle
+  ChevronsRight, Bell, HelpCircle
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import Image from "next/image";
@@ -209,31 +209,44 @@ export function Dashboard({ onLogout }: DashboardProps) {
 
   return (
     <TooltipProvider>
-      <div className={`flex min-h-screen w-full ${isDark ? 'dark' : ''}`}>
+      <div className={`flex min-h-screen w-full`}>
         <div className="flex w-full bg-transparent text-foreground min-h-screen">
 
-          {/* Sidebar */}
+          {/* Sidebar — 3D Glass Design */}
           <nav
-            className={`sticky top-0 h-screen shrink-0 border-r transition-all duration-300 ease-in-out ${sidebarOpen ? 'w-64' : 'w-16'
-              } border-border bg-sidebar p-2 shadow-sm flex flex-col`}
+            className={`sticky top-0 h-screen shrink-0 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] ${sidebarOpen ? 'w-64' : 'w-16'
+              } flex flex-col relative overflow-hidden`}
+            style={{
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(250,250,250,0.96) 100%)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              borderRight: '1px solid rgba(0,0,0,0.06)',
+              boxShadow: '4px 0 24px -4px rgba(0,0,0,0.05)',
+            }}
           >
+            {/* Gradient accent strip */}
+            <div className="absolute top-0 left-0 w-[3px] h-full bg-gradient-to-b from-zinc-900 via-zinc-500 to-transparent opacity-60" />
+
             {/* Title Section */}
-            <div className="mb-6 border-b border-border pb-4">
-              <div className="flex cursor-pointer items-center justify-between rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground">
+            <div className="mb-6 border-b border-border/50 pb-4 pl-1">
+              <div className="flex cursor-pointer items-center justify-between rounded-xl p-2 transition-all duration-300 hover:bg-black/[0.03] group">
                 <div className="flex items-center gap-3">
-                  {/* Logo */}
-                  <div className="grid size-10 shrink-0 place-content-center rounded-lg bg-primary shadow-sm">
-                    <svg width="20" height="auto" viewBox="0 0 50 39" fill="none" xmlns="http://www.w3.org/2000/svg" className="fill-primary-foreground">
-                      <path d="M16.4992 2H37.5808L22.0816 24.9729H1L16.4992 2Z" />
-                      <path d="M17.4224 27.102L11.4192 36H33.5008L49 13.0271H32.7024L23.2064 27.102H17.4224Z" />
+                  {/* Logo — floating animation */}
+                  <div
+                    className="grid size-10 shrink-0 place-content-center rounded-xl bg-primary shadow-lg transition-transform duration-500 group-hover:scale-105"
+                    style={{ animation: 'sidebar-logo-float 4s ease-in-out infinite' }}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <text x="3" y="24" fontFamily="system-ui,sans-serif" fontSize="18" fontWeight="700" fill="white" letterSpacing="-0.5">AS</text>
+                      <circle cx="27" cy="6" r="2.5" fill="white" opacity="0.6" />
                     </svg>
                   </div>
                   {sidebarOpen && (
-                    <div className={`transition-opacity duration-200 ${sidebarOpen ? 'opacity-100' : 'opacity-0'}`}>
+                    <div className={`transition-all duration-300 whitespace-nowrap ${sidebarOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2'}`}>
                       <div className="flex items-center gap-2">
                         <div>
-                          <span className="block text-sm font-semibold text-sidebar-foreground" style={{ letterSpacing: '0.3px' }}>
-                            CollabHub
+                          <span className="block text-sm font-bold text-sidebar-foreground tracking-tight">
+                            AlloySphere
                           </span>
                           <span className="block text-xs text-muted-foreground capitalize">
                             {user.role} Portal
@@ -244,30 +257,34 @@ export function Dashboard({ onLogout }: DashboardProps) {
                   )}
                 </div>
                 {sidebarOpen && (
-                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-300 group-hover:rotate-180" />
                 )}
               </div>
             </div>
 
-            {/* Navigation Options */}
-            <div className="space-y-1 mb-8 flex-1 overflow-y-auto custom-scrollbar pr-1">
-              {navItems.map((item) => {
+            {/* Navigation Options — 3D hover */}
+            <div className="space-y-1 mb-8 flex-1 overflow-y-auto custom-scrollbar pr-1 pl-1" style={{ perspective: '800px' }}>
+              {navItems.map((item, index) => {
                 const isSelected = activeTab === item.id;
                 return (
                   <button
                     key={item.id}
                     onClick={() => setActiveTab(item.id)}
                     title={!sidebarOpen ? item.label : undefined}
-                    className={`relative flex h-11 w-full items-center rounded-md transition-all duration-200 ${isSelected
-                      ? "bg-primary/10 text-primary shadow-sm border-l-2 border-primary"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                    className={`sidebar-nav-item relative flex h-11 w-full items-center rounded-xl transition-all duration-300 ${isSelected
+                      ? "bg-primary text-primary-foreground shadow-md"
+                      : "text-muted-foreground hover:text-foreground"
                       }`}
+                    style={{
+                      animationDelay: `${index * 50}ms`,
+                      transformStyle: 'preserve-3d',
+                    }}
                   >
                     <div className="grid h-full w-12 place-content-center shrink-0">
-                      <item.icon className="h-4 w-4" />
+                      <item.icon className={`h-4 w-4 transition-transform duration-300 ${isSelected ? '' : 'group-hover:scale-110'}`} />
                     </div>
                     {sidebarOpen && (
-                      <span className={`text-sm font-medium transition-opacity duration-200 whitespace-nowrap ${sidebarOpen ? 'opacity-100' : 'opacity-0'}`}>
+                      <span className={`text-sm font-medium transition-all duration-200 whitespace-nowrap ${sidebarOpen ? 'opacity-100' : 'opacity-0'}`}>
                         {item.label}
                       </span>
                     )}
@@ -278,14 +295,14 @@ export function Dashboard({ onLogout }: DashboardProps) {
 
             {/* Bottom Actions */}
             {sidebarOpen && (
-              <div className="border-t border-border pt-4 pb-12 space-y-1">
+              <div className="border-t border-border/50 pt-4 pb-12 space-y-1 pl-1">
                 {user.role === 'founder' && (userPlan === 'free' || userPlan === 'free_founder') && (
-                  <div className="mb-2 p-3 rounded-md border border-border bg-background">
+                  <div className="mb-2 p-3 rounded-xl border border-border/50 bg-gradient-to-br from-zinc-50 to-white shadow-sm">
                     <div className="flex items-center gap-2 mb-2">
                       <Sparkles className="h-4 w-4 text-primary" />
                       <span className="text-sm font-medium">Upgrade plan</span>
                     </div>
-                    <Button size="sm" variant="default" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" onClick={handleUpgradeClick}>
+                    <Button size="sm" variant="default" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg" onClick={handleUpgradeClick}>
                       View plans
                     </Button>
                   </div>
@@ -297,9 +314,9 @@ export function Dashboard({ onLogout }: DashboardProps) {
 
                 <button
                   onClick={handleProfileClick}
-                  className={`relative flex h-11 w-full items-center rounded-md transition-all duration-200 ${activeTab === 'profile'
-                    ? "bg-primary/10 text-primary shadow-sm border-l-2 border-primary"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  className={`sidebar-nav-item relative flex h-11 w-full items-center rounded-xl transition-all duration-300 ${activeTab === 'profile'
+                    ? "bg-primary text-primary-foreground shadow-md"
+                    : "text-muted-foreground hover:text-foreground"
                     }`}
                 >
                   <div className="grid h-full w-12 place-content-center shrink-0">
@@ -317,7 +334,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
 
                 <button
                   onClick={onLogout}
-                  className="relative flex h-11 w-full items-center rounded-md transition-all duration-200 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                  className="sidebar-nav-item relative flex h-11 w-full items-center rounded-xl transition-all duration-300 text-muted-foreground hover:bg-red-50 hover:text-red-600"
                 >
                   <div className="grid h-full w-12 place-content-center shrink-0">
                     <LogOut className="h-4 w-4" />
@@ -329,7 +346,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
 
             {!sidebarOpen && (
               <div className="pb-12 space-y-1">
-                <button onClick={handleProfileClick} title="Profile" className="relative flex h-11 w-full items-center justify-center rounded-md transition-all duration-200 text-muted-foreground hover:bg-accent hover:text-accent-foreground">
+                <button onClick={handleProfileClick} title="Profile" className="sidebar-nav-item relative flex h-11 w-full items-center justify-center rounded-xl transition-all duration-300 text-muted-foreground hover:text-foreground">
                   <Avatar className="h-5 w-5">
                     <AvatarImage src={user.avatar} />
                     <AvatarFallback className="bg-primary/10 text-primary text-[10px]">
@@ -337,7 +354,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
                     </AvatarFallback>
                   </Avatar>
                 </button>
-                <button onClick={onLogout} title="Sign Out" className="relative flex h-11 w-full items-center justify-center rounded-md transition-all duration-200 text-muted-foreground hover:bg-destructive/10 hover:text-destructive">
+                <button onClick={onLogout} title="Sign Out" className="sidebar-nav-item relative flex h-11 w-full items-center justify-center rounded-xl transition-all duration-300 text-muted-foreground hover:bg-red-50 hover:text-red-600">
                   <LogOut className="h-4 w-4" />
                 </button>
               </div>
@@ -346,12 +363,13 @@ export function Dashboard({ onLogout }: DashboardProps) {
             {/* Toggle Close */}
             <button
               onClick={toggleSidebar}
-              className="absolute bottom-0 left-0 right-0 border-t border-border transition-colors hover:bg-accent z-10 bg-sidebar"
+              className="absolute bottom-0 left-0 right-0 border-t border-border/50 transition-all duration-300 hover:bg-black/[0.03] z-10"
+              style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(12px)' }}
             >
               <div className="flex items-center p-3">
                 <div className="grid size-10 place-content-center shrink-0">
                   <ChevronsRight
-                    className={`h-4 w-4 transition-transform duration-300 text-muted-foreground ${sidebarOpen ? "rotate-180" : ""
+                    className={`h-4 w-4 transition-transform duration-500 text-muted-foreground ${sidebarOpen ? "rotate-180" : ""
                       }`}
                   />
                 </div>
@@ -387,13 +405,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
                   <NotificationDropdown />
                 </div>
 
-                {/* Theme Toggle */}
-                <button
-                  onClick={() => setTheme(isDark ? 'light' : 'dark')}
-                  className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-                >
-                  {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                </button>
+                {/* Theme toggle removed — light mode only */}
 
                 {/* Avatar Top Right */}
                 <button onClick={handleProfileClick} className="h-10 w-10 rounded-lg overflow-hidden border border-border shadow-sm ml-2 relative">

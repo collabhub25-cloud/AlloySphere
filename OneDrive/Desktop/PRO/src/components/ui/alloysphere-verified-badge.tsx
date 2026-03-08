@@ -9,19 +9,19 @@ import {
 } from '@/components/ui/tooltip';
 import { ShieldCheck, BadgeCheck, CheckCircle2, Sparkles } from 'lucide-react';
 
-interface CollabhubVerifiedBadgeProps {
+interface AlloySphereVerifiedBadgeProps {
     verified: boolean;
     verifiedAt?: string;
     variant?: 'compact' | 'full';
     className?: string;
 }
 
-export function CollabhubVerifiedBadge({
+export function AlloySphereVerifiedBadge({
     verified,
     verifiedAt,
     variant = 'full',
     className = '',
-}: CollabhubVerifiedBadgeProps) {
+}: AlloySphereVerifiedBadgeProps) {
     const [isHovered, setIsHovered] = useState(false);
 
     if (!verified) {
@@ -112,7 +112,7 @@ export function CollabhubVerifiedBadge({
                                     className="text-xs font-bold uppercase tracking-wider shimmer-text"
                                     style={{ lineHeight: '1.2' }}
                                 >
-                                    CollabHub Verified
+                                    AlloySphere Verified
                                 </span>
                                 {formattedDate && (
                                     <span className="text-[10px] text-muted-foreground" style={{ lineHeight: '1.2' }}>
@@ -140,11 +140,11 @@ export function CollabhubVerifiedBadge({
                         <div className="flex items-center gap-2">
                             <BadgeCheck className="h-5 w-5 text-white" />
                             <span className="font-bold text-white text-sm">
-                                CollabHub Verified ✓
+                                AlloySphere Verified ✓
                             </span>
                         </div>
                         <p className="text-xs text-white/80 leading-relaxed">
-                            This startup has been <strong className="text-white">physically verified</strong> by the CollabHub team.
+                            This startup has been <strong className="text-white">physically verified</strong> by the AlloySphere team.
                             Our team conducted an on-site visit, background checks, and document verification
                             to confirm this startup is genuine and trustworthy.
                         </p>

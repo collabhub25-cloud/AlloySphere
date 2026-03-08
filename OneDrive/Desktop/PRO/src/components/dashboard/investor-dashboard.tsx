@@ -618,7 +618,7 @@ export function InvestorDashboard({ activeTab }: InvestorDashboardProps) {
               </div>
               <div className="rounded-md border p-3 bg-muted/50">
                 <p className="text-sm text-muted-foreground">
-                  <strong>How it works:</strong> Message the founder to request a pitch. All payments are handled off-platform between you and the startup. Agreements and terms will be managed here on CollabHub.
+                  <strong>How it works:</strong> Message the founder to request a pitch. All payments are handled off-platform between you and the startup. Agreements and terms will be managed here on AlloySphere.
                 </p>
               </div>
               <div className="flex justify-end gap-2">
@@ -1078,7 +1078,7 @@ export function InvestorDashboard({ activeTab }: InvestorDashboardProps) {
               </div>
               <div className="rounded-md border p-3 bg-muted/50">
                 <p className="text-sm text-muted-foreground">
-                  <strong>How it works:</strong> Message the founder to request a pitch. All payments are handled off-platform between you and the startup. Agreements and terms will be managed here on CollabHub.
+                  <strong>How it works:</strong> Message the founder to request a pitch. All payments are handled off-platform between you and the startup. Agreements and terms will be managed here on AlloySphere.
                 </p>
               </div>
               <div className="flex justify-end gap-2">

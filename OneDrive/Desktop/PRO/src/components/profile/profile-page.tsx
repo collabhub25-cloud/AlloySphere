@@ -19,7 +19,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAuthStore, useUIStore } from '@/store';
 import { AllianceButton } from '@/components/alliances/alliance-button';
 import { TrustBadge } from '@/components/profile/trust-badge';
-import { CollabhubVerifiedBadge } from '@/components/ui/collabhub-verified-badge';
+import { AlloySphereVerifiedBadge } from '@/components/ui/alloysphere-verified-badge';
 import { VerificationProgress } from '@/components/verification/verification-progress';
 import { KycDashboard } from '@/components/kyc/kyc-dashboard';
 import { PricingPage } from '@/components/pricing/pricing-page';
@@ -53,8 +53,8 @@ interface ProfileData {
     industry: string;
     trustScore: number;
     logo?: string;
-    collabhubVerified?: boolean;
-    collabhubVerifiedAt?: string;
+    AlloySphereVerified?: boolean;
+    AlloySphereVerifiedAt?: string;
   }>;
   ticketSize?: { min: number; max: number };
   preferredIndustries?: string[];
@@ -669,7 +669,7 @@ export function ProfilePage({ profileId }: ProfilePageProps) {
             </>
           )}
 
-          {/* Founder-specific: Startups with CollabHub Verified badge */}
+          {/* Founder-specific: Startups with AlloySphere Verified badge */}
           {profile.role === 'founder' && profile.startups && profile.startups.length > 0 && (
             <Card className="card-3d-hover">
               <CardHeader>
@@ -686,10 +686,10 @@ export function ProfilePage({ profileId }: ProfilePageProps) {
                       key={startup._id}
                       className="flex items-start gap-4 p-4 rounded-lg border transition-all duration-300 hover:shadow-md"
                       style={{
-                        borderColor: startup.collabhubVerified
+                        borderColor: startup.AlloySphereVerified
                           ? 'rgba(46, 139, 87, 0.3)'
                           : undefined,
-                        background: startup.collabhubVerified
+                        background: startup.AlloySphereVerified
                           ? 'linear-gradient(135deg, rgba(46, 139, 87, 0.04) 0%, rgba(0, 71, 171, 0.03) 100%)'
                           : undefined,
                       }}
@@ -704,9 +704,9 @@ export function ProfilePage({ profileId }: ProfilePageProps) {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <h3 className="font-semibold">{startup.name}</h3>
-                          <CollabhubVerifiedBadge
-                            verified={startup.collabhubVerified || false}
-                            verifiedAt={startup.collabhubVerifiedAt}
+                          <AlloySphereVerifiedBadge
+                            verified={startup.AlloySphereVerified || false}
+                            verifiedAt={startup.AlloySphereVerifiedAt}
                             variant="compact"
                           />
                         </div>

@@ -43,9 +43,9 @@ export interface IStartup extends Document {
     website?: string;
     pitchDeck?: string;
     isActive: boolean;
-    collabhubVerified: boolean;
-    collabhubVerifiedAt?: Date;
-    collabhubVerifiedBy?: mongoose.Types.ObjectId;
+    AlloySphereVerified: boolean;
+    AlloySphereVerifiedAt?: Date;
+    AlloySphereVerifiedBy?: mongoose.Types.ObjectId;
     verificationNotes?: string;
     createdAt: Date;
     updatedAt: Date;
@@ -69,9 +69,9 @@ const StartupSchema = new Schema<IStartup>(
         website: { type: String },
         pitchDeck: { type: String },
         isActive: { type: Boolean, default: true },
-        collabhubVerified: { type: Boolean, default: false },
-        collabhubVerifiedAt: { type: Date },
-        collabhubVerifiedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+        AlloySphereVerified: { type: Boolean, default: false },
+        AlloySphereVerifiedAt: { type: Date },
+        AlloySphereVerifiedBy: { type: Schema.Types.ObjectId, ref: 'User' },
         verificationNotes: { type: String, maxlength: 2000 },
     },
     { timestamps: true }

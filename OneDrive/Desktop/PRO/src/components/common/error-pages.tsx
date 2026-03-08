@@ -158,7 +158,7 @@ export function ServerErrorPage({ onGoHome, onGoBack }: ErrorPageProps) {
           
           <p className="text-xs text-muted-foreground mt-6">
             If this problem persists, please{' '}
-            <a href="mailto:support@collabhub.com" className="text-primary hover:underline inline-flex items-center gap-1">
+            <a href="mailto:support@AlloySphere.com" className="text-primary hover:underline inline-flex items-center gap-1">
               <Mail className="h-3 w-3" />
               contact support
             </a>

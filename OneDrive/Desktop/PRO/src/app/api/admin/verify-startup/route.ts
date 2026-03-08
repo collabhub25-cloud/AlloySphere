@@ -36,16 +36,16 @@ export async function POST(req: NextRequest) {
         await connectDB();
 
         const update: Record<string, unknown> = {
-            collabhubVerified: verified,
+            AlloySphereVerified: verified,
             verificationNotes: notes || '',
         };
 
         if (verified) {
-            update.collabhubVerifiedAt = new Date();
-            update.collabhubVerifiedBy = admin._id;
+            update.AlloySphereVerifiedAt = new Date();
+            update.AlloySphereVerifiedBy = admin._id;
         } else {
-            update.collabhubVerifiedAt = null;
-            update.collabhubVerifiedBy = null;
+            update.AlloySphereVerifiedAt = null;
+            update.AlloySphereVerifiedBy = null;
         }
 
         const startup = await Startup.findByIdAndUpdate(startupId, update, { new: true });

@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
 
         const { userId, role } = authResult.user;
 
-        // Only Founders and Investors can instantiate an agreement on CollabHub
+        // Only Founders and Investors can instantiate an agreement on AlloySphere
         if (role !== 'founder' && role !== 'investor') {
             return NextResponse.json({ error: 'Only founders and investors can draft agreements' }, { status: 403 });
         }

@@ -8,7 +8,7 @@ import {
     TrendingUp, FileText, Target, DollarSign, Settings, Edit3,
     Check, X, BadgeCheck, Heart, Send, Clock, CheckCircle2, Lock
 } from 'lucide-react';
-import { CollabhubVerifiedBadge } from '@/components/ui/collabhub-verified-badge';
+import { AlloySphereVerifiedBadge } from '@/components/ui/alloysphere-verified-badge';
 import { toast } from 'sonner';
 
 interface StartupData {
@@ -298,7 +298,7 @@ export default function StartupPage({
                         <div>
                             <div className="flex items-center gap-3 flex-wrap">
                                 <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">{startup.name}</h1>
-                                <CollabhubVerifiedBadge
+                                <AlloySphereVerifiedBadge
                                     verified={startup.collabhubVerified || false}
                                     verifiedAt={startup.collabhubVerifiedAt}
                                     variant="full"
@@ -324,8 +324,8 @@ export default function StartupPage({
                                 <button
                                     onClick={toggleFavorite}
                                     className={`flex items-center justify-center h-10 w-10 rounded-xl border transition-all duration-200 ${isFavorite
-                                            ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800/30 text-red-500 shadow-sm'
-                                            : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-400 hover:text-red-500 hover:border-red-200 dark:hover:border-red-800/30 hover:bg-red-50 dark:hover:bg-red-900/20'
+                                        ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800/30 text-red-500 shadow-sm'
+                                        : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-400 hover:text-red-500 hover:border-red-200 dark:hover:border-red-800/30 hover:bg-red-50 dark:hover:bg-red-900/20'
                                         }`}
                                     title={isFavorite ? 'Remove from watchlist' : 'Add to watchlist'}
                                 >

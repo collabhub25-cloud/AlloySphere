@@ -28,7 +28,7 @@ import {
     AlertDialogTrigger
 } from '@/components/ui/alert-dialog';
 import { getPlanDisplayName } from '@/lib/subscription/features';
-import { CollabhubVerifiedBadge } from '@/components/ui/collabhub-verified-badge';
+import { AlloySphereVerifiedBadge } from '@/components/ui/alloysphere-verified-badge';
 
 export function SettingsPage() {
     const { user, updateUser, logout } = useAuthStore();
@@ -58,7 +58,7 @@ export function SettingsPage() {
         alertNotifications: true,
     });
 
-    // Fetch founder's startups for CollabHub verification section
+    // Fetch founder's startups for AlloySphere verification section
     useEffect(() => {
         if (user?.role === 'founder') {
             const fetchStartups = async () => {
@@ -165,7 +165,7 @@ export function SettingsPage() {
     };
 
     const handleRequestVerification = (startupId: string, startupName: string) => {
-        toast.success(`Verification request sent for "${startupName}". The CollabHub team will contact you to schedule an on-site visit.`, {
+        toast.success(`Verification request sent for "${startupName}". The AlloySphere team will contact you to schedule an on-site visit.`, {
             duration: 5000,
         });
     };
@@ -387,7 +387,7 @@ export function SettingsPage() {
                     </CardContent>
                 </Card>
 
-                {/* COLLABHUB VERIFICATION PANEL (Founder only) */}
+                {/* AlloySphere VERIFICATION PANEL (Founder only) */}
                 {user?.role === 'founder' && (
                     <Card
                         className="col-span-1 md:col-span-2 overflow-hidden relative"
@@ -411,10 +411,10 @@ export function SettingsPage() {
                                 >
                                     <BadgeCheck className="h-4 w-4 text-white" />
                                 </div>
-                                <span className="shimmer-text font-bold">CollabHub Verification</span>
+                                <span className="shimmer-text font-bold">AlloySphere Verification</span>
                             </CardTitle>
                             <CardDescription>
-                                Get your startups physically verified by the CollabHub team to earn investor trust
+                                Get your startups physically verified by the AlloySphere team to earn investor trust
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="relative z-10 space-y-4">
@@ -428,7 +428,7 @@ export function SettingsPage() {
                             >
                                 <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
                                     <Shield className="h-4 w-4" style={{ color: 'var(--sea-green)' }} />
-                                    How CollabHub Verification Works
+                                    How AlloySphere Verification Works
                                 </h4>
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                     {[
@@ -469,10 +469,10 @@ export function SettingsPage() {
                                             key={startup._id}
                                             className="flex items-center justify-between p-4 rounded-lg border transition-all duration-300 hover:shadow-md card-3d-hover"
                                             style={{
-                                                borderColor: startup.collabhubVerified
+                                                borderColor: startup.AlloySphereVerified
                                                     ? 'rgba(46, 139, 87, 0.3)'
                                                     : undefined,
-                                                background: startup.collabhubVerified
+                                                background: startup.AlloySphereVerified
                                                     ? 'linear-gradient(135deg, rgba(46, 139, 87, 0.06) 0%, rgba(0, 71, 171, 0.03) 100%)'
                                                     : 'rgba(255, 255, 255, 0.4)',
                                             }}
@@ -488,9 +488,9 @@ export function SettingsPage() {
                                                 <div className="min-w-0">
                                                     <div className="flex items-center gap-2 flex-wrap">
                                                         <p className="text-sm font-medium truncate">{startup.name}</p>
-                                                        <CollabhubVerifiedBadge
-                                                            verified={startup.collabhubVerified || false}
-                                                            verifiedAt={startup.collabhubVerifiedAt}
+                                                        <AlloySphereVerifiedBadge
+                                                            verified={startup.AlloySphereVerified || false}
+                                                            verifiedAt={startup.AlloySphereVerifiedAt}
                                                             variant="compact"
                                                         />
                                                     </div>
@@ -498,7 +498,7 @@ export function SettingsPage() {
                                                 </div>
                                             </div>
 
-                                            {startup.collabhubVerified ? (
+                                            {startup.AlloySphereVerified ? (
                                                 <div className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full" style={{ background: 'rgba(46, 139, 87, 0.1)', color: 'var(--sea-green)' }}>
                                                     <CheckCircle2 className="h-3.5 w-3.5" />
                                                     Verified
@@ -534,7 +534,7 @@ export function SettingsPage() {
                                 <Shield className="h-5 w-5" style={{ color: 'var(--cobalt-blue)' }} />
                                 Subscription Plan
                             </CardTitle>
-                            <CardDescription>Manage your CollabHub limits and billing</CardDescription>
+                            <CardDescription>Manage your AlloySphere limits and billing</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-background rounded-lg border">

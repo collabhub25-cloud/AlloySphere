@@ -103,7 +103,7 @@ export class ProductionRedisCache implements CacheInterface {
   private misses = 0;
   private connected = false;
 
-  constructor(client: RedisClient, prefix = 'collabhub:') {
+  constructor(client: RedisClient, prefix = 'AlloySphere:') {
     this.client = client;
     this.prefix = prefix;
     this.connected = true;

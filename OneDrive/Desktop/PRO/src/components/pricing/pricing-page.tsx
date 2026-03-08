@@ -148,7 +148,7 @@ export function PricingPage() {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: orderData.amount,
         currency: orderData.currency,
-        name: "CollabHub",
+        name: "AlloySphere",
         description: "PRO Subscription", // This description might need to be dynamic based on planKey
         order_id: orderData.orderId,
         handler: async function (response: any) {

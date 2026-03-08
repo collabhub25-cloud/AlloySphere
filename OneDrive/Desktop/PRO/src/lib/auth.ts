@@ -6,7 +6,7 @@ import { User, IUser } from './models';
 // ============================================
 // SECRETS — from environment, never hardcoded
 // ============================================
-const JWT_SECRET = process.env.JWT_SECRET || 'collabhub-dev-secret-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET || 'AlloySphere-dev-secret-change-in-production';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || JWT_SECRET + '-refresh';
 const ACCESS_TOKEN_EXPIRES = '15m';
 const REFRESH_TOKEN_EXPIRES = '7d';

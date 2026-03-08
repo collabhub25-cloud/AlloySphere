@@ -11,8 +11,6 @@ import {
     Users,
     ChevronDown,
     ChevronsRight,
-    Moon,
-    Sun,
     TrendingUp,
     Activity,
     Package,
@@ -36,30 +34,13 @@ export const DashboardSidebarLayout = ({
 }) => {
     const [isDark, setIsDark] = useState(false);
 
-    useEffect(() => {
-        // Check local storage or system preference on mount
-        const isDarkMode = localStorage.getItem('theme') === 'dark' ||
-            (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
-        setIsDark(isDarkMode);
-    }, []);
-
-    useEffect(() => {
-        if (isDark) {
-            document.documentElement.classList.add('dark');
-            localStorage.setItem('theme', 'dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-            localStorage.setItem('theme', 'light');
-        }
-    }, [isDark]);
-
     return (
         <div className={`flex min-h-screen w-full`}>
-            <div className="flex w-full min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
+            <div className="flex w-full min-h-screen bg-gray-50 text-gray-900">
                 <Sidebar role={role} />
                 <div className="flex-1 flex flex-col h-screen overflow-hidden">
                     <Header isDark={isDark} setIsDark={setIsDark} role={role} />
-                    <main className="flex-1 overflow-auto p-6 bg-gray-50 dark:bg-gray-950">
+                    <main className="flex-1 overflow-auto p-6 bg-gray-50">
                         {children || <ExampleContent />}
                     </main>
                 </div>
@@ -197,7 +178,7 @@ const TitleSection = ({ open, role = 'founder' }: { open: boolean, role?: string
                         <div className={`transition-opacity duration-200 whitespace-nowrap ${open ? 'opacity-100' : 'opacity-0'}`}>
                             <div className="flex flex-col">
                                 <span className="block text-sm font-bold text-gray-900 dark:text-gray-100 tracking-tight">
-                                    CollabHub
+                                    AlloySphere
                                 </span>
                                 <span className="block text-[11px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                     {role} Portal
@@ -216,17 +197,10 @@ const TitleSection = ({ open, role = 'founder' }: { open: boolean, role?: string
 
 const Logo = () => {
     return (
-        <div className="grid size-10 shrink-0 place-content-center rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 shadow-md">
-            <svg
-                width="22"
-                height="auto"
-                viewBox="0 0 50 39"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="fill-white"
-            >
-                <path d="M16.4992 2H37.5808L22.0816 24.9729H1L16.4992 2Z" />
-                <path d="M17.4224 27.102L11.4192 36H33.5008L49 13.0271H32.7024L23.2064 27.102H17.4224Z" />
+        <div className="grid size-10 shrink-0 place-content-center rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-950 shadow-md">
+            <svg width="22" height="22" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <text x="3" y="24" fontFamily="system-ui,sans-serif" fontSize="18" fontWeight="700" fill="white" letterSpacing="-0.5">AS</text>
+                <circle cx="27" cy="6" r="2.5" fill="white" opacity="0.6" />
             </svg>
         </div>
     );
@@ -260,22 +234,16 @@ const ToggleClose = ({ open, setOpen }: any) => {
 
 const Header = ({ isDark, setIsDark, role }: any) => {
     return (
-        <header className="h-16 flex items-center justify-between px-6 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 z-10 sticky top-0">
+        <header className="h-16 flex items-center justify-between px-6 bg-white/80 backdrop-blur-md border-b border-gray-200 z-10 sticky top-0">
             <div>
                 {/* Can put breadcrumbs or search here */}
             </div>
             <div className="flex items-center gap-3">
-                <button className="relative p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                <button className="relative p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
                     <Bell className="h-4 w-4" />
-                    <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-red-500 rounded-full border border-white dark:border-gray-900"></span>
+                    <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-red-500 rounded-full border border-white"></span>
                 </button>
-                <button
-                    onClick={() => setIsDark(!isDark)}
-                    className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                >
-                    {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                </button>
-                <button className="h-9 w-9 rounded-full overflow-hidden border-2 border-white dark:border-gray-800 shadow-sm ml-2 relative">
+                <button className="h-9 w-9 rounded-full overflow-hidden border-2 border-white shadow-sm ml-2 relative">
                     <Image
                         src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
                         alt="User Avatar"
