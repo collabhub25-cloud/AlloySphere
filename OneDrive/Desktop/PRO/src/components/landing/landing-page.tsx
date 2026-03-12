@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Rocket, Users, Shield, Zap, ChevronRight, Check, Star,
   TrendingUp, Handshake, FileCheck, Award, Building2,
-  Lightbulb, Target, Globe, Menu, X
+  Lightbulb, Target, Globe, Menu, X, ArrowDown, Sparkles
 } from 'lucide-react';
 
 interface LandingPageProps {
@@ -17,40 +17,60 @@ interface LandingPageProps {
   onRegister: () => void;
 }
 
+/* --- Scroll-triggered fade-in hook --- */
+function useScrollReveal() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setIsVisible(true); },
+      { threshold: 0.15, rootMargin: '0px 0px -40px 0px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return { ref, isVisible };
+}
+
+function RevealSection({ children, className = '', delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+  const { ref, isVisible } = useScrollReveal();
+  return (
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        opacity: isVisible ? 1 : 0,
+        transform: isVisible ? 'translateY(0)' : 'translateY(40px)',
+        transition: `opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1) ${delay}s, transform 0.8s cubic-bezier(0.22, 1, 0.36, 1) ${delay}s`,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const features = [
-    {
-      icon: <Shield className="h-6 w-6" />,
-      title: 'Verified Talent Pool',
-      description: '4-level verification system ensuring quality collaborations',
-    },
-    {
-      icon: <Handshake className="h-6 w-6" />,
-      title: 'Smart Agreements',
-      description: 'Automated NDA, Work, Equity, and SAFE agreements',
-    },
-    {
-      icon: <TrendingUp className="h-6 w-6" />,
-      title: 'Milestone Tracking',
-      description: 'Escrow-based payments with milestone verification',
-    },
-    {
-      icon: <Award className="h-6 w-6" />,
-      title: 'Trust Score Engine',
-      description: 'Reputation scoring based on performance metrics',
-    },
-    {
-      icon: <Building2 className="h-6 w-6" />,
-      title: 'Investor Deal Flow',
-      description: 'Curated startup pipeline for investors',
-    },
-    {
-      icon: <FileCheck className="h-6 w-6" />,
-      title: 'KYC & Compliance',
-      description: 'Built-in verification and legal compliance',
-    },
+    { icon: <Shield className="h-6 w-6" />, title: 'Verified Talent Pool', description: '4-level verification system ensuring quality collaborations' },
+    { icon: <Handshake className="h-6 w-6" />, title: 'Smart Agreements', description: 'Automated NDA, Work, Equity, and SAFE agreements' },
+    { icon: <TrendingUp className="h-6 w-6" />, title: 'Milestone Tracking', description: 'Escrow-based payments with milestone verification' },
+    { icon: <Award className="h-6 w-6" />, title: 'Trust Score Engine', description: 'Reputation scoring based on performance metrics' },
+    { icon: <Building2 className="h-6 w-6" />, title: 'Investor Deal Flow', description: 'Curated startup pipeline for investors' },
+    { icon: <FileCheck className="h-6 w-6" />, title: 'KYC & Compliance', description: 'Built-in verification and legal compliance' },
   ];
 
   const stats = [
@@ -61,96 +81,74 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
   ];
 
   const pricingPlans = [
-    {
-      name: 'Starter',
-      price: 'Free',
-      description: 'Perfect for getting started',
-      features: ['1 Startup Profile', '5 Applications/Month', 'Basic Agreements', 'Community Support'],
-      cta: 'Get Started',
-      popular: false,
-    },
-    {
-      name: 'Professional',
-      price: '$49',
-      period: '/month',
-      description: 'For growing startups',
-      features: ['5 Startup Profiles', 'Unlimited Applications', 'Custom Agreements', 'Escrow Payments', 'Priority Support', 'Analytics Dashboard'],
-      cta: 'Start Free Trial',
-      popular: true,
-    },
-    {
-      name: 'Enterprise',
-      price: 'Custom',
-      description: 'For incubators & VCs',
-      features: ['Unlimited Everything', 'White-label Options', 'API Access', 'Dedicated Manager', 'Custom Integrations', 'SLA Guarantee'],
-      cta: 'Contact Sales',
-      popular: false,
-    },
+    { name: 'Starter', price: 'Free', description: 'Perfect for getting started', features: ['1 Startup Profile', '5 Applications/Month', 'Basic Agreements', 'Community Support'], cta: 'Get Started', popular: false },
+    { name: 'Professional', price: '$49', period: '/month', description: 'For growing startups', features: ['5 Startup Profiles', 'Unlimited Applications', 'Custom Agreements', 'Escrow Payments', 'Priority Support', 'Analytics Dashboard'], cta: 'Start Free Trial', popular: true },
+    { name: 'Enterprise', price: 'Custom', description: 'For incubators & VCs', features: ['Unlimited Everything', 'White-label Options', 'API Access', 'Dedicated Manager', 'Custom Integrations', 'SLA Guarantee'], cta: 'Contact Sales', popular: false },
   ];
 
   const testimonials = [
-    {
-      quote: "AlloySphere transformed how we build our team. Found 3 amazing co-founders through the platform.",
-      author: "Sarah Chen",
-      role: "Founder, TechNova AI",
-      avatar: "SC"
-    },
-    {
-      quote: "The verification system gives me confidence in every collaboration. Trust is everything.",
-      author: "Marcus Johnson",
-      role: "Full-Stack Developer",
-      avatar: "MJ"
-    },
-    {
-      quote: "Finally, a platform that understands startup fundraising. The investor dashboard is brilliant.",
-      author: "David Park",
-      role: "Angel Investor",
-      avatar: "DP"
-    }
+    { quote: "AlloySphere transformed how we build our team. Found 3 amazing co-founders through the platform.", author: "Sarah Chen", role: "Founder, TechNova AI", avatar: "SC" },
+    { quote: "The verification system gives me confidence in every collaboration. Trust is everything.", author: "Marcus Johnson", role: "Full-Stack Developer", avatar: "MJ" },
+    { quote: "Finally, a platform that understands startup fundraising. The investor dashboard is brilliant.", author: "David Park", role: "Angel Investor", avatar: "DP" },
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div className="min-h-screen bg-background overflow-x-hidden">
+      {/* Cinematic CSS Animations */}
+      <style>{`
+        @keyframes hero-gradient { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+        @keyframes float-particle { 0%,100% { transform: translateY(0) rotate(0deg); opacity: 0.3; } 50% { transform: translateY(-30px) rotate(180deg); opacity: 0.7; } }
+        @keyframes pulse-glow { 0%,100% { box-shadow: 0 0 20px rgba(46,139,87,0.2); } 50% { box-shadow: 0 0 60px rgba(46,139,87,0.4), 0 0 120px rgba(0,71,171,0.1); } }
+        @keyframes scroll-indicator { 0%, 100% { transform: translateY(0); opacity: 0.6; } 50% { transform: translateY(8px); opacity: 1; } }
+        .hero-bg { background: linear-gradient(135deg, rgba(46,139,87,0.08), rgba(0,71,171,0.06), rgba(124,58,237,0.04), rgba(46,139,87,0.08)); background-size: 400% 400%; animation: hero-gradient 15s ease infinite; }
+        .feature-card { transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
+        .feature-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 20px 60px rgba(0,0,0,0.08), 0 0 0 1px rgba(46,139,87,0.15); }
+        .stat-item { transition: transform 0.3s ease; }
+        .stat-item:hover { transform: scale(1.08); }
+        .testimonial-card { transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
+        .testimonial-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(0,0,0,0.06); }
+      `}</style>
+
+      {/* Navigation - Glass Effect */}
+      <header
+        className="sticky top-0 z-50 w-full border-b transition-all duration-300"
+        style={{
+          background: scrolled ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.6)',
+          backdropFilter: 'blur(20px)',
+          borderColor: scrolled ? 'rgba(0,0,0,0.08)' : 'transparent',
+          boxShadow: scrolled ? '0 4px 30px rgba(0,0,0,0.04)' : 'none',
+        }}
+      >
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
-              <Rocket className="h-5 w-5 text-primary-foreground" />
+          <div className="flex items-center gap-2.5">
+            <div className="h-9 w-9 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #2E8B57 0%, #0047AB 100%)', boxShadow: '0 4px 12px rgba(46,139,87,0.3)' }}>
+              <Rocket className="h-5 w-5 text-white" />
             </div>
-            <span className="text-xl font-bold">AlloySphere</span>
+            <span className="text-xl font-bold tracking-tight">AlloySphere</span>
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-6">
-            <a href="#features" className="text-sm font-medium hover:text-primary transition-colors">Features</a>
-            <a href="#pricing" className="text-sm font-medium hover:text-primary transition-colors">Pricing</a>
-            <a href="#testimonials" className="text-sm font-medium hover:text-primary transition-colors">Testimonials</a>
-            <a href="#about" className="text-sm font-medium hover:text-primary transition-colors">About</a>
+          <nav className="hidden md:flex items-center gap-8">
+            {['Features', 'Pricing', 'Testimonials', 'About'].map(item => (
+              <a key={item} href={`#${item.toLowerCase()}`} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-primary after:transition-all hover:after:w-full">{item}</a>
+            ))}
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
-            <Button variant="ghost" onClick={onLogin}>Log In</Button>
+            <Button variant="ghost" onClick={onLogin} className="font-medium">Log In</Button>
             <InteractiveHoverButton text="Get Started" onClick={onRegister} className="w-36" />
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden p-2"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
+          <button className="md:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
             {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
 
-        {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t bg-background">
+          <div className="md:hidden border-t bg-background/95 backdrop-blur-xl">
             <div className="container mx-auto px-4 py-4 space-y-4">
-              <a href="#features" className="block text-sm font-medium hover:text-primary">Features</a>
-              <a href="#pricing" className="block text-sm font-medium hover:text-primary">Pricing</a>
-              <a href="#testimonials" className="block text-sm font-medium hover:text-primary">Testimonials</a>
-              <a href="#about" className="block text-sm font-medium hover:text-primary">About</a>
+              {['Features', 'Pricing', 'Testimonials', 'About'].map(item => (
+                <a key={item} href={`#${item.toLowerCase()}`} className="block text-sm font-medium hover:text-primary">{item}</a>
+              ))}
               <div className="flex gap-2 pt-4 border-t">
                 <Button variant="outline" className="flex-1" onClick={onLogin}>Log In</Button>
                 <InteractiveHoverButton text="Get Started" onClick={onRegister} className="flex-1" />
@@ -160,303 +158,281 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
         )}
       </header>
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-background" />
-        <div className="container mx-auto px-4 py-20 md:py-32 relative">
-          <div className="max-w-4xl mx-auto text-center">
-            <Badge variant="secondary" className="mb-6 px-4 py-2">
-              <Zap className="h-3 w-3 mr-2" />
+      {/* Hero Section - Cinematic */}
+      <section className="relative overflow-hidden hero-bg">
+        {/* Floating Particles */}
+        <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="absolute rounded-full" style={{
+              width: 4 + i * 2, height: 4 + i * 2,
+              left: `${15 + i * 14}%`, top: `${20 + (i % 3) * 25}%`,
+              background: i % 2 === 0 ? 'rgba(46,139,87,0.3)' : 'rgba(0,71,171,0.3)',
+              animation: `float-particle ${3 + i * 0.8}s ease-in-out infinite ${i * 0.5}s`,
+            }} />
+          ))}
+        </div>
+
+        <div className="container mx-auto px-4 py-24 md:py-36 relative">
+          <RevealSection className="max-w-4xl mx-auto text-center">
+            <div className="inline-flex items-center gap-2 mb-8 px-5 py-2.5 rounded-full text-sm font-medium" style={{ background: 'rgba(46,139,87,0.08)', border: '1px solid rgba(46,139,87,0.15)', color: '#2E8B57' }}>
+              <Sparkles className="h-4 w-4" />
               AI-Powered Startup Collaboration Platform
-            </Badge>
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
+            </div>
+
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 leading-[1.1]">
               Build Your Startup with{' '}
-              <span className="text-primary">Verified Talent</span>{' '}
-              & Investors
+              <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(135deg, #2E8B57 0%, #0047AB 60%, #7C3AED 100%)' }}>
+                Verified Talent
+              </span>
+              {' '}& Investors
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+
+            <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
               The all-in-one platform connecting founders, talents, and investors.
               Verified collaborations, automated agreements, milestone-based payments,
               and trust scoring.
             </p>
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <InteractiveHoverButton text="Start Building Free" onClick={onRegister} className="w-52 p-3 text-lg" />
-              <Button size="lg" variant="outline" className="text-lg px-8" onClick={onLogin}>
+              <InteractiveHoverButton text="Start Building Free" onClick={onRegister} className="w-56 p-3.5 text-lg" />
+              <Button size="lg" variant="outline" className="text-lg px-8 rounded-xl border-2" onClick={onLogin}>
                 Watch Demo
               </Button>
             </div>
-          </div>
+          </RevealSection>
 
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-20 max-w-4xl mx-auto">
+          {/* Stats - Animated counters */}
+          <RevealSection delay={0.3} className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-24 max-w-4xl mx-auto">
             {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-primary">{stat.value}</div>
-                <div className="text-sm text-muted-foreground mt-1">{stat.label}</div>
+              <div key={index} className="text-center stat-item p-4 rounded-2xl cursor-default" style={{ background: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(10px)', border: '1px solid rgba(0,0,0,0.04)' }}>
+                <div className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(135deg, #2E8B57, #0047AB)' }}>{stat.value}</div>
+                <div className="text-sm text-muted-foreground mt-1 font-medium">{stat.label}</div>
               </div>
             ))}
+          </RevealSection>
+
+          {/* Scroll Indicator */}
+          <div className="flex justify-center mt-16">
+            <ArrowDown className="h-5 w-5 text-muted-foreground" style={{ animation: 'scroll-indicator 2s ease-in-out infinite' }} />
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 bg-muted/30">
+      <section id="features" className="py-24">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <Badge variant="outline" className="mb-4">Features</Badge>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Everything You Need to Build
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
+          <RevealSection className="text-center mb-16">
+            <Badge variant="outline" className="mb-4 px-4 py-1.5">Features</Badge>
+            <h2 className="text-3xl md:text-5xl font-bold mb-4 tracking-tight">Everything You Need to Build</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
               Comprehensive tools for founders, talents, and investors to collaborate
               effectively and build successful startups.
             </p>
-          </div>
+          </RevealSection>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {features.map((feature, index) => (
-              <Card key={index} className="border-border/50 bg-background hover:border-primary/50 transition-colors">
-                <CardHeader>
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-4">
+              <RevealSection key={index} delay={0.1 * index}>
+                <div className="feature-card p-6 rounded-2xl bg-background border border-border/50 h-full cursor-default" style={{ backdropFilter: 'blur(8px)' }}>
+                  <div className="h-14 w-14 rounded-2xl flex items-center justify-center mb-5" style={{ background: 'linear-gradient(135deg, rgba(46,139,87,0.1) 0%, rgba(0,71,171,0.08) 100%)', color: '#2E8B57' }}>
                     {feature.icon}
                   </div>
-                  <CardTitle className="text-lg">{feature.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">{feature.description}</p>
-                </CardContent>
-              </Card>
+                  <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{feature.description}</p>
+                </div>
+              </RevealSection>
             ))}
           </div>
         </div>
       </section>
 
       {/* How It Works */}
-      <section className="py-20">
+      <section className="py-24 relative" style={{ background: 'linear-gradient(180deg, rgba(46,139,87,0.03) 0%, transparent 100%)' }}>
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <Badge variant="outline" className="mb-4">How It Works</Badge>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Simple Steps to Get Started
-            </h2>
-          </div>
+          <RevealSection className="text-center mb-16">
+            <Badge variant="outline" className="mb-4 px-4 py-1.5">How It Works</Badge>
+            <h2 className="text-3xl md:text-5xl font-bold mb-4 tracking-tight">Simple Steps to Get Started</h2>
+          </RevealSection>
 
-          <Tabs defaultValue="founder" className="max-w-4xl mx-auto">
-            <TabsList className="grid w-full grid-cols-3 mb-8">
-              <TabsTrigger value="founder">For Founders</TabsTrigger>
-              <TabsTrigger value="talent">For Talent</TabsTrigger>
-              <TabsTrigger value="investor">For Investors</TabsTrigger>
-            </TabsList>
-            <TabsContent value="founder" className="space-y-4">
+          <RevealSection delay={0.2}>
+            <Tabs defaultValue="founder" className="max-w-4xl mx-auto">
+              <TabsList className="grid w-full grid-cols-3 mb-8 h-12 rounded-xl">
+                <TabsTrigger value="founder" className="rounded-lg">For Founders</TabsTrigger>
+                <TabsTrigger value="talent" className="rounded-lg">For Talent</TabsTrigger>
+                <TabsTrigger value="investor" className="rounded-lg">For Investors</TabsTrigger>
+              </TabsList>
               {[
-                { step: 1, title: 'Create Your Startup', desc: 'Define your vision, stage, and roles needed' },
-                { step: 2, title: 'Review Applications', desc: 'Browse verified talent and their portfolios' },
-                { step: 3, title: 'Sign Agreements', desc: 'Automated NDA and work agreements' },
-                { step: 4, title: 'Track Milestones', desc: 'Manage deliverables and escrow payments' },
-              ].map((item) => (
-                <div key={item.step} className="flex items-start gap-4 p-4 rounded-lg bg-muted/30">
-                  <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
-                    {item.step}
-                  </div>
-                  <div>
-                    <h4 className="font-semibold">{item.title}</h4>
-                    <p className="text-sm text-muted-foreground">{item.desc}</p>
-                  </div>
-                </div>
+                { key: 'founder', steps: [
+                  { step: 1, title: 'Create Your Startup', desc: 'Define your vision, stage, and roles needed' },
+                  { step: 2, title: 'Review Applications', desc: 'Browse verified talent and their portfolios' },
+                  { step: 3, title: 'Sign Agreements', desc: 'Automated NDA and work agreements' },
+                  { step: 4, title: 'Track Milestones', desc: 'Manage deliverables and escrow payments' },
+                ]},
+                { key: 'talent', steps: [
+                  { step: 1, title: 'Complete Profile', desc: 'Build your professional profile and portfolio' },
+                  { step: 2, title: 'Get Verified', desc: 'Pass skill tests and KYC verification' },
+                  { step: 3, title: 'Apply to Startups', desc: 'Find opportunities matching your skills' },
+                  { step: 4, title: 'Deliver & Get Paid', desc: 'Complete milestones and receive payment' },
+                ]},
+                { key: 'investor', steps: [
+                  { step: 1, title: 'Set Preferences', desc: 'Define investment criteria and ticket size' },
+                  { step: 2, title: 'Browse Deal Flow', desc: 'Access curated startup opportunities' },
+                  { step: 3, title: 'Due Diligence', desc: 'Review trust scores and metrics' },
+                  { step: 4, title: 'Invest & Track', desc: 'Complete deals and monitor progress' },
+                ]},
+              ].map(tab => (
+                <TabsContent key={tab.key} value={tab.key} className="space-y-4">
+                  {tab.steps.map((item) => (
+                    <div key={item.step} className="flex items-start gap-4 p-5 rounded-xl transition-all duration-300 hover:bg-accent/50" style={{ border: '1px solid rgba(0,0,0,0.04)' }}>
+                      <div className="h-10 w-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 text-white" style={{ background: 'linear-gradient(135deg, #2E8B57, #0047AB)' }}>
+                        {item.step}
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-base">{item.title}</h4>
+                        <p className="text-sm text-muted-foreground mt-0.5">{item.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </TabsContent>
               ))}
-            </TabsContent>
-            <TabsContent value="talent" className="space-y-4">
-              {[
-                { step: 1, title: 'Complete Profile', desc: 'Build your professional profile and portfolio' },
-                { step: 2, title: 'Get Verified', desc: 'Pass skill tests and KYC verification' },
-                { step: 3, title: 'Apply to Startups', desc: 'Find opportunities matching your skills' },
-                { step: 4, title: 'Deliver & Get Paid', desc: 'Complete milestones and receive payment' },
-              ].map((item) => (
-                <div key={item.step} className="flex items-start gap-4 p-4 rounded-lg bg-muted/30">
-                  <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
-                    {item.step}
-                  </div>
-                  <div>
-                    <h4 className="font-semibold">{item.title}</h4>
-                    <p className="text-sm text-muted-foreground">{item.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </TabsContent>
-            <TabsContent value="investor" className="space-y-4">
-              {[
-                { step: 1, title: 'Set Preferences', desc: 'Define investment criteria and ticket size' },
-                { step: 2, title: 'Browse Deal Flow', desc: 'Access curated startup opportunities' },
-                { step: 3, title: 'Due Diligence', desc: 'Review trust scores and metrics' },
-                { step: 4, title: 'Invest & Track', desc: 'Complete deals and monitor progress' },
-              ].map((item) => (
-                <div key={item.step} className="flex items-start gap-4 p-4 rounded-lg bg-muted/30">
-                  <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
-                    {item.step}
-                  </div>
-                  <div>
-                    <h4 className="font-semibold">{item.title}</h4>
-                    <p className="text-sm text-muted-foreground">{item.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </TabsContent>
-          </Tabs>
+            </Tabs>
+          </RevealSection>
         </div>
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-20 bg-muted/30">
+      <section id="pricing" className="py-24">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <Badge variant="outline" className="mb-4">Pricing</Badge>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Simple, Transparent Pricing
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Start for free, upgrade as you grow. No hidden fees.
-            </p>
-          </div>
+          <RevealSection className="text-center mb-16">
+            <Badge variant="outline" className="mb-4 px-4 py-1.5">Pricing</Badge>
+            <h2 className="text-3xl md:text-5xl font-bold mb-4 tracking-tight">Simple, Transparent Pricing</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto text-lg">Start for free, upgrade as you grow. No hidden fees.</p>
+          </RevealSection>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto items-start">
             {pricingPlans.map((plan, index) => (
-              <Card
-                key={index}
-                className={`relative ${plan.popular ? 'border-primary shadow-lg scale-105' : 'border-border/50'}`}
-              >
-                {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <Badge className="bg-primary">Most Popular</Badge>
-                  </div>
-                )}
-                <CardHeader className="text-center">
-                  <CardTitle>{plan.name}</CardTitle>
-                  <CardDescription>{plan.description}</CardDescription>
-                  <div className="mt-4">
-                    <span className="text-4xl font-bold">{plan.price}</span>
-                    {plan.period && <span className="text-muted-foreground">{plan.period}</span>}
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-3">
-                    {plan.features.map((feature, fIndex) => (
-                      <li key={fIndex} className="flex items-center gap-2">
-                        <Check className="h-4 w-4 text-primary" />
-                        <span className="text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-                <CardFooter>
-                  {plan.popular ? (
-                    <InteractiveHoverButton text={plan.cta} onClick={onRegister} className="w-full" />
-                  ) : (
-                    <Button
-                      className="w-full"
-                      variant="outline"
-                      onClick={onRegister}
-                    >
-                      {plan.cta}
-                    </Button>
+              <RevealSection key={index} delay={0.15 * index}>
+                <Card className={`relative rounded-2xl transition-all duration-400 hover:-translate-y-2 ${plan.popular ? 'border-2 shadow-xl' : 'border-border/50 hover:shadow-lg'}`} style={plan.popular ? { borderColor: '#2E8B57', boxShadow: '0 20px 60px rgba(46,139,87,0.12)' } : {}}>
+                  {plan.popular && (
+                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                      <Badge className="px-4 py-1 text-white" style={{ background: 'linear-gradient(135deg, #2E8B57, #0047AB)' }}>Most Popular</Badge>
+                    </div>
                   )}
-                </CardFooter>
-              </Card>
+                  <CardHeader className="text-center pt-8">
+                    <CardTitle className="text-xl">{plan.name}</CardTitle>
+                    <CardDescription>{plan.description}</CardDescription>
+                    <div className="mt-4">
+                      <span className="text-5xl font-bold">{plan.price}</span>
+                      {plan.period && <span className="text-muted-foreground text-lg">{plan.period}</span>}
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-3.5">
+                      {plan.features.map((feature, fIndex) => (
+                        <li key={fIndex} className="flex items-center gap-2.5">
+                          <Check className="h-4 w-4 shrink-0" style={{ color: '#2E8B57' }} />
+                          <span className="text-sm">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                  <CardFooter className="pb-8">
+                    {plan.popular ? (
+                      <InteractiveHoverButton text={plan.cta} onClick={onRegister} className="w-full" />
+                    ) : (
+                      <Button className="w-full rounded-xl" variant="outline" onClick={onRegister}>{plan.cta}</Button>
+                    )}
+                  </CardFooter>
+                </Card>
+              </RevealSection>
             ))}
           </div>
         </div>
       </section>
 
       {/* Testimonials */}
-      <section id="testimonials" className="py-20">
+      <section id="testimonials" className="py-24" style={{ background: 'linear-gradient(180deg, rgba(46,139,87,0.03) 0%, transparent 100%)' }}>
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <Badge variant="outline" className="mb-4">Testimonials</Badge>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Trusted by Thousands
-            </h2>
-          </div>
+          <RevealSection className="text-center mb-16">
+            <Badge variant="outline" className="mb-4 px-4 py-1.5">Testimonials</Badge>
+            <h2 className="text-3xl md:text-5xl font-bold mb-4 tracking-tight">Trusted by Thousands</h2>
+          </RevealSection>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {testimonials.map((testimonial, index) => (
-              <Card key={index} className="border-border/50">
-                <CardContent className="pt-6">
-                  <div className="flex gap-1 mb-4">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-primary text-primary" />
-                    ))}
-                  </div>
-                  <p className="text-muted-foreground mb-6">&quot;{testimonial.quote}&quot;</p>
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center font-semibold text-primary">
-                      {testimonial.avatar}
+              <RevealSection key={index} delay={0.15 * index}>
+                <Card className="testimonial-card border-border/50 rounded-2xl h-full">
+                  <CardContent className="pt-8 pb-8">
+                    <div className="flex gap-1 mb-5">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                      ))}
                     </div>
-                    <div>
-                      <div className="font-semibold">{testimonial.author}</div>
-                      <div className="text-sm text-muted-foreground">{testimonial.role}</div>
+                    <p className="text-muted-foreground mb-6 leading-relaxed italic">&quot;{testimonial.quote}&quot;</p>
+                    <div className="flex items-center gap-3">
+                      <div className="h-11 w-11 rounded-full flex items-center justify-center font-semibold text-white text-sm" style={{ background: 'linear-gradient(135deg, #2E8B57, #0047AB)' }}>
+                        {testimonial.avatar}
+                      </div>
+                      <div>
+                        <div className="font-semibold text-sm">{testimonial.author}</div>
+                        <div className="text-xs text-muted-foreground">{testimonial.role}</div>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </RevealSection>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-primary text-primary-foreground">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+      {/* CTA Section - Cinematic */}
+      <section className="py-24 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #2E8B57 0%, #0047AB 60%, #1a1a2e 100%)' }}>
+        <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+          <div className="absolute rounded-full opacity-20" style={{ width: 400, height: 400, top: '-15%', right: '-10%', background: 'radial-gradient(circle, #7C3AED 0%, transparent 70%)', filter: 'blur(80px)' }} />
+          <div className="absolute rounded-full opacity-15" style={{ width: 300, height: 300, bottom: '-10%', left: '-5%', background: 'radial-gradient(circle, #2E8B57 0%, transparent 70%)', filter: 'blur(60px)' }} />
+        </div>
+        <RevealSection className="container mx-auto px-4 text-center relative z-10">
+          <h2 className="text-3xl md:text-5xl font-bold mb-6 text-white tracking-tight">
             Ready to Build Your Dream Team?
           </h2>
-          <p className="text-lg opacity-90 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-white/80 mb-10 max-w-2xl mx-auto leading-relaxed">
             Join thousands of founders, talents, and investors building the future together.
           </p>
-          <InteractiveHoverButton text="Get Started Free" onClick={onRegister} className="w-52 p-3 text-lg border-primary-foreground" />
-        </div>
+          <InteractiveHoverButton text="Get Started Free" onClick={onRegister} className="w-56 p-3.5 text-lg border-white/20" />
+        </RevealSection>
       </section>
 
       {/* Footer */}
-      <footer id="about" className="py-12 border-t">
+      <footer id="about" className="py-16 border-t">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
-                  <Rocket className="h-5 w-5 text-primary-foreground" />
+              <div className="flex items-center gap-2.5 mb-4">
+                <div className="h-9 w-9 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #2E8B57, #0047AB)' }}>
+                  <Rocket className="h-5 w-5 text-white" />
                 </div>
-                <span className="text-xl font-bold">AlloySphere</span>
+                <span className="text-xl font-bold tracking-tight">AlloySphere</span>
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 The AI-powered startup collaboration platform connecting verified talents,
                 founders, and investors.
               </p>
             </div>
-            <div>
-              <h4 className="font-semibold mb-4">Platform</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-primary">Features</a></li>
-                <li><a href="#" className="hover:text-primary">Pricing</a></li>
-                <li><a href="#" className="hover:text-primary">Security</a></li>
-                <li><a href="#" className="hover:text-primary">API</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Company</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-primary">About</a></li>
-                <li><a href="#" className="hover:text-primary">Careers</a></li>
-                <li><a href="#" className="hover:text-primary">Blog</a></li>
-                <li><a href="#" className="hover:text-primary">Contact</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Legal</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-primary">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-primary">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-primary">Cookie Policy</a></li>
-              </ul>
-            </div>
+            {[
+              { title: 'Platform', links: ['Features', 'Pricing', 'Security', 'API'] },
+              { title: 'Company', links: ['About', 'Careers', 'Blog', 'Contact'] },
+              { title: 'Legal', links: ['Privacy Policy', 'Terms of Service', 'Cookie Policy'] },
+            ].map(col => (
+              <div key={col.title}>
+                <h4 className="font-semibold mb-4">{col.title}</h4>
+                <ul className="space-y-2.5 text-sm text-muted-foreground">
+                  {col.links.map(link => (
+                    <li key={link}><a href="#" className="hover:text-foreground transition-colors">{link}</a></li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
           <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
             © 2025 AlloySphere. All rights reserved.
