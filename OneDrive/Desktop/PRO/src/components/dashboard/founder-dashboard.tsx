@@ -16,7 +16,7 @@ import {
   Plus, Building2, Users, CheckCircle2, Clock,
   Briefcase, Target, Zap, Loader2, Edit, Trash2,
   FileText, AlertCircle, DollarSign, Lock, ExternalLink,
-  ChevronRight, TrendingUp, Presentation, Check
+  ChevronRight, TrendingUp, Presentation, Check, Shield
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts';
@@ -116,14 +116,6 @@ interface Agreement {
   signedBy: Array<{ userId: string; signedAt: string }>;
 }
 
-const mockActivityFeed = [
-  { id: 1, user: "MJ", action: "updated AgriChain's startup profile", time: "Just now", type: 'AI' },
-  { id: 2, user: "FinPilot", action: "secured $150k in seed funding", time: "1d ago", type: 'FUNDING' },
-  { id: 3, user: "Sarah", action: "added the \"Smart Contract Deployment\" milestone in AgriChain", time: "7 days ago", type: 'DOC' },
-  { id: 4, user: "MJ", action: "joined the team of SkillForge", time: "3 days ago", type: 'TEAM' },
-];
-
-
 
 const chartConfig = {
   sales: {
@@ -157,6 +149,7 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
 
   const [selectedMilestone, setSelectedMilestone] = useState<Milestone | null>(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
 
   // Compute dynamic chart data from real user data
   const dynamicChartData = React.useMemo(() => {
@@ -263,6 +256,15 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
       toast.error('Failed to load data');
     }
     setLoading(false);
+
+    // Fetch real activity feed from notifications
+    try {
+      const notifRes = await fetch('/api/notifications?limit=6', { credentials: 'include' });
+      if (notifRes.ok) {
+        const notifData = await notifRes.json();
+        setNotifications(notifData.notifications || []);
+      }
+    } catch { /* silent */ }
   }, []);
 
   useEffect(() => {
@@ -506,217 +508,205 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
 
   // Dashboard Overview
   if (activeTab === 'dashboard') {
+    const activeMilestones = milestones.filter(m => m.status !== 'completed');
+    const completedMilestones = milestones.filter(m => m.status === 'completed');
+    const pendingApplications = applications.filter(a => a.status === 'pending');
+
     return (
-      <div className="space-y-6 page-enter">
-        <div className="flex items-center justify-between">
+      <div className="space-y-6 page-enter relative">
+        {/* 3D Animated Background Orbs */}
+        <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10" aria-hidden="true">
+          <div className="absolute rounded-full opacity-[0.07]" style={{ width: 500, height: 500, top: '-8%', right: '-10%', background: 'radial-gradient(circle, #2E8B57 0%, transparent 70%)', animation: 'float-orb-f 18s ease-in-out infinite', filter: 'blur(80px)' }} />
+          <div className="absolute rounded-full opacity-[0.06]" style={{ width: 400, height: 400, bottom: '10%', left: '-8%', background: 'radial-gradient(circle, #0047AB 0%, transparent 70%)', animation: 'float-orb-f 22s ease-in-out infinite reverse', filter: 'blur(70px)' }} />
+          <div className="absolute rounded-full opacity-[0.04]" style={{ width: 300, height: 300, top: '40%', left: '40%', background: 'radial-gradient(circle, #7C3AED 0%, transparent 70%)', animation: 'float-orb-f 26s ease-in-out infinite 3s', filter: 'blur(60px)' }} />
+        </div>
+        <style>{`@keyframes float-orb-f { 0%, 100% { transform: translate(0, 0) scale(1); } 25% { transform: translate(30px, -20px) scale(1.05); } 50% { transform: translate(-20px, 25px) scale(0.95); } 75% { transform: translate(15px, 10px) scale(1.02); } }`}</style>
+
+        {/* Glassmorphic Header */}
+        <div className="flex items-center justify-between p-6 rounded-2xl" style={{ background: 'linear-gradient(135deg, rgba(46,139,87,0.06) 0%, rgba(0,71,171,0.04) 50%, rgba(255,255,255,0.85) 100%)', backdropFilter: 'blur(20px)', border: '1px solid rgba(46,139,87,0.12)', boxShadow: '0 8px 32px rgba(0,0,0,0.04)' }}>
           <div>
-            <h1 className="text-2xl font-bold">Welcome back!</h1>
-            <p className="text-muted-foreground mt-1">
-              Here&apos;s what&apos;s happening with <span className="font-semibold text-foreground">your startups:</span>
-            </p>
+            <h1 className="text-2xl font-bold tracking-tight">Welcome back, {user?.name?.split(' ')[0]}!</h1>
+            <p className="text-muted-foreground mt-1">Here&apos;s what&apos;s happening with <span className="font-semibold text-foreground">your startups</span></p>
           </div>
+          <Badge variant="outline" className="px-3 py-1.5 text-xs font-semibold" style={{ background: 'rgba(46,139,87,0.08)', borderColor: 'rgba(46,139,87,0.2)', color: 'var(--sea-green)' }}>
+            Level {user?.verificationLevel || 0} Verified
+          </Badge>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-          {/* Left Column - Recent Milestones & Funding */}
-          <div className="md:col-span-5 flex flex-col gap-6">
-            <Card className="card-elevated flex-1">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-lg font-medium">Recent Milestones</CardTitle>
-                <Button variant="ghost" size="sm" className="text-muted-foreground h-auto p-0 font-normal hover:bg-transparent hover:text-foreground">
-                  View All <ChevronRight className="ml-1 h-4 w-4" />
-                </Button>
-              </CardHeader>
-              <CardContent className="pt-4">
-                {loading ? (
-                  <div className="flex justify-center py-8">
-                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                  </div>
-                ) : milestones.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">No milestones yet</p>
-                ) : (
-                  <div className="space-y-6">
-                    {milestones.slice(0, 4).map((milestone) => {
-                      const isCompleted = milestone.status === 'completed';
-                      return (
-                        <div key={milestone._id} className="flex flex-col gap-1">
-                          <div className="flex justify-between items-start">
-                            <span className="font-medium text-[15px]">{milestone.startupId?.name || 'Startup'}</span>
-                            <span className="text-xs text-muted-foreground whitespace-nowrap">
-                              {milestone.dueDate ? formatDistanceToNow(new Date(milestone.dueDate), { addSuffix: true }) : 'N/A'}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            {isCompleted ? (
-                              <Check className="h-4 w-4 text-primary shrink-0" />
-                            ) : (
-                              <AlertCircle className="h-4 w-4 text-orange-500 shrink-0" />
-                            )}
-                            <span className="text-muted-foreground truncate">{milestone.title}</span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+        {/* Premium Stat Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          {[
+            { label: 'Startups', value: startups.length, icon: '🏢', gradient: 'rgba(46,139,87,0.08)' },
+            { label: 'Team Members', value: totalTeamMembers, icon: '👥', gradient: 'rgba(0,71,171,0.08)' },
+            { label: 'Active Milestones', value: activeMilestones.length, icon: '🎯', gradient: 'rgba(124,58,237,0.08)' },
+            { label: 'Funding Raised', value: totalRaisedDisplay, icon: '💰', gradient: 'rgba(234,179,8,0.08)' },
+            { label: 'Agreements', value: agreements.length, icon: '📄', gradient: 'rgba(59,130,246,0.08)' },
+            { label: 'Trust Score', value: `${user?.trustScore || 50}/100`, icon: '⚡', gradient: 'rgba(46,139,87,0.08)' },
+          ].map((stat) => (
+            <div key={stat.label} className="p-4 rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-lg cursor-default" style={{ background: stat.gradient, backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.18)', boxShadow: '0 4px 16px rgba(0,0,0,0.03)' }}>
+              <div className="text-2xl mb-2">{stat.icon}</div>
+              <p className="text-xl font-bold tracking-tight">{stat.value}</p>
+              <p className="text-xs text-muted-foreground font-medium mt-0.5">{stat.label}</p>
+            </div>
+          ))}
+        </div>
 
-            <Card className="card-elevated">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-lg font-medium">Funding Activity</CardTitle>
-                <Button variant="ghost" size="sm" className="text-muted-foreground h-auto p-0 font-normal hover:bg-transparent hover:text-foreground">
-                  View All <ChevronRight className="ml-1 h-4 w-4" />
-                </Button>
-              </CardHeader>
-              <CardContent className="pt-4">
-                {loading ? (
-                  <div className="flex justify-center py-8">
-                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                  </div>
-                ) : fundingRounds.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">No funding activity yet</p>
-                ) : (
-                  <div className="space-y-6">
-                    {fundingRounds.slice(0, 3).map((round, index) => (
-                      <div key={round._id} className="flex justify-between items-center bg-transparent gap-2">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm truncate">
-                            <span className="font-semibold text-foreground">{round.startupId?.name}</span>{" "}
-                            <span className="font-bold text-foreground">${(round.targetAmount / 1000).toFixed(0)}k</span>{" "}
-                            <span className="text-muted-foreground ml-1">{round.roundName} Round</span>
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-3 shrink-0">
+        {/* Verification Banner */}
+        {(user?.verificationLevel || 0) < 2 && (
+          <div className="p-4 rounded-xl flex items-center justify-between" style={{ background: 'linear-gradient(135deg, rgba(46,139,87,0.06) 0%, rgba(0,71,171,0.04) 100%)', border: '1px solid rgba(46,139,87,0.15)' }}>
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #2E8B57 0%, #0047AB 100%)' }}>
+                <Shield className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold">Complete Verification Level {(user?.verificationLevel || 0) + 1}</p>
+                <p className="text-xs text-muted-foreground">Unlock more features like funding rounds and alliances</p>
+              </div>
+            </div>
+            <Badge variant="outline" className="cursor-pointer hover:bg-primary/5" style={{ borderColor: 'var(--sea-green)', color: 'var(--sea-green)' }}>Continue →</Badge>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+          {/* Left Column */}
+          <div className="md:col-span-5 flex flex-col gap-6">
+            {/* Recent Milestones */}
+            <div className="p-5 rounded-xl" style={{ background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(16px)', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 4px 24px rgba(0,0,0,0.03)' }}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-base font-semibold flex items-center gap-2"><Target className="h-4 w-4" style={{ color: 'var(--sea-green)' }} /> Recent Milestones</h3>
+                <Button variant="ghost" size="sm" className="text-xs text-muted-foreground h-auto p-0">View All <ChevronRight className="ml-1 h-3 w-3" /></Button>
+              </div>
+              {loading ? (
+                <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
+              ) : milestones.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8 text-sm">No milestones yet</p>
+              ) : (
+                <div className="space-y-4">
+                  {milestones.slice(0, 4).map((milestone) => {
+                    const isCompleted = milestone.status === 'completed';
+                    return (
+                      <div key={milestone._id} className="p-3 rounded-lg transition-all hover:bg-white/50" style={{ border: '1px solid rgba(0,0,0,0.04)' }}>
+                        <div className="flex justify-between items-start">
+                          <span className="font-medium text-sm">{milestone.startupId?.name || 'Startup'}</span>
                           <span className="text-xs text-muted-foreground">
-                            {formatDistanceToNow(new Date(round.createdAt), { addSuffix: true })}
+                            {milestone.dueDate ? formatDistanceToNow(new Date(milestone.dueDate), { addSuffix: true }) : 'N/A'}
                           </span>
-                          {index === 0 && (
-                            <Badge className="bg-orange-500 hover:bg-orange-600 text-[10px] px-1.5 py-0 h-5">New</Badge>
-                          )}
+                        </div>
+                        <div className="flex items-center gap-2 text-sm mt-1">
+                          {isCompleted ? <Check className="h-4 w-4 shrink-0" style={{ color: 'var(--sea-green)' }} /> : <AlertCircle className="h-4 w-4 text-orange-500 shrink-0" />}
+                          <span className="text-muted-foreground truncate text-xs">{milestone.title}</span>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Funding Activity */}
+            <div className="p-5 rounded-xl" style={{ background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(16px)', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 4px 24px rgba(0,0,0,0.03)' }}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-base font-semibold flex items-center gap-2"><DollarSign className="h-4 w-4" style={{ color: 'var(--cobalt-blue)' }} /> Funding Activity</h3>
+                <Button variant="ghost" size="sm" className="text-xs text-muted-foreground h-auto p-0">View All <ChevronRight className="ml-1 h-3 w-3" /></Button>
+              </div>
+              {loading ? (
+                <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
+              ) : fundingRounds.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8 text-sm">No funding activity yet</p>
+              ) : (
+                <div className="space-y-3">
+                  {fundingRounds.slice(0, 3).map((round, index) => (
+                    <div key={round._id} className="flex justify-between items-center p-3 rounded-lg transition-all hover:bg-white/50" style={{ border: '1px solid rgba(0,0,0,0.04)' }}>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm truncate">
+                          <span className="font-semibold">{round.startupId?.name}</span>{" "}
+                          <span className="font-bold">${(round.targetAmount / 1000).toFixed(0)}k</span>{" "}
+                          <span className="text-muted-foreground text-xs ml-1">{round.roundName} Round</span>
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(round.createdAt), { addSuffix: true })}</span>
+                        {index === 0 && <Badge className="text-[10px] px-1.5 py-0 h-5" style={{ background: 'linear-gradient(135deg, #2E8B57, #0047AB)', color: 'white' }}>New</Badge>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Right Column - Graph & Feed */}
+          {/* Right Column */}
           <div className="md:col-span-7 flex flex-col gap-6">
-            <Card className="card-elevated">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg font-medium mb-4">Startup Growth</CardTitle>
-                <div className="flex flex-wrap gap-8 items-start">
-                  <div>
-                    <div className="flex items-baseline gap-3">
-                      <span className="text-3xl font-bold tracking-tight text-foreground">{totalTeamMembers}</span>
-                      <span className="text-sm font-medium text-primary flex items-center">
-                        {teamGrowth >= 0 ? '+' : ''}{teamGrowth}
-                      </span>
-                    </div>
-                    <span className="text-sm text-muted-foreground flex items-center gap-3">Team Members <span className="opacity-70 text-xs">this month</span></span>
+            {/* Growth Chart */}
+            <div className="p-5 rounded-xl" style={{ background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(16px)', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 4px 24px rgba(0,0,0,0.03)' }}>
+              <h3 className="text-base font-semibold mb-4">Startup Growth</h3>
+              <div className="flex flex-wrap gap-8 items-start mb-4">
+                <div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-bold tracking-tight">{totalTeamMembers}</span>
+                    <span className="text-sm font-medium" style={{ color: 'var(--sea-green)' }}>{teamGrowth >= 0 ? '+' : ''}{teamGrowth}</span>
                   </div>
-                  <Separator orientation="vertical" className="h-12 hidden sm:block" />
-                  <div>
-                    <div className="flex items-baseline gap-3">
-                      <span className="text-3xl font-bold tracking-tight text-foreground">{totalRaisedDisplay}</span>
-                      <span className="text-sm font-medium text-primary flex items-center">
-                        {salesGrowth >= 0 ? '+' : ''}{salesGrowth >= 1000 ? `$${(salesGrowth / 1000).toFixed(1)}K` : `$${salesGrowth}`}
-                      </span>
-                    </div>
-                    <span className="text-sm text-muted-foreground flex items-center gap-3">Revenue <span className="opacity-70 text-xs text-primary">raised this month</span></span>
+                  <span className="text-xs text-muted-foreground">Team Members</span>
+                </div>
+                <Separator orientation="vertical" className="h-10 hidden sm:block" />
+                <div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-bold tracking-tight">{totalRaisedDisplay}</span>
+                    <span className="text-sm font-medium" style={{ color: 'var(--sea-green)' }}>{salesGrowth >= 0 ? '+' : ''}{salesGrowth >= 1000 ? `$${(salesGrowth / 1000).toFixed(1)}K` : `$${salesGrowth}`}</span>
                   </div>
+                  <span className="text-xs text-muted-foreground">Revenue <span style={{ color: 'var(--sea-green)' }}>raised this month</span></span>
                 </div>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <div className="h-[200px] w-full">
-                  <ChartContainer config={chartConfig} className="h-full w-full">
-                    <AreaChart
-                      data={dynamicChartData}
-                      margin={{ top: 10, right: 0, left: -20, bottom: 0 }}
-                    >
-                      <defs>
-                        <linearGradient id="fillCustomers" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="var(--color-customers)" stopOpacity={0.1} />
-                          <stop offset="95%" stopColor="var(--color-customers)" stopOpacity={0.0} />
-                        </linearGradient>
-                        <linearGradient id="fillSales" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="var(--color-sales)" stopOpacity={0.1} />
-                          <stop offset="95%" stopColor="var(--color-sales)" stopOpacity={0.0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid vertical={false} strokeDasharray="3 3" opacity={0.3} />
-                      <XAxis
-                        dataKey="month"
-                        tickLine={false}
-                        axisLine={false}
-                        tickMargin={10}
-                        fontSize={12}
-                        color="hsl(var(--muted-foreground))"
-                      />
-                      <YAxis
-                        tickLine={false}
-                        axisLine={false}
-                        tickMargin={10}
-                        fontSize={12}
-                        color="hsl(var(--muted-foreground))"
-                      />
-                      <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-                      <Area
-                        type="monotone"
-                        dataKey="customers"
-                        stroke="var(--color-customers)"
-                        strokeWidth={2}
-                        fill="url(#fillCustomers)"
-                        fillOpacity={1}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="sales"
-                        stroke="var(--color-sales)"
-                        strokeWidth={2}
-                        fill="url(#fillSales)"
-                        fillOpacity={1}
-                      />
-                    </AreaChart>
-                  </ChartContainer>
-                </div>
-              </CardContent>
-            </Card>
+              </div>
+              <div className="h-[200px] w-full">
+                <ChartContainer config={chartConfig} className="h-full w-full">
+                  <AreaChart data={dynamicChartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="fillCustomers" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="var(--color-customers)" stopOpacity={0.1} />
+                        <stop offset="95%" stopColor="var(--color-customers)" stopOpacity={0.0} />
+                      </linearGradient>
+                      <linearGradient id="fillSales" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="var(--color-sales)" stopOpacity={0.1} />
+                        <stop offset="95%" stopColor="var(--color-sales)" stopOpacity={0.0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid vertical={false} strokeDasharray="3 3" opacity={0.3} />
+                    <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={10} fontSize={12} />
+                    <YAxis tickLine={false} axisLine={false} tickMargin={10} fontSize={12} />
+                    <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                    <Area type="monotone" dataKey="customers" stroke="var(--color-customers)" strokeWidth={2} fill="url(#fillCustomers)" fillOpacity={1} />
+                    <Area type="monotone" dataKey="sales" stroke="var(--color-sales)" strokeWidth={2} fill="url(#fillSales)" fillOpacity={1} />
+                  </AreaChart>
+                </ChartContainer>
+              </div>
+            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 h-full">
-              {[0, 1].map((colIndex) => (
-                <Card key={colIndex} className="card-elevated h-full">
-                  <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-lg font-medium">Activity Feed</CardTitle>
-                    <Button variant="ghost" size="sm" className="text-muted-foreground h-auto p-0 font-normal hover:bg-transparent hover:text-foreground">
-                      View All <ChevronRight className="ml-1 h-4 w-4" />
-                    </Button>
-                  </CardHeader>
-                  <CardContent className="pt-4">
-                    <div className="space-y-6">
-                      {mockActivityFeed.slice(colIndex * 2, colIndex * 2 + 2).map((activity) => (
-                        <div key={activity.id} className="flex gap-4 items-start">
-                          <Avatar className={`h-10 w-10 shrink-0 ${activity.type === 'AI' ? 'bg-primary/10 text-primary' : activity.type === 'FUNDING' ? 'bg-orange-500/10 text-orange-500' : 'bg-muted text-muted-foreground'
-                            }`}>
-                            <AvatarFallback className="bg-transparent font-medium">
-                              {activity.type === 'AI' ? 'AI' : activity.type === 'FUNDING' ? '$' : activity.user[0]}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex flex-col gap-1 min-w-0">
-                            <p className="text-sm font-medium leading-snug">
-                              {activity.user} <span className="text-muted-foreground font-normal">{activity.action}</span>
-                            </p>
-                            <span className="text-xs text-muted-foreground">{activity.time}</span>
-                          </div>
-                        </div>
-                      ))}
+            {/* Real Activity Feed */}
+            <div className="p-5 rounded-xl" style={{ background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(16px)', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 4px 24px rgba(0,0,0,0.03)' }}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-base font-semibold flex items-center gap-2"><Zap className="h-4 w-4" style={{ color: 'var(--sea-green)' }} /> Activity Feed</h3>
+              </div>
+              {notifications.length === 0 ? (
+                <div className="text-center py-8">
+                  <Zap className="h-8 w-8 mx-auto text-muted-foreground/30 mb-2" />
+                  <p className="text-sm text-muted-foreground">No recent activity. Start by creating a startup!</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {notifications.slice(0, 6).map((notif: any) => (
+                    <div key={notif._id} className="flex gap-3 items-start p-3 rounded-lg transition-all hover:bg-white/50" style={{ border: '1px solid rgba(0,0,0,0.04)' }}>
+                      <div className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold" style={{ background: notif.type?.includes('milestone') ? 'rgba(46,139,87,0.1)' : notif.type?.includes('funding') ? 'rgba(234,179,8,0.1)' : 'rgba(0,71,171,0.1)', color: notif.type?.includes('milestone') ? '#2E8B57' : notif.type?.includes('funding') ? '#B45309' : '#0047AB' }}>
+                        {notif.type?.includes('milestone') ? '🎯' : notif.type?.includes('funding') ? '💰' : notif.type?.includes('agreement') ? '📄' : '🔔'}
+                      </div>
+                      <div className="flex flex-col gap-0.5 min-w-0">
+                        <p className="text-sm font-medium leading-snug">{notif.title}</p>
+                        <p className="text-xs text-muted-foreground truncate">{notif.message}</p>
+                        <span className="text-[10px] text-muted-foreground/60">{notif.createdAt ? formatDistanceToNow(new Date(notif.createdAt), { addSuffix: true }) : ''}</span>
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -825,12 +815,12 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
             <Tooltip>
               <TooltipTrigger asChild>
                 <div>
-                  <InteractiveHoverButton text="Create Startup" onClick={() => setShowCreateStartup(true)} disabled={(user?.verificationLevel || 0) < 2} className="w-40" />
+                  <InteractiveHoverButton text="Create Startup" onClick={() => setShowCreateStartup(true)} disabled={(user?.verificationLevel || 0) < 1} className="w-40" />
                 </div>
               </TooltipTrigger>
-              {(user?.verificationLevel || 0) < 2 && (
+              {(user?.verificationLevel || 0) < 1 && (
                 <TooltipContent>
-                  <p>You need Verification Level 2 to create a startup.</p>
+                  <p>You need to complete your profile (Level 1) to create a startup.</p>
                 </TooltipContent>
               )}
             </Tooltip>
@@ -1213,12 +1203,12 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
             <Tooltip>
               <TooltipTrigger asChild>
                 <div>
-                  <InteractiveHoverButton text="Create Funding Round" onClick={() => setShowCreateFundingRound(true)} disabled={(user?.verificationLevel || 0) < 3} className="w-52" />
+                  <InteractiveHoverButton text="Create Funding Round" onClick={() => setShowCreateFundingRound(true)} disabled={(user?.verificationLevel || 0) < 2} className="w-52" />
                 </div>
               </TooltipTrigger>
-              {(user?.verificationLevel || 0) < 3 && (
+              {(user?.verificationLevel || 0) < 2 && (
                 <TooltipContent>
-                  <p>You need Verification Level 3 to raise capital.</p>
+                  <p>You need Business KYC (Level 2) to raise capital.</p>
                 </TooltipContent>
               )}
             </Tooltip>

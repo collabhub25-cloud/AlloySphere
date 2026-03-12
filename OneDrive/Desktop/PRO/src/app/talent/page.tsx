@@ -8,7 +8,7 @@ export default function TalentLanding() {
             <header className="border-b" style={{ borderColor: '#D8D2C8' }}>
                 <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
                     <Link href="/" className="text-base font-medium" style={{ letterSpacing: '0.3px' }}>
-                        <span>Collab</span><span style={{ color: '#8A6C8F' }}>·</span><span>Hub</span>
+                        <span className="font-bold tracking-tight">AlloySphere</span>
                     </Link>
                     <div className="flex items-center gap-5">
                         <Link href="/login" className="text-sm" style={{ color: '#6C635C' }}>Sign in</Link>

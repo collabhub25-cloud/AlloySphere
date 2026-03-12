@@ -8,7 +8,7 @@ export default function InvestorLanding() {
             <header className="border-b" style={{ borderColor: '#2A3545' }}>
                 <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
                     <Link href="/" className="text-base font-medium text-white" style={{ letterSpacing: '0.3px' }}>
-                        <span>Collab</span><span style={{ color: '#5A8AB5' }}>·</span><span>Hub</span>
+                        <span className="font-bold tracking-tight">AlloySphere</span>
                     </Link>
                     <div className="flex items-center gap-5">
                         <Link href="/login" className="text-sm" style={{ color: '#8897A8' }}>Sign in</Link>

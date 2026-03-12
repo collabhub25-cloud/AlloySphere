@@ -59,7 +59,7 @@ export default function LoginPage() {
         <div className="min-h-screen flex flex-col page-enter bg-transparent text-foreground">
             <header className="border-b border-border">
                 <div className="max-w-5xl mx-auto px-6 py-4">
-                    <Link href="/" className="text-base font-medium tracking-wide">Collab·Hub</Link>
+                    <Link href="/" className="text-base font-medium tracking-wide">AlloySphere</Link>
                 </div>
             </header>
 

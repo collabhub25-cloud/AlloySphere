@@ -25,8 +25,8 @@ interface StartupData {
     logo?: string;
     website?: string;
     isActive: boolean;
-    collabhubVerified?: boolean;
-    collabhubVerifiedAt?: string;
+    AlloySphereVerified?: boolean;
+    AlloySphereVerifiedAt?: string;
     createdAt: string;
     founderId?: {
         _id: string;
@@ -299,8 +299,8 @@ export default function StartupPage({
                             <div className="flex items-center gap-3 flex-wrap">
                                 <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">{startup.name}</h1>
                                 <AlloySphereVerifiedBadge
-                                    verified={startup.collabhubVerified || false}
-                                    verifiedAt={startup.collabhubVerifiedAt}
+                                    verified={startup.AlloySphereVerified || false}
+                                    verifiedAt={startup.AlloySphereVerifiedAt}
                                     variant="full"
                                 />
                             </div>
@@ -391,16 +391,16 @@ export default function StartupPage({
                                     <p className="text-lg font-bold mt-1 text-gray-900 dark:text-gray-100 capitalize">{value}</p>
                                 </div>
                             ))}
-                            {/* CollabHub Verified stat card */}
+                            {/* AlloySphere Verified stat card */}
                             <div
-                                className={`px-4 py-4 rounded-xl border shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${startup.collabhubVerified
+                                className={`px-4 py-4 rounded-xl border shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${startup.AlloySphereVerified
                                     ? 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-200/50 dark:border-blue-800/30'
                                     : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800'
                                     }`}
                             >
                                 <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Verified</p>
                                 <div className="flex items-center gap-1.5 mt-1.5">
-                                    {startup.collabhubVerified ? (
+                                    {startup.AlloySphereVerified ? (
                                         <>
                                             <BadgeCheck className="h-4 w-4" style={{ color: 'var(--sea-green)' }} />
                                             <span className="text-sm font-medium" style={{ color: 'var(--sea-green)' }}>Yes</span>

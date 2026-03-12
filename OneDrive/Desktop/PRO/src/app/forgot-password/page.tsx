@@ -40,7 +40,7 @@ export default function ForgotPasswordPage() {
         <div className="min-h-screen flex flex-col" style={{ background: '#F4F2ED', color: '#2A2623' }}>
             <header className="border-b" style={{ borderColor: '#D8D2C8' }}>
                 <div className="max-w-5xl mx-auto px-6 py-4">
-                    <Link href="/" className="text-base font-medium" style={{ letterSpacing: '0.3px' }}>Collab·Hub</Link>
+                    <Link href="/" className="text-base font-medium" style={{ letterSpacing: '0.3px' }}>AlloySphere</Link>
                 </div>
             </header>
 
