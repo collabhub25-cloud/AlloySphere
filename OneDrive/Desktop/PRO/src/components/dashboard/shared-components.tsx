@@ -91,7 +91,7 @@ export function StatCard({
           </div>
         ) : (
           <>
-            <div className="text-2xl font-bold tracking-tight">
+            <div className="text-xl font-semibold">
               {value}
             </div>
             {(description || trend) && (
@@ -399,7 +399,7 @@ export function DashboardHeader({
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div className="flex items-center gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+          <h1 className="text-xl font-semibold">{title}</h1>
           {description && (
             <p className="text-muted-foreground">{description}</p>
           )}

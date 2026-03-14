@@ -11,7 +11,7 @@ import {
   TrendingUp, Handshake, FileCheck, Award, Building2,
   Lightbulb, Target, Globe, Menu, X, ArrowDown, Sparkles
 } from 'lucide-react';
-import AnoAI from '@/components/ui/animated-shader-background';
+import { PremiumHero } from '@/components/ui/hero';
 
 interface LandingPageProps {
   onLogin: () => void;
@@ -159,55 +159,8 @@ export function LandingPage({ onLogin, onRegister }: LandingPageProps) {
         )}
       </header>
 
-      {/* Hero Section - Cinematic */}
-      <section className="relative overflow-hidden w-full h-full min-h-[90vh]">
-        <AnoAI />
-
-        <div className="container mx-auto px-4 py-24 md:py-36 relative">
-          <RevealSection className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 mb-8 px-5 py-2.5 rounded-full text-sm font-medium" style={{ background: 'rgba(46,139,87,0.08)', border: '1px solid rgba(46,139,87,0.15)', color: '#2E8B57' }}>
-              <Sparkles className="h-4 w-4" />
-              AI-Powered Startup Collaboration Platform
-            </div>
-
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 leading-[1.1]">
-              Build Your Startup with{' '}
-              <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(135deg, #2E8B57 0%, #0047AB 60%, #7C3AED 100%)' }}>
-                Verified Talent
-              </span>
-              {' '}& Investors
-            </h1>
-
-            <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-              The all-in-one platform connecting founders, talents, and investors.
-              Verified collaborations, automated agreements, milestone-based payments,
-              and trust scoring.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <InteractiveHoverButton text="Start Building Free" onClick={onRegister} className="w-56 p-3.5 text-lg" />
-              <Button size="lg" variant="outline" className="text-lg px-8 rounded-xl border-2" onClick={onLogin}>
-                Watch Demo
-              </Button>
-            </div>
-          </RevealSection>
-
-          {/* Stats - Animated counters */}
-          <RevealSection delay={0.3} className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-24 max-w-4xl mx-auto">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center stat-item p-4 rounded-2xl cursor-default" style={{ background: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(10px)', border: '1px solid rgba(0,0,0,0.04)' }}>
-                <div className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(135deg, #2E8B57, #0047AB)' }}>{stat.value}</div>
-                <div className="text-sm text-muted-foreground mt-1 font-medium">{stat.label}</div>
-              </div>
-            ))}
-          </RevealSection>
-
-          {/* Scroll Indicator */}
-          <div className="flex justify-center mt-16">
-            <ArrowDown className="h-5 w-5 text-muted-foreground" style={{ animation: 'scroll-indicator 2s ease-in-out infinite' }} />
-          </div>
-        </div>
-      </section>
+      {/* Hero Section - Animated PremiumHero */}
+      <PremiumHero onRegister={onRegister} onDemo={onLogin} />
 
       {/* Features Section */}
       <section id="features" className="py-24">

@@ -40,7 +40,6 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
-import AnoAI from '@/components/ui/animated-shader-background';
 
 interface FundingRound {
   _id: string;
@@ -385,13 +384,10 @@ export function InvestorDashboard({ activeTab }: InvestorDashboardProps) {
 
     return (
       <div className="space-y-6 page-enter relative">
-        {/* Animated Shader Background */}
-        <AnoAI />
-
         {/* Header with glassmorphism */}
         <div className="flex items-center justify-between p-6 rounded-2xl" style={{ background: 'linear-gradient(135deg, rgba(46,139,87,0.06) 0%, rgba(0,71,171,0.04) 50%, rgba(255,255,255,0.8) 100%)', backdropFilter: 'blur(20px)', border: '1px solid rgba(46,139,87,0.25)', boxShadow: '0 8px 32px rgba(0,0,0,0.04)' }}>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Welcome back, {user?.name?.split(' ')[0]}!</h1>
+            <h1 className="text-xl font-semibold">Welcome back, {user?.name?.split(' ')[0]}!</h1>
             <p className="text-muted-foreground mt-1">Discover your next investment opportunity</p>
           </div>
           <Button onClick={() => setGlobalTab('search')} className="rounded-xl px-5" style={{ background: 'linear-gradient(135deg, #0047AB 0%, #0066CC 100%)', boxShadow: '0 4px 14px rgba(0,71,171,0.25)' }}>
@@ -437,7 +433,7 @@ export function InvestorDashboard({ activeTab }: InvestorDashboardProps) {
                   )}
                 </div>
               </div>
-              <div className="text-2xl font-bold tracking-tight">{stat.value}</div>
+              <div className="text-xl font-semibold">{stat.value}</div>
               <p className="text-xs text-muted-foreground mt-1">{stat.sub}</p>
               {stat.showProgress && (
                 <div className="mt-3 h-2 rounded-full bg-muted overflow-hidden">

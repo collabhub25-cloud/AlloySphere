@@ -125,8 +125,8 @@ const AnoAI = () => {
     return (
         <div 
             ref={containerRef} 
-            className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none opacity-20 dark:opacity-60"
-            style={{ zIndex: 0 }}
+            className="fixed inset-0 w-full h-full overflow-hidden pointer-events-none opacity-20 dark:opacity-60"
+            style={{ zIndex: -1 }}
         />
     );
 };

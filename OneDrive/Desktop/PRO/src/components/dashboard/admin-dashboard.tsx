@@ -13,7 +13,6 @@ import {
   TrendingUp, TrendingDown, Clock, CheckCircle2, XCircle,
   Shield, Activity, FileText, Zap
 } from 'lucide-react';
-import AnoAI from '@/components/ui/animated-shader-background';
 
 interface AdminDashboardProps {
   activeTab: string;
@@ -37,7 +36,6 @@ export function AdminDashboard({ activeTab }: AdminDashboardProps) {
   if (activeTab === 'dashboard') {
     return (
       <div className="space-y-6 relative page-enter">
-        <AnoAI />
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">Admin Dashboard</h1>

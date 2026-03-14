@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { Loader2, Eye, EyeOff, ArrowRight, Rocket, Sparkles } from 'lucide-react';
 import { useAuthStore } from '@/store';
 import { toast } from 'sonner';
-import AnoAI from '@/components/ui/animated-shader-background';
 
 const roles = [
     { id: 'founder' as const, label: 'Founder', desc: 'Launch & grow' },
@@ -81,8 +80,6 @@ export default function LoginPage() {
             </header>
 
             <main className="flex-1 flex items-center justify-center px-6 py-16 relative">
-                <AnoAI />
-
                 <div className="w-full max-w-sm relative z-10">
                     {/* Header */}
                     <div className="text-center mb-8">

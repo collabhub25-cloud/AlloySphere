@@ -193,6 +193,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
   };
 
   const handleProfileClick = () => {
+    safeLocalStorage.removeItem(STORAGE_KEYS.VIEW_PROFILE); // Fix it here instead of passing undefined
     setViewProfileId(undefined); // Reset to show own profile
     setActiveTab('profile');
   };
@@ -209,39 +210,32 @@ export function Dashboard({ onLogout }: DashboardProps) {
 
   return (
     <TooltipProvider>
-      <div className={`flex min-h-screen w-full`}>
-        <div className="flex w-full bg-transparent text-foreground min-h-screen">
+      <div className={`flex min-h-screen w-full relative`}>
+        <div className="flex w-full bg-transparent text-foreground min-h-screen relative z-10">
 
           {/* Sidebar — 3D Glass Design */}
           <nav
             className={`sticky top-0 h-screen shrink-0 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] ${sidebarOpen ? 'w-64' : 'w-16'
-              } flex flex-col relative overflow-hidden`}
-            style={{
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(250,250,250,0.96) 100%)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              borderRight: '1px solid rgba(0,0,0,0.2)',
-              boxShadow: '4px 0 24px -4px rgba(0,0,0,0.05)',
-            }}
+              } flex flex-col relative overflow-hidden bg-white/5 dark:bg-black/20 backdrop-blur-2xl border-r border-white/10 dark:border-white/5`}
           >
-            {/* Gradient accent strip */}
-            <div className="absolute top-0 left-0 w-[3px] h-full bg-gradient-to-b from-zinc-900 via-zinc-500 to-transparent opacity-60" />
+            {/* Shiny animated border on right edge */}
+            <div className="sidebar-shiny-border" />
 
             {/* Title Section */}
-            <div className="mb-6 border-b border-border/50 pb-4 pl-1">
-              <div className="flex cursor-pointer items-center justify-between rounded-xl p-2 transition-all duration-300 hover:bg-black/[0.03] group">
+            <div className="mb-6 border-b border-border/40 pb-4 pl-1">
+              <div className="flex cursor-pointer items-center justify-between rounded-xl p-2 transition-all duration-200 hover:bg-white/10 dark:hover:bg-white/5 group">
                 <div className="flex items-center gap-3">
-                  {/* Logo — floating animation */}
+                  {/* Logo — Interconnected Spheres */}
                   <div
-                    className="grid size-10 shrink-0 place-content-center rounded-xl bg-primary shadow-lg transition-transform duration-500 group-hover:scale-105"
-                    style={{ animation: 'sidebar-logo-float 4s ease-in-out infinite' }}
+                    className="grid size-10 shrink-0 place-content-center rounded-xl bg-gradient-to-br from-indigo-600 to-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-transform duration-300 group-hover:scale-[1.05]"
                   >
-                    <svg width="20" height="20" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      {/* Abstract Sphere Intersection Logo */}
-                      <circle cx="16" cy="12" r="6" fill="white" opacity="0.9" />
-                      <circle cx="12" cy="20" r="6" fill="white" opacity="0.7" />
-                      <circle cx="20" cy="20" r="6" fill="white" opacity="0.5" />
-                      <path d="M12 20a6 6 0 018 0" stroke="var(--primary)" strokeWidth="1.5" strokeLinecap="round" opacity="0.8" />
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white">
+                      <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="2" strokeDasharray="4 4" className="animate-[spin_10s_linear_infinite]" />
+                      <circle cx="12" cy="12" r="3" fill="currentColor" />
+                      <circle cx="12" cy="4" r="2" fill="currentColor" />
+                      <circle cx="12" cy="20" r="2" fill="currentColor" />
+                      <line x1="12" y1="9" x2="12" y2="6" stroke="currentColor" strokeWidth="1.5" />
+                      <line x1="12" y1="15" x2="12" y2="18" stroke="currentColor" strokeWidth="1.5" />
                     </svg>
                   </div>
                   {sidebarOpen && (
@@ -265,29 +259,25 @@ export function Dashboard({ onLogout }: DashboardProps) {
               </div>
             </div>
 
-            {/* Navigation Options — 3D hover */}
-            <div className="space-y-1 mb-8 flex-1 overflow-y-auto custom-scrollbar pr-1 pl-1" style={{ perspective: '800px' }}>
-              {navItems.map((item, index) => {
+            {/* Navigation Options — Clean flat design */}
+            <div className="space-y-0.5 mb-8 flex-1 overflow-y-auto custom-scrollbar pr-1 pl-1">
+              {navItems.map((item) => {
                 const isSelected = activeTab === item.id;
                 return (
                   <button
                     key={item.id}
                     onClick={() => setActiveTab(item.id)}
                     title={!sidebarOpen ? item.label : undefined}
-                    className={`sidebar-nav-item relative flex h-11 w-full items-center rounded-xl transition-all duration-300 ${isSelected
-                      ? "bg-primary text-primary-foreground shadow-md"
-                      : "text-muted-foreground hover:text-foreground border border-transparent hover:border-black/10"
+                    className={`relative flex h-10 w-full items-center rounded-lg transition-all duration-200 ${isSelected
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground hover:bg-white/10 dark:hover:bg-white/5"
                       }`}
-                    style={{
-                      animationDelay: `${index * 50}ms`,
-                      transformStyle: 'preserve-3d',
-                    }}
                   >
                     <div className="grid h-full w-12 place-content-center shrink-0">
-                      <item.icon className={`h-4 w-4 transition-transform duration-300 ${isSelected ? '' : 'group-hover:scale-110'}`} />
+                      <item.icon className="h-[18px] w-[18px]" />
                     </div>
                     {sidebarOpen && (
-                      <span className={`text-sm font-medium transition-all duration-200 whitespace-nowrap ${sidebarOpen ? 'opacity-100' : 'opacity-0'}`}>
+                      <span className={`text-[13px] font-medium transition-all duration-200 whitespace-nowrap ${sidebarOpen ? 'opacity-100' : 'opacity-0'}`}>
                         {item.label}
                       </span>
                     )}
@@ -298,14 +288,14 @@ export function Dashboard({ onLogout }: DashboardProps) {
 
             {/* Bottom Actions */}
             {sidebarOpen && (
-              <div className="border-t border-border/50 pt-4 pb-12 space-y-1 pl-1">
+              <div className="border-t border-border/40 pt-4 pb-12 space-y-0.5 pl-1">
                 {user.role === 'founder' && (userPlan === 'free' || userPlan === 'free_founder') && (
-                  <div className="mb-2 p-3 rounded-xl border border-black/20 bg-gradient-to-br from-zinc-50 to-white shadow-sm">
+                  <div className="mb-2 p-3 rounded-lg border border-white/10 dark:border-white/5 bg-white/5 dark:bg-black/20 backdrop-blur-md">
                     <div className="flex items-center gap-2 mb-2">
                       <Sparkles className="h-4 w-4 text-primary" />
-                      <span className="text-sm font-medium">Upgrade plan</span>
+                      <span className="text-[13px] font-medium">Upgrade plan</span>
                     </div>
-                    <Button size="sm" variant="default" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg" onClick={handleUpgradeClick}>
+                    <Button size="sm" variant="default" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-xs" onClick={handleUpgradeClick}>
                       View plans
                     </Button>
                   </div>
@@ -317,9 +307,9 @@ export function Dashboard({ onLogout }: DashboardProps) {
 
                 <button
                   onClick={handleProfileClick}
-                  className={`sidebar-nav-item relative flex h-11 w-full items-center rounded-xl transition-all duration-300 ${activeTab === 'profile'
-                    ? "bg-primary text-primary-foreground shadow-md"
-                    : "text-muted-foreground hover:text-foreground"
+                  className={`relative flex h-10 w-full items-center rounded-lg transition-all duration-200 ${activeTab === 'profile'
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground hover:bg-gray-50"
                     }`}
                 >
                   <div className="grid h-full w-12 place-content-center shrink-0">
@@ -331,25 +321,25 @@ export function Dashboard({ onLogout }: DashboardProps) {
                     </Avatar>
                   </div>
                   <div className="flex-1 min-w-0 text-left">
-                    <span className="text-sm font-medium block truncate">{user.name}</span>
+                    <span className="text-[13px] font-medium block truncate">{user.name}</span>
                   </div>
                 </button>
 
                 <button
                   onClick={onLogout}
-                  className="sidebar-nav-item relative flex h-11 w-full items-center rounded-xl transition-all duration-300 text-muted-foreground hover:bg-red-50 hover:text-red-600"
+                  className="relative flex h-10 w-full items-center rounded-lg transition-all duration-200 text-muted-foreground hover:bg-red-50 hover:text-red-600"
                 >
                   <div className="grid h-full w-12 place-content-center shrink-0">
                     <LogOut className="h-4 w-4" />
                   </div>
-                  <span className="text-sm font-medium">Sign Out</span>
+                  <span className="text-[13px] font-medium">Sign Out</span>
                 </button>
               </div>
             )}
 
             {!sidebarOpen && (
-              <div className="pb-12 space-y-1">
-                <button onClick={handleProfileClick} title="Profile" className="sidebar-nav-item relative flex h-11 w-full items-center justify-center rounded-xl transition-all duration-300 text-muted-foreground hover:text-foreground">
+              <div className="pb-12 space-y-0.5">
+                <button onClick={handleProfileClick} title="Profile" className="relative flex h-10 w-full items-center justify-center rounded-lg transition-all duration-200 text-muted-foreground hover:text-foreground hover:bg-gray-50">
                   <Avatar className="h-5 w-5">
                     <AvatarImage src={user.avatar} />
                     <AvatarFallback className="bg-primary/10 text-primary text-[10px]">
@@ -357,7 +347,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
                     </AvatarFallback>
                   </Avatar>
                 </button>
-                <button onClick={onLogout} title="Sign Out" className="sidebar-nav-item relative flex h-11 w-full items-center justify-center rounded-xl transition-all duration-300 text-muted-foreground hover:bg-red-50 hover:text-red-600">
+                <button onClick={onLogout} title="Sign Out" className="relative flex h-10 w-full items-center justify-center rounded-lg transition-all duration-200 text-muted-foreground hover:bg-red-50 hover:text-red-600">
                   <LogOut className="h-4 w-4" />
                 </button>
               </div>
@@ -366,18 +356,17 @@ export function Dashboard({ onLogout }: DashboardProps) {
             {/* Toggle Close */}
             <button
               onClick={toggleSidebar}
-              className="absolute bottom-0 left-0 right-0 border-t border-border/50 transition-all duration-300 hover:bg-black/[0.03] z-10"
-              style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(12px)' }}
+              className="absolute bottom-0 left-0 right-0 border-t border-border/40 transition-all duration-200 hover:bg-gray-50 z-10 bg-white"
             >
               <div className="flex items-center p-3">
                 <div className="grid size-10 place-content-center shrink-0">
                   <ChevronsRight
-                    className={`h-4 w-4 transition-transform duration-500 text-muted-foreground ${sidebarOpen ? "rotate-180" : ""
+                    className={`h-4 w-4 transition-transform duration-300 text-muted-foreground ${sidebarOpen ? "rotate-180" : ""
                       }`}
                   />
                 </div>
                 {sidebarOpen && (
-                  <span className="text-sm font-medium text-muted-foreground transition-opacity duration-200 opacity-100">
+                  <span className="text-[13px] font-medium text-muted-foreground">
                     Collapse Sidebar
                   </span>
                 )}
@@ -394,13 +383,12 @@ export function Dashboard({ onLogout }: DashboardProps) {
                 </h1>
               </div>
               <div className="flex items-center gap-4">
-                {/* Trust Score */}
                 <button
                   onClick={handleProfileClick}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-full hover:bg-primary/20 transition-colors border border-primary/20 box-border"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100/50 backdrop-blur-sm rounded-full hover:bg-gray-200/50 transition-colors border border-gray-200/50"
                 >
-                  <Award className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium text-primary">{user.trustScore} points</span>
+                  <span className="text-sm">⭐</span>
+                  <span className="text-sm font-semibold text-foreground">{user.trustScore}</span>
                 </button>
 
                 {/* Notifications */}

@@ -23,7 +23,6 @@ import {
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { MilestonePaymentModal } from '@/components/milestones/milestone-payment-modal';
-import AnoAI from '@/components/ui/animated-shader-background';
 
 interface Application {
   _id: string;
@@ -232,13 +231,10 @@ export function TalentDashboard({ activeTab }: TalentDashboardProps) {
 
     return (
       <div className="space-y-6 page-enter relative">
-        {/* Animated Shader Background */}
-        <AnoAI />
-
         {/* Header with glassmorphism */}
         <div className="flex items-center justify-between p-6 rounded-2xl" style={{ background: 'linear-gradient(135deg, rgba(0,71,171,0.05) 0%, rgba(46,139,87,0.04) 50%, rgba(255,255,255,0.8) 100%)', backdropFilter: 'blur(20px)', border: '1px solid rgba(0,71,171,0.25)', boxShadow: '0 8px 32px rgba(0,0,0,0.04)' }}>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Welcome back, {user?.name?.split(' ')[0]}!</h1>
+            <h1 className="text-xl font-semibold">Welcome back, {user?.name?.split(' ')[0]}!</h1>
             <p className="text-muted-foreground mt-1">Track your progress and find new opportunities</p>
           </div>
           <Button onClick={() => setGlobalTab('search')} className="rounded-xl px-5" style={{ background: 'linear-gradient(135deg, #0047AB 0%, #0066CC 100%)', boxShadow: '0 4px 14px rgba(0,71,171,0.25)' }}>
@@ -264,7 +260,7 @@ export function TalentDashboard({ activeTab }: TalentDashboardProps) {
                   <stat.icon className="h-4 w-4" style={{ color: stat.iconColor }} />
                 </div>
               </div>
-              <div className={`text-2xl font-bold tracking-tight ${stat.truncate ? 'truncate' : ''}`}>{stat.value}</div>
+              <div className={`text-xl font-semibold ${stat.truncate ? 'truncate' : ''}`}>{stat.value}</div>
               <p className="text-xs text-muted-foreground mt-1">{stat.sub}</p>
               {stat.showProgress && (
                 <div className="mt-3 h-2 rounded-full bg-muted overflow-hidden">
@@ -282,7 +278,7 @@ export function TalentDashboard({ activeTab }: TalentDashboardProps) {
               <div className="h-8 w-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(46,139,87,0.08)' }}>
                 <Award className="h-4 w-4" style={{ color: '#2E8B57' }} />
               </div>
-              <h3 className="text-lg font-bold tracking-tight">Verification Progress</h3>
+              <h3 className="text-lg font-semibold">Verification Progress</h3>
             </div>
             <p className="text-sm text-muted-foreground ml-10">Complete all levels to unlock premium opportunities</p>
           </div>
@@ -321,7 +317,7 @@ export function TalentDashboard({ activeTab }: TalentDashboardProps) {
           <div className="rounded-2xl overflow-hidden shadow-[0_0_15px_rgba(255,255,255,0.4)] dark:shadow-[0_0_15px_rgba(255,255,255,0.1)]" style={{ background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(20px)', border: '1px solid rgba(0,0,0,0.06)' }}>
             <div className="p-6 pb-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-bold tracking-tight">Active Milestones</h3>
+                <h3 className="text-lg font-semibold">Active Milestones</h3>
                 <Button variant="ghost" size="sm" className="rounded-xl text-sm" onClick={() => setGlobalTab('projects')}>View All</Button>
               </div>
             </div>
@@ -356,7 +352,7 @@ export function TalentDashboard({ activeTab }: TalentDashboardProps) {
           <div className="rounded-2xl overflow-hidden shadow-[0_0_15px_rgba(255,255,255,0.4)] dark:shadow-[0_0_15px_rgba(255,255,255,0.1)]" style={{ background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(20px)', border: '1px solid rgba(0,0,0,0.06)' }}>
             <div className="p-6 pb-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-bold tracking-tight">Recommended Opportunities</h3>
+                <h3 className="text-lg font-semibold">Recommended Opportunities</h3>
                 <Button variant="ghost" size="sm" className="rounded-xl text-sm" onClick={() => setGlobalTab('search')}>See Trends</Button>
               </div>
             </div>

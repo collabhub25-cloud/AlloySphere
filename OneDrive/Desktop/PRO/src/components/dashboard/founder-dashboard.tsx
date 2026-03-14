@@ -12,12 +12,11 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import AnoAI from '@/components/ui/animated-shader-background';
 import {
   Plus, Building2, Users, CheckCircle2, Clock,
   Briefcase, Target, Zap, Loader2, Edit, Trash2,
   FileText, AlertCircle, DollarSign, Lock, ExternalLink,
-  ChevronRight, TrendingUp, Presentation, Check, Shield
+  ChevronRight, TrendingUp, Presentation, Check, Shield, Star
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts';
@@ -55,6 +54,7 @@ import { toast } from 'sonner';
 import { CreateMilestoneModal } from '@/components/milestones/create-milestone-modal';
 import { apiFetch } from '@/lib/api-client';
 import { MilestonePaymentModal } from '@/components/milestones/milestone-payment-modal';
+import { AlloySphereVerifiedBadge } from '@/components/ui/alloysphere-verified-badge';
 
 interface Startup {
   _id: string;
@@ -67,6 +67,8 @@ interface Startup {
   trustScore: number;
   team: { _id: string; name: string }[];
   founderId: { _id: string; name: string; email: string };
+  AlloySphereVerified?: boolean;
+  AlloySphereVerifiedAt?: string;
 }
 
 interface Application {
@@ -515,13 +517,10 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
 
     return (
       <div className="space-y-6 page-enter relative">
-        {/* Animated Shader Background */}
-        <AnoAI />
-
         {/* Glassmorphic Header */}
-        <div className="flex items-center justify-between p-6 rounded-2xl" style={{ background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(20px)', border: '1px solid rgba(0,0,0,0.25)', boxShadow: '0 8px 32px rgba(0,0,0,0.04)' }}>
+        <div className="flex items-center justify-between p-6 rounded-2xl" style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 8px 32px rgba(0,0,0,0.1)' }}>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Welcome back, {user?.name?.split(' ')[0]}!</h1>
+            <h1 className="text-xl font-semibold">Welcome back, {user?.name?.split(' ')[0]}!</h1>
             <p className="text-muted-foreground mt-1">Here&apos;s what&apos;s happening with <span className="font-semibold text-foreground">your startups</span></p>
           </div>
           <Badge variant="outline" className="px-3 py-1.5 text-xs font-semibold" style={{ background: 'rgba(0,0,0,0.05)', borderColor: 'rgba(0,0,0,0.2)' }}>
@@ -537,11 +536,11 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
             { label: 'Active Milestones', value: activeMilestones.length, icon: '🎯', gradient: 'rgba(0,0,0,0.03)' },
             { label: 'Funding Raised', value: totalRaisedDisplay, icon: '💰', gradient: 'rgba(0,0,0,0.03)' },
             { label: 'Agreements', value: agreements.length, icon: '📄', gradient: 'rgba(0,0,0,0.03)' },
-            { label: 'Trust Score', value: `${user?.trustScore || 50}/100`, icon: '⚡', gradient: 'rgba(0,0,0,0.03)' },
+            { label: 'Trust Score', value: `${user?.trustScore || 50}`, icon: '⭐', gradient: 'rgba(0,0,0,0.03)' },
           ].map((stat) => (
             <div key={stat.label} className="p-4 rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_20px_rgba(0,0,0,0.1)] cursor-default" style={{ background: stat.gradient, backdropFilter: 'blur(12px)', border: '1px solid rgba(0,0,0,0.25)' }}>
               <div className="text-2xl mb-2">{stat.icon}</div>
-              <p className="text-xl font-bold tracking-tight">{stat.value}</p>
+              <p className="text-xl font-semibold">{stat.value}</p>
               <p className="text-xs text-muted-foreground font-medium mt-0.5">{stat.label}</p>
             </div>
           ))}
@@ -567,7 +566,7 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
           {/* Left Column */}
           <div className="md:col-span-5 flex flex-col gap-6">
             {/* Recent Milestones */}
-            <div className="p-5 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.05)]" style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(16px)', border: '1px solid rgba(0,0,0,0.15)' }}>
+            <div className="p-5 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.1)]" style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.1)' }}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-base font-semibold flex items-center gap-2"><Target className="h-4 w-4" style={{ color: 'var(--sea-green)' }} /> Recent Milestones</h3>
                 <Button variant="ghost" size="sm" className="text-xs text-muted-foreground h-auto p-0">View All <ChevronRight className="ml-1 h-3 w-3" /></Button>
@@ -600,7 +599,7 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
             </div>
 
             {/* Funding Activity */}
-            <div className="p-5 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.05)]" style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(16px)', border: '1px solid rgba(0,0,0,0.15)' }}>
+            <div className="p-5 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.1)]" style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.1)' }}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-base font-semibold flex items-center gap-2"><DollarSign className="h-4 w-4" style={{ color: 'var(--cobalt-blue)' }} /> Funding Activity</h3>
                 <Button variant="ghost" size="sm" className="text-xs text-muted-foreground h-auto p-0">View All <ChevronRight className="ml-1 h-3 w-3" /></Button>
@@ -634,12 +633,12 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
           {/* Right Column */}
           <div className="md:col-span-7 flex flex-col gap-6">
             {/* Growth Chart */}
-            <div className="p-5 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.05)]" style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(16px)', border: '1px solid rgba(0,0,0,0.15)' }}>
+            <div className="p-5 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.1)]" style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.1)' }}>
               <h3 className="text-base font-semibold mb-4">Startup Growth</h3>
               <div className="flex flex-wrap gap-8 items-start mb-4">
                 <div>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-bold tracking-tight">{totalTeamMembers}</span>
+                    <span className="text-2xl font-semibold">{totalTeamMembers}</span>
                     <span className="text-sm font-medium" style={{ color: 'var(--sea-green)' }}>{teamGrowth >= 0 ? '+' : ''}{teamGrowth}</span>
                   </div>
                   <span className="text-xs text-muted-foreground">Team Members</span>
@@ -647,7 +646,7 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
                 <Separator orientation="vertical" className="h-10 hidden sm:block" />
                 <div>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-bold tracking-tight">{totalRaisedDisplay}</span>
+                    <span className="text-2xl font-semibold">{totalRaisedDisplay}</span>
                     <span className="text-sm font-medium" style={{ color: 'var(--sea-green)' }}>{salesGrowth >= 0 ? '+' : ''}{salesGrowth >= 1000 ? `$${(salesGrowth / 1000).toFixed(1)}K` : `$${salesGrowth}`}</span>
                   </div>
                   <span className="text-xs text-muted-foreground">Revenue <span style={{ color: 'var(--sea-green)' }}>raised this month</span></span>
@@ -678,7 +677,7 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
             </div>
 
             {/* Real Activity Feed */}
-            <div className="p-5 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.05)]" style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(16px)', border: '1px solid rgba(0,0,0,0.15)' }}>
+            <div className="p-5 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.1)]" style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.1)' }}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-base font-semibold flex items-center gap-2"><Zap className="h-4 w-4" style={{ color: 'var(--sea-green)' }} /> Activity Feed</h3>
               </div>
@@ -828,7 +827,7 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : startups.length === 0 ? (
-          <Card className="border-dashed">
+          <Card className="border-dashed bg-white/5 dark:bg-black/20 backdrop-blur-xl border-white/10 dark:border-white/5">
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Building2 className="h-12 w-12 text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">No startups yet</h3>
@@ -841,11 +840,16 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
             {startups.map((startup) => (
-              <Card key={startup._id} className="hover:border-primary/50 transition-colors cursor-pointer" onClick={() => router.push(`/startup/${startup._id}`)}>
+              <Card key={startup._id} className="hover:border-primary/50 transition-colors cursor-pointer bg-white/5 dark:bg-black/20 backdrop-blur-xl border-white/10 dark:border-white/5" onClick={() => router.push(`/startup/${startup._id}`)}>
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div>
-                      <CardTitle>{startup.name}</CardTitle>
+                      <CardTitle className="flex items-center gap-1.5">
+                        {startup.name}
+                        {startup.AlloySphereVerified && (
+                          <AlloySphereVerifiedBadge verified={true} variant="inline" />
+                        )}
+                      </CardTitle>
                       <CardDescription className="mt-1">{startup.industry}</CardDescription>
                     </div>
                     <Badge>{startup.stage}</Badge>
@@ -858,9 +862,9 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
                       <Users className="h-4 w-4 text-muted-foreground" />
                       <span>{startup.team?.length || 1} members</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Zap className="h-4 w-4 text-primary" />
-                      <span>Trust: {startup.trustScore}</span>
+                    <div className="flex items-center gap-1.5">
+                      <Star className="h-4 w-4 text-amber-500" />
+                      <span>{startup.trustScore}</span>
                     </div>
                   </div>
                   <Separator />

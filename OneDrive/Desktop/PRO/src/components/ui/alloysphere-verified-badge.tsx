@@ -12,7 +12,7 @@ import { ShieldCheck, BadgeCheck, CheckCircle2, Sparkles } from 'lucide-react';
 interface AlloySphereVerifiedBadgeProps {
     verified: boolean;
     verifiedAt?: string;
-    variant?: 'compact' | 'full';
+    variant?: 'compact' | 'full' | 'inline';
     className?: string;
 }
 
@@ -31,6 +31,27 @@ export function AlloySphereVerifiedBadge({
                 Not Verified
             </div>
         ) : null;
+    }
+
+    // Inline variant — Instagram-style small blue tick
+    if (variant === 'inline') {
+        return (
+            <span
+                className={`inline-flex items-center justify-center shrink-0 ${className}`}
+                title="AlloySphere Verified"
+                style={{
+                    width: '18px',
+                    height: '18px',
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
+                    boxShadow: '0 1px 3px rgba(37, 99, 235, 0.3)',
+                }}
+            >
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M5 13l4 4L19 7" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+            </span>
+        );
     }
 
     const formattedDate = verifiedAt

@@ -351,11 +351,11 @@ export function MessagingPage() {
   return (
     <div className="h-[calc(100vh-140px)] w-full w-full">
       <div className="h-full">
-        <Card className="h-full border shadow-sm rounded-xl overflow-hidden flex flex-col">
+        <Card className="h-full border shadow-sm rounded-xl overflow-hidden flex flex-col bg-white/5 dark:bg-black/20 backdrop-blur-xl border-white/10 dark:border-white/5">
           <div className="flex flex-1 min-h-0" style={{ flexDirection: selectedConversation ? 'row' : 'column' }}>
             {/* Conversations List */}
             <div className={`border-r overflow-hidden ${selectedConversation ? 'hidden md:flex flex-col w-80 shrink-0' : 'flex flex-col w-full'}`}>
-              <CardHeader className="border-b bg-card shrink-0 p-4">
+              <CardHeader className="border-b bg-transparent border-white/10 shrink-0 p-4">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg">Messages</CardTitle>
                   {unreadTotal > 0 && (
@@ -367,7 +367,7 @@ export function MessagingPage() {
                   <Input placeholder="Search conversations..." className="pl-8" />
                 </div>
               </CardHeader>
-              <ScrollArea className="h-[calc(100%-144px)]">
+              <ScrollArea className="flex-1 overflow-y-auto">
                 {conversations.length === 0 ? (
                   <div className="flex flex-col items-center justify-center p-8 text-center">
                     <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
@@ -384,27 +384,27 @@ export function MessagingPage() {
                       className={`flex items-center gap-3 p-4 cursor-pointer hover:bg-muted/50 transition-colors ${selectedConversation?._id === conv._id ? 'bg-muted' : ''
                         }`}
                     >
-                      <Avatar className="h-10 w-10">
+                      <Avatar className="h-10 w-10 shrink-0">
                         <AvatarImage src={conv.otherUser?.avatar} />
                         <AvatarFallback>
                           {getInitials(conv.otherUser?.name)}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="flex-1 min-w-0">
+                      <div className="flex-1 min-w-0 overflow-visible">
                         <div className="flex items-center justify-between">
                           <p className="font-medium truncate">{conv.otherUser?.name || 'Unknown User'}</p>
                           {conv.lastMessageAt && (
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-xs text-muted-foreground shrink-0 ml-2">
                               {formatTime(conv.lastMessageAt)}
                             </span>
                           )}
                         </div>
                         <div className="flex items-center justify-between mt-1">
-                          <p className="text-sm text-muted-foreground truncate">
-                            {conv.lastMessage}
+                          <p className="text-sm text-muted-foreground truncate pr-2">
+                            {conv.lastMessage || '\u00A0'}
                           </p>
                           {conv.unreadCount > 0 && (
-                            <Badge variant="destructive" className="ml-2 h-5 w-5 p-0 flex items-center justify-center">
+                            <Badge variant="destructive" className="ml-2 h-5 w-5 p-0 flex items-center justify-center shrink-0">
                               {conv.unreadCount}
                             </Badge>
                           )}

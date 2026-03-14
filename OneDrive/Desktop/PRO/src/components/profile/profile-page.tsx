@@ -95,7 +95,7 @@ export function ProfilePage({ profileId }: ProfilePageProps) {
   const fetchProfile = useCallback(async () => {
 
     try {
-      const endpoint = profileId
+      const endpoint = (profileId && profileId !== 'undefined')
         ? `/api/users/profile/${profileId}`
         : '/api/users/me';
 
@@ -257,7 +257,7 @@ export function ProfilePage({ profileId }: ProfilePageProps) {
       )}
 
       {/* Profile Header — Enhanced with gradient mesh background */}
-      <Card className="overflow-hidden relative">
+      <Card className="overflow-hidden relative bg-white/5 dark:bg-black/20 backdrop-blur-xl border-white/10 dark:border-white/5">
         {/* Gradient mesh background */}
         <div className="absolute inset-0 gradient-mesh-bg opacity-60 pointer-events-none" />
         <div
@@ -449,7 +449,7 @@ export function ProfilePage({ profileId }: ProfilePageProps) {
       {(profileTab === 'overview' || !isOwnProfile) && (
         <>
           {/* Recent Trust Activity — 3D hover */}
-          <Card className="card-3d-hover">
+          <Card className="card-3d-hover bg-white/5 dark:bg-black/20 backdrop-blur-xl border-white/10 dark:border-white/5">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Shield className="h-5 w-5 icon-float" style={{ color: 'var(--sea-green)' }} />
@@ -503,7 +503,7 @@ export function ProfilePage({ profileId }: ProfilePageProps) {
 
           {/* Social Links Section (Editable) */}
           {isOwnProfile && (
-            <Card className="card-3d-hover">
+            <Card className="card-3d-hover bg-white/5 dark:bg-black/20 backdrop-blur-xl border-white/10 dark:border-white/5">
               <CardHeader>
                 <CardTitle className="text-lg">Social Links</CardTitle>
                 <CardDescription>Add your social profiles to showcase your work</CardDescription>
@@ -556,7 +556,7 @@ export function ProfilePage({ profileId }: ProfilePageProps) {
 
           {/* Public Social Links View */}
           {!isOwnProfile && (profile.githubUrl || profile.linkedinUrl || profile.portfolioUrl) && (
-            <Card className="card-3d-hover">
+            <Card className="card-3d-hover bg-white/5 dark:bg-black/20 backdrop-blur-xl border-white/10 dark:border-white/5">
               <CardHeader>
                 <CardTitle>Links</CardTitle>
               </CardHeader>
@@ -596,7 +596,7 @@ export function ProfilePage({ profileId }: ProfilePageProps) {
             <>
               {/* Skills */}
               {(isOwnProfile || (profile.skills && profile.skills.length > 0)) && (
-                <Card className="card-3d-hover">
+                <Card className="card-3d-hover bg-white/5 dark:bg-black/20 backdrop-blur-xl border-white/10 dark:border-white/5">
                   <CardHeader>
                     <CardTitle>Skills</CardTitle>
                   </CardHeader>
@@ -625,7 +625,7 @@ export function ProfilePage({ profileId }: ProfilePageProps) {
 
               {/* Experience */}
               {(isOwnProfile || profile.experience) && (
-                <Card className="card-3d-hover">
+                <Card className="card-3d-hover bg-white/5 dark:bg-black/20 backdrop-blur-xl border-white/10 dark:border-white/5">
                   <CardHeader>
                     <CardTitle>Experience</CardTitle>
                   </CardHeader>
@@ -648,7 +648,7 @@ export function ProfilePage({ profileId }: ProfilePageProps) {
 
               {/* Resume */}
               {profile.hasResume && (
-                <Card className="card-3d-hover">
+                <Card className="card-3d-hover bg-white/5 dark:bg-black/20 backdrop-blur-xl border-white/10 dark:border-white/5">
                   <CardHeader>
                     <CardTitle>Resume</CardTitle>
                   </CardHeader>
@@ -671,7 +671,7 @@ export function ProfilePage({ profileId }: ProfilePageProps) {
 
           {/* Founder-specific: Startups with AlloySphere Verified badge */}
           {profile.role === 'founder' && profile.startups && profile.startups.length > 0 && (
-            <Card className="card-3d-hover">
+            <Card className="card-3d-hover bg-white/5 dark:bg-black/20 backdrop-blur-xl border-white/10 dark:border-white/5">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Building2 className="h-5 w-5 icon-float" style={{ color: 'var(--cobalt-blue)' }} />
@@ -725,7 +725,7 @@ export function ProfilePage({ profileId }: ProfilePageProps) {
 
           {/* Investor-specific sections */}
           {profile.role === 'investor' && (
-            <Card className="card-3d-hover">
+            <Card className="card-3d-hover bg-white/5 dark:bg-black/20 backdrop-blur-xl border-white/10 dark:border-white/5">
               <CardHeader>
                 <CardTitle>Investment Profile</CardTitle>
               </CardHeader>
