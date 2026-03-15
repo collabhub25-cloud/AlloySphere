@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
-import AnoAI from "@/components/ui/animated-shader-background";
+import { BeamBackground } from "@/components/ui/beam-background";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const inter = Inter({
@@ -47,7 +47,7 @@ export default function RootLayout({
         className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased bg-transparent text-foreground`}
       >
         <GoogleOAuthProvider clientId="473460743491-ph80eufbukqtl7gi7daov9b54d9fjec.apps.googleusercontent.com">
-          <AnoAI />
+          <BeamBackground />
           {children}
           <Toaster />
         </GoogleOAuthProvider>
