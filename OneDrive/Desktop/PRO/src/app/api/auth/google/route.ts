@@ -4,12 +4,17 @@ import { connectDB } from '@/lib/mongodb';
 import { User } from '@/lib/models';
 import { generateAccessToken, generateRefreshToken, setAuthCookies, sanitizeUser } from '@/lib/auth';
 
-const GOOGLE_CLIENT_ID = "473460743491-ph80eufbukqtl7gi7daov9b54d9fjec.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 const client = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 export async function POST(request: NextRequest) {
   try {
     const { credential, role } = await request.json();
+
+    if (!GOOGLE_CLIENT_ID) {
+      console.error('GOOGLE_CLIENT_ID environment variable is not set');
+      return NextResponse.json({ error: 'Google authentication is not configured. Please contact support.' }, { status: 500 });
+    }
 
     if (!credential) {
       return NextResponse.json({ error: 'Missing Google credential' }, { status: 400 });

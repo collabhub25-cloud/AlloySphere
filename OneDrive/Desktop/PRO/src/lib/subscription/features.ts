@@ -119,9 +119,9 @@ export const PLAN_FEATURES = FOUNDER_PLAN_FEATURES;
 
 export const PLAN_PRICES: Record<FounderPlanType, { monthly: number; yearly: number }> = {
   free_founder: { monthly: 0, yearly: 0 },
-  pro_founder: { monthly: 29, yearly: 290 },
-  scale_founder: { monthly: 99, yearly: 990 },
-  enterprise_founder: { monthly: 299, yearly: 2990 },
+  pro_founder: { monthly: 2499, yearly: 23988 },
+  scale_founder: { monthly: 8499, yearly: 81588 },
+  enterprise_founder: { monthly: 24999, yearly: 239988 },
 };
 
 // ============================================

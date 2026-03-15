@@ -27,8 +27,8 @@ interface Subscription {
 const founderPricingPlans = [
   {
     name: "PRO",
-    price: "29",
-    yearlyPrice: "23",
+    price: "2499",
+    yearlyPrice: "1999",
     period: "per month",
     features: [
       "5 active projects",
@@ -45,8 +45,8 @@ const founderPricingPlans = [
   },
   {
     name: "SCALE",
-    price: "99",
-    yearlyPrice: "79",
+    price: "8499",
+    yearlyPrice: "6799",
     period: "per month",
     features: [
       "20 active projects",
@@ -65,8 +65,8 @@ const founderPricingPlans = [
   },
   {
     name: "ENTERPRISE",
-    price: "299",
-    yearlyPrice: "239",
+    price: "24999",
+    yearlyPrice: "19999",
     period: "per month",
     features: [
       "Unlimited projects",

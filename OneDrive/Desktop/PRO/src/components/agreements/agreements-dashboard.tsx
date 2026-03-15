@@ -210,9 +210,96 @@ export function AgreementsDashboard() {
 
                 <div className="mt-6 border border-border/50 rounded-xl bg-card/50 shadow-sm min-h-[400px] p-4 relative overflow-hidden">
                     {filteredAgreements.length === 0 ? (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground">
-                            <FileSignature className="h-12 w-12 mb-4 opacity-20" />
-                            <p>No agreements found in this view.</p>
+                        <div className="space-y-6">
+                            {/* Sample Agreements Preview */}
+                            <div className="text-center space-y-1 pt-2">
+                                <h3 className="text-lg font-semibold text-foreground/80">Preview: How Agreements Look</h3>
+                                <p className="text-sm text-muted-foreground">These are sample templates to show the design. Create your first agreement to get started.</p>
+                            </div>
+                            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                {[
+                                    {
+                                        _id: 'sample-nda',
+                                        title: 'Non-Disclosure Agreement',
+                                        type: 'NDA',
+                                        status: 'active' as const,
+                                        content: 'This Non-Disclosure Agreement ("Agreement") is entered into by and between the undersigned parties. Both parties agree to maintain strict confidentiality of all proprietary information, trade secrets, and business strategies shared during the course of collaboration...',
+                                        parties: [
+                                            { userId: { _id: 'sample-1', name: 'Alex Sharma', avatar: undefined, role: 'founder' }, role: 'Disclosing Party', hasSigned: true, signedAt: new Date(Date.now() - 86400000).toISOString(), signatureHash: 'sha256:a1b2c3d4e5f6...' },
+                                            { userId: { _id: 'sample-2', name: 'Priya Patel', avatar: undefined, role: 'talent' }, role: 'Receiving Party', hasSigned: true, signedAt: new Date(Date.now() - 43200000).toISOString(), signatureHash: 'sha256:f6e5d4c3b2a1...' },
+                                        ],
+                                        createdBy: 'sample-1',
+                                        updatedAt: new Date().toISOString(),
+                                        createdAt: new Date(Date.now() - 172800000).toISOString(),
+                                    },
+                                    {
+                                        _id: 'sample-equity',
+                                        title: 'Equity Split Agreement',
+                                        type: 'EQUITY',
+                                        status: 'sent' as const,
+                                        content: 'This Equity Distribution Agreement outlines the ownership percentages, vesting schedule, and cliff period for each co-founder. The equity split shall be as follows: Founder A — 40%, Founder B — 35%, Advisor Pool — 10%, ESOP — 15%...',
+                                        parties: [
+                                            { userId: { _id: 'sample-3', name: 'Rohan Mehta', avatar: undefined, role: 'founder' }, role: 'Co-Founder', hasSigned: true, signedAt: new Date(Date.now() - 36000000).toISOString(), signatureHash: 'sha256:c3d4e5f6a1b2...' },
+                                            { userId: { _id: 'sample-4', name: 'Neha Gupta', avatar: undefined, role: 'founder' }, role: 'Co-Founder', hasSigned: false },
+                                        ],
+                                        createdBy: 'sample-3',
+                                        updatedAt: new Date(Date.now() - 3600000).toISOString(),
+                                        createdAt: new Date(Date.now() - 259200000).toISOString(),
+                                    },
+                                    {
+                                        _id: 'sample-freelancer',
+                                        title: 'Freelancer Service Contract',
+                                        type: 'CONTRACT',
+                                        status: 'draft' as const,
+                                        content: 'This Freelancer Service Agreement establishes the terms of engagement between the Client and the Service Provider. Scope of work includes: UI/UX design, frontend development, and deployment. Payment terms: milestone-based with 30% upfront...',
+                                        parties: [
+                                            { userId: { _id: 'sample-5', name: 'Vikram Singh', avatar: undefined, role: 'founder' }, role: 'Client', hasSigned: false },
+                                            { userId: { _id: 'sample-6', name: 'Aisha Khan', avatar: undefined, role: 'talent' }, role: 'Service Provider', hasSigned: false },
+                                        ],
+                                        createdBy: 'sample-5',
+                                        updatedAt: new Date(Date.now() - 7200000).toISOString(),
+                                        createdAt: new Date(Date.now() - 86400000).toISOString(),
+                                    },
+                                ].map((agreement) => {
+                                    const CurrentIcon = StatusIcon[agreement.status] || FileText;
+                                    return (
+                                        <Card key={agreement._id} className="group hover:border-primary/50 transition-all duration-300 hover:shadow-md cursor-pointer flex flex-col relative overflow-hidden" onClick={() => setSelectedAgreement(agreement as Agreement)}>
+                                            {/* Sample badge */}
+                                            <div className="absolute top-2 right-2 z-10">
+                                                <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 bg-amber-500/10 text-amber-600 border-amber-500/30">
+                                                    Sample
+                                                </Badge>
+                                            </div>
+                                            <CardHeader className="pb-3">
+                                                <div className="flex justify-between items-start">
+                                                    <Badge className={`${StatusColors[agreement.status]} text-white px-2 py-0.5 capitalize flex items-center gap-1.5`}>
+                                                        <CurrentIcon className="h-3 w-3" />
+                                                        {agreement.status}
+                                                    </Badge>
+                                                    <p className="text-xs text-muted-foreground flex items-center gap-1 mr-12">
+                                                        <Clock className="h-3 w-3" />
+                                                        {new Date(agreement.updatedAt).toLocaleDateString()}
+                                                    </p>
+                                                </div>
+                                                <CardTitle className="text-lg mt-3 truncate">{agreement.title}</CardTitle>
+                                                <CardDescription className="uppercase text-xs tracking-wider">{agreement.type}</CardDescription>
+                                            </CardHeader>
+                                            <CardContent className="mt-auto">
+                                                <div className="flex items-center -space-x-2 pt-2">
+                                                    {agreement.parties.map((p, i) => (
+                                                        <Avatar key={i} className={`h-8 w-8 border-2 border-background ${p.hasSigned ? 'ring-2 ring-green-500 ring-offset-1' : ''}`}>
+                                                            <AvatarImage src={p.userId.avatar} />
+                                                            <AvatarFallback className="text-caption bg-primary/10 text-primary">
+                                                                {getInitials(p.userId.name)}
+                                                            </AvatarFallback>
+                                                        </Avatar>
+                                                    ))}
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    );
+                                })}
+                            </div>
                         </div>
                     ) : (
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

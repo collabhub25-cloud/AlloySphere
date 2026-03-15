@@ -46,7 +46,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased bg-transparent text-foreground`}
       >
-        <GoogleOAuthProvider clientId="473460743491-ph80eufbukqtl7gi7daov9b54d9fjec.apps.googleusercontent.com">
+        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
           <BeamBackground />
           {children}
           <Toaster />
