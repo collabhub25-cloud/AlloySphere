@@ -5,6 +5,7 @@ import {
   Search, Filter, ChevronDown, X, Loader2, Users, Building2,
   TrendingUp, MapPin, Star, Briefcase, DollarSign, FileText, Send, Lock
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -93,6 +94,7 @@ const stages = ['idea', 'validation', 'mvp', 'growth', 'scaling'];
 const fundingStages = ['pre-seed', 'seed', 'series-a', 'series-b', 'series-c', 'ipo'];
 
 export function SearchPage() {
+  const router = useRouter();
   const { user } = useAuthStore();
   const { setActiveTab } = useUIStore();
   const [activeTab, setActiveTabState] = useState<SearchType>('startups');
@@ -460,7 +462,13 @@ export function SearchPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => viewProfile(result._id)}
+                              onClick={() => {
+                                if (activeTab === 'startups') {
+                                  router.push(`/startup/${result._id}`);
+                                } else {
+                                  viewProfile(result._id);
+                                }
+                              }}
                             >
                               View Profile
                             </Button>
