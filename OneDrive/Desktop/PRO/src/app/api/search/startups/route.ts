@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
     const sortOrder = searchParams.get('sortOrder') === 'asc' ? 1 : -1;
 
     // Build filter
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const filter: Record<string, any> = { isActive: true };
 
     // SECURITY FIX: Escape regex in queries

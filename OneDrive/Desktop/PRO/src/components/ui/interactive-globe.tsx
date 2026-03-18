@@ -128,7 +128,7 @@ export function InteractiveGlobe({
         dotsRef.current = dots;
     }, []);
 
-    const draw = useCallback(() => {
+    const draw = useCallback(function drawGlobe() {
         const canvas = canvasRef.current;
         if (!canvas) return;
         const ctx = canvas.getContext("2d");
@@ -264,7 +264,7 @@ export function InteractiveGlobe({
             }
         }
 
-        animRef.current = requestAnimationFrame(draw);
+        animRef.current = requestAnimationFrame(drawGlobe);
     }, [dotColor, arcColor, markerColor, autoRotateSpeed, connections, markers]);
 
     useEffect(() => {

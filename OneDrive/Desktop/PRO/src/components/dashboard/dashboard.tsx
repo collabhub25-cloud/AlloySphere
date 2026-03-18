@@ -95,6 +95,9 @@ export function Dashboard({ onLogout }: DashboardProps) {
   const [key, setKey] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [viewProfileId, setViewProfileId] = useState<string | undefined>(undefined);
+  const { theme, setTheme } = useTheme();
+  
+  const isDark = theme === 'dark';
 
   // Check for profile view from localStorage (safe client-side only)
   useEffect(() => {
@@ -206,9 +209,6 @@ export function Dashboard({ onLogout }: DashboardProps) {
 
   // Only founders have subscription plans
   const userPlan = user.role === 'founder' ? (user.plan || 'free_founder') : 'free';
-
-  const { theme, setTheme } = useTheme();
-  const isDark = theme === 'dark';
 
   return (
     <TooltipProvider>

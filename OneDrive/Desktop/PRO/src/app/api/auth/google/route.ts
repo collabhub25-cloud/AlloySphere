@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { OAuth2Client } from 'google-auth-library';
 import { connectDB } from '@/lib/mongodb';
-import { User } from '@/lib/models';
+import { User, Subscription } from '@/lib/models';
+import mongoose from 'mongoose';
 import { generateAccessToken, generateRefreshToken, setAuthCookies, sanitizeUser } from '@/lib/auth';
 import { checkRateLimit, getRateLimitKey, rateLimitResponse, RATE_LIMITS } from '@/lib/security';
 
@@ -118,9 +119,7 @@ export async function POST(request: NextRequest) {
     const refreshToken = generateRefreshToken(tokenPayload);
 
     // Explicitly fetch subscription to ensure frontend has accurate plan
-    const mongoose = require('mongoose');
-    const db = mongoose.connection.db;
-    const sub = await db.collection('subscriptions').findOne({ userId: user._id });
+    const sub = await Subscription.findOne({ userId: user._id });
     const userPlan = sub ? sub.plan : 'free';
 
     const sanitizedUser = sanitizeUser(user);

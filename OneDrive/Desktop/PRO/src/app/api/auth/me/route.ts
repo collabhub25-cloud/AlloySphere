@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import { connectDB } from '@/lib/mongodb';
-import { User } from '@/lib/models';
+import { User, Subscription } from '@/lib/models';
 import {
   extractTokenFromCookies,
   verifyAccessToken,
@@ -38,9 +39,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Explicitly fetch subscription to assure frontend has accurate plan
-    const mongoose = require('mongoose');
-    const db = mongoose.connection.db;
-    const sub = await db.collection('subscriptions').findOne({ userId: user._id });
+    const sub = await Subscription.findOne({ userId: user._id });
     const userPlan = sub ? sub.plan : 'free';
 
     const sanitizedUser = sanitizeUser(user);

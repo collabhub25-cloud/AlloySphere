@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import { connectDB } from '@/lib/mongodb';
+import { Subscription } from '@/lib/models';
 import { authenticateUser, sanitizeUser, setAuthCookies } from '@/lib/auth';
 import { LoginSchema, validateInput } from '@/lib/validation/schemas';
 import { checkRateLimit, getRateLimitKey, rateLimitResponse, RATE_LIMITS } from '@/lib/security';
@@ -40,9 +42,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Explicitly fetch subscription to ensure frontend has accurate plan
-    const mongoose = require('mongoose');
-    const db = mongoose.connection.db;
-    const sub = await db.collection('subscriptions').findOne({ userId: result.user._id });
+    const sub = await Subscription.findOne({ userId: result.user._id });
     const userPlan = sub ? sub.plan : 'free';
 
     const sanitizedUser = sanitizeUser(result.user);

@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build investor filter
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const investorFilter: Record<string, any> = {};
 
     if (minTicket || maxTicket) {

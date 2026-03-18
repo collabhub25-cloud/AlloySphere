@@ -1,0 +1,65 @@
+
+C:\Users\murar\CollabHub-Pro\OneDrive\Desktop\PRO\src\app\api\auth\google\route.ts
+  121:22  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+C:\Users\murar\CollabHub-Pro\OneDrive\Desktop\PRO\src\app\api\auth\login\route.ts
+  43:22  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+C:\Users\murar\CollabHub-Pro\OneDrive\Desktop\PRO\src\app\api\auth\me\route.ts
+  41:22  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+C:\Users\murar\CollabHub-Pro\OneDrive\Desktop\PRO\src\components\dashboard\dashboard.tsx
+  210:31  error  React Hook "useTheme" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+
+C:\Users\murar\CollabHub-Pro\OneDrive\Desktop\PRO\src\components\ui\interactive-globe.tsx
+  267:49  error  Error: Cannot access variable before it is declared
+
+`draw` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+C:\Users\murar\CollabHub-Pro\OneDrive\Desktop\PRO\src\components\ui\interactive-globe.tsx:267:49
+  265 |         }
+  266 |
+> 267 |         animRef.current = requestAnimationFrame(draw);
+      |                                                 ^^^^ `draw` accessed before it is declared
+  268 |     }, [dotColor, arcColor, markerColor, autoRotateSpeed, connections, markers]);
+  269 |
+  270 |     useEffect(() => {
+
+C:\Users\murar\CollabHub-Pro\OneDrive\Desktop\PRO\src\components\ui\interactive-globe.tsx:131:5
+  129 |     }, []);
+  130 |
+> 131 |     const draw = useCallback(() => {
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 132 |         const canvas = canvasRef.current;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 133 |         if (!canvas) return;
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 267 |         animRef.current = requestAnimationFrame(draw);
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 268 |     }, [dotColor, arcColor, markerColor, autoRotateSpeed, connections, markers]);
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `draw` is declared here
+  269 |
+  270 |     useEffect(() => {
+  271 |         animRef.current = requestAnimationFrame(draw);  react-hooks/immutability
+
+C:\Users\murar\CollabHub-Pro\OneDrive\Desktop\PRO\src\hooks\use-media-query.ts
+  8:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\murar\CollabHub-Pro\OneDrive\Desktop\PRO\src\hooks\use-media-query.ts:8:9
+   6 |     useEffect(() => {
+   7 |         const mediaQuery = window.matchMedia(query);
+>  8 |         setMatches(mediaQuery.matches);
+     |         ^^^^^^^^^^ Avoid calling setState() directly within an effect
+   9 |
+  10 |         const handler = (event: MediaQueryListEvent) => {
+  11 |             setMatches(event.matches);  react-hooks/set-state-in-effect
+
+✖ 6 problems (6 errors, 0 warnings)
+
