@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { DateTime } from 'luxon';
 import { useAuthStore, useUIStore } from '@/store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,8 @@ import {
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { MilestonePaymentModal } from '@/components/milestones/milestone-payment-modal';
+import { TalentStatsChart } from '@/components/dashboard/talent-stats-chart';
+import { FloatingTooltip } from '@/components/ui/floating-tooltip';
 
 interface Application {
   _id: string;
@@ -226,13 +229,13 @@ export function TalentDashboard({ activeTab }: TalentDashboardProps) {
     // Intelligence Widgets Data
     const totalEarnings = completedMilestones.reduce((sum, m) => sum + (m.amount || 0), 0);
     const nextDeadline = activeMilestones.length > 0
-      ? new Date(Math.min(...activeMilestones.map(m => new Date(m.dueDate).getTime()))).toLocaleDateString()
+      ? DateTime.fromMillis(Math.min(...activeMilestones.map(m => new Date(m.dueDate).getTime()))).toLocaleString(DateTime.DATE_MED)
       : 'No assignments';
 
     return (
-      <div className="space-y-6 page-enter relative">
+      <div className="space-y-6 page-enter relative" data-aos="fade-in">
         {/* Header with glassmorphism */}
-        <div className="flex items-center justify-between p-6 rounded-2xl" style={{ background: 'linear-gradient(135deg, rgba(0,71,171,0.05) 0%, rgba(46,139,87,0.04) 50%, rgba(255,255,255,0.8) 100%)', backdropFilter: 'blur(20px)', border: '1px solid rgba(0,71,171,0.25)', boxShadow: '0 8px 32px rgba(0,0,0,0.04)' }}>
+        <div data-aos="slide-down" className="flex items-center justify-between p-6 rounded-2xl" style={{ background: 'linear-gradient(135deg, rgba(0,71,171,0.05) 0%, rgba(46,139,87,0.04) 50%, rgba(255,255,255,0.8) 100%)', backdropFilter: 'blur(20px)', border: '1px solid rgba(0,71,171,0.25)', boxShadow: '0 8px 32px rgba(0,0,0,0.04)' }}>
           <div>
             <h1 className="text-xl font-semibold">Welcome back, {user?.name?.split(' ')[0]}!</h1>
             <p className="text-muted-foreground mt-1">Track your progress and find new opportunities</p>
@@ -249,18 +252,26 @@ export function TalentDashboard({ activeTab }: TalentDashboardProps) {
             { title: 'Active Projects', value: activeMilestones.length, sub: 'In progress', icon: Briefcase, iconColor: '#0047AB', bg: 'rgba(0,71,171,0.06)' },
             { title: 'Completed Tasks', value: completedMilestones.length, sub: 'Total completed', icon: CheckCircle2, iconColor: '#2E8B57', bg: 'rgba(46,139,87,0.06)' },
             { title: 'Pending Applications', value: pendingApplications.length, sub: 'Awaiting response', icon: Clock, iconColor: '#F97316', bg: 'rgba(249,115,22,0.06)' },
-            { title: 'Total Earnings', value: `$${totalEarnings.toLocaleString()}`, sub: 'From completed tasks', icon: DollarSign, iconColor: '#2E8B57', bg: 'rgba(46,139,87,0.06)' },
+            { title: 'Total Earnings', value: `$${totalEarnings.toLocaleString()}`, sub: 'From completed tasks', icon: DollarSign, iconColor: '#2E8B57', bg: 'rgba(46,139,87,0.06)', tooltip: 'Based on your completed milestones.' },
             { title: 'Next Deadline', value: nextDeadline, sub: 'Upcoming milestone', icon: Calendar, iconColor: '#F97316', bg: 'rgba(249,115,22,0.06)', truncate: true },
             { title: 'Trust Score', value: user?.trustScore || 50, sub: 'Your reputation', icon: Zap, iconColor: '#2E8B57', bg: 'rgba(46,139,87,0.06)', showProgress: true },
           ].map((stat, index) => (
-            <div key={stat.title} className="group rounded-2xl p-5 transition-all duration-500 hover:-translate-y-1 hover:shadow-lg" style={{ background: `linear-gradient(135deg, ${stat.bg} 0%, rgba(255,255,255,0.9) 100%)`, backdropFilter: 'blur(20px)', border: '1px solid rgba(0,0,0,0.2)', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', transformStyle: 'preserve-3d', animationDelay: `${index * 80}ms` }}>
+            <div data-aos="fade-up" data-aos-delay={index * 100} key={stat.title} className="group rounded-2xl p-5 transition-all duration-500 hover:-translate-y-1 hover:shadow-lg" style={{ background: `linear-gradient(135deg, ${stat.bg} 0%, rgba(255,255,255,0.9) 100%)`, backdropFilter: 'blur(20px)', border: '1px solid rgba(0,0,0,0.2)', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', transformStyle: 'preserve-3d' }}>
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium text-muted-foreground">{stat.title}</span>
                 <div className="h-9 w-9 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110" style={{ background: stat.bg }}>
                   <stat.icon className="h-4 w-4" style={{ color: stat.iconColor }} />
                 </div>
               </div>
-              <div className={`text-xl font-semibold ${stat.truncate ? 'truncate' : ''}`}>{stat.value}</div>
+              <div className={`text-xl font-semibold ${stat.truncate ? 'truncate' : ''}`}>
+                {stat.tooltip ? (
+                  <FloatingTooltip content={stat.tooltip} placement="top">
+                    <span>{stat.value}</span>
+                  </FloatingTooltip>
+                ) : (
+                  stat.value
+                )}
+              </div>
               <p className="text-xs text-muted-foreground mt-1">{stat.sub}</p>
               {stat.showProgress && (
                 <div className="mt-3 h-2 rounded-full bg-muted overflow-hidden">
@@ -269,6 +280,12 @@ export function TalentDashboard({ activeTab }: TalentDashboardProps) {
               )}
             </div>
           ))}
+        </div>
+
+        {/* Chart Section */}
+        <div data-aos="fade-up" className="rounded-2xl p-6 shadow-[0_0_15px_rgba(255,255,255,0.4)] dark:shadow-[0_0_15px_rgba(255,255,255,0.1)]" style={{ background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(20px)', border: '1px solid rgba(0,0,0,0.06)' }}>
+          <h3 className="text-lg font-semibold mb-6">Performance Overview</h3>
+          <TalentStatsChart />
         </div>
 
         {/* Verification Progress — Premium Stepper */}
@@ -678,7 +695,7 @@ export function TalentDashboard({ activeTab }: TalentDashboardProps) {
                         <p className="text-sm text-muted-foreground mt-1">{milestone.description}</p>
                         <div className="flex items-center gap-2 mt-2">
                           <Badge variant="outline">{milestone.startupId?.name}</Badge>
-                          <span className="text-sm text-muted-foreground">Due: {new Date(milestone.dueDate).toLocaleDateString()}</span>
+                          <span className="text-sm text-muted-foreground">Due: {DateTime.fromISO(milestone.dueDate).toLocaleString(DateTime.DATE_MED)}</span>
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-2">

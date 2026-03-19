@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/store';
 import { toast } from 'sonner';
+import { showPremiumAlert, Toast } from '@/lib/sweetalert';
+import { DateTime } from 'luxon';
 import { Pricing } from '@/components/ui/pricing';
 
 // Load Razorpay Script dynamically
@@ -122,7 +124,7 @@ export function PricingPage() {
 
     const res = await loadRazorpayScript();
     if (!res) {
-      toast.error('Razorpay SDK failed to load. Are you online?');
+      showPremiumAlert({ title: 'Connection Error', text: 'Razorpay SDK failed to load. Are you online?', icon: 'error' });
       setProcessing(null);
       return;
     }
@@ -136,7 +138,7 @@ export function PricingPage() {
       const orderData = await orderResp.json();
 
       if (!orderData.success) {
-        toast.error(orderData.error || 'Failed to initialize payment');
+        showPremiumAlert({ title: 'Error', text: orderData.error || 'Failed to initialize payment', icon: 'error' });
         setProcessing(null);
         return;
       }
@@ -166,14 +168,14 @@ export function PricingPage() {
             const verifyData = await verifyResp.json();
 
             if (verifyData.success) {
-              toast.success('Subscription upgraded successfully!');
+              Toast.fire({ icon: 'success', title: 'Subscription upgraded successfully!' });
               fetchSubscription();
               window.location.reload();
             } else {
-              toast.error(verifyData.error || 'Payment verification failed');
+              showPremiumAlert({ title: 'Payment Failed', text: verifyData.error || 'Payment verification failed', icon: 'error' });
             }
           } catch (err) {
-            toast.error('Error verifying payment');
+            showPremiumAlert({ title: 'Verification Error', text: 'Error verifying payment', icon: 'error' });
           }
         },
         theme: { color: "#10b981" }
@@ -181,7 +183,7 @@ export function PricingPage() {
 
       const rzp = new (window as any).Razorpay(options);
       rzp.on('payment.failed', function (response: any) {
-        toast.error(response.error?.description || 'Payment Failed');
+        showPremiumAlert({ title: 'Payment Failed', text: response.error?.description || 'Payment Failed', icon: 'error' });
       });
       rzp.open();
 
@@ -194,7 +196,11 @@ export function PricingPage() {
   };
 
   const handleManageSubscription = async () => {
-    toast.error('Account portal management is currently being migrated.');
+    showPremiumAlert({
+      title: 'Migration in Progress',
+      text: 'Account portal management is currently being migrated.',
+      icon: 'info'
+    });
   };
 
   // Track billing toggle state
@@ -213,7 +219,7 @@ export function PricingPage() {
   // Non-founders see a free account message
   if (user && user.role !== 'founder') {
     return (
-      <div className="space-y-8">
+      <div className="space-y-8" data-aos="fade-in">
         <div className="text-center space-y-4">
           <h1 className="text-3xl font-bold">Free Account</h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -225,7 +231,7 @@ export function PricingPage() {
           </p>
         </div>
 
-        <Card className="max-w-md mx-auto">
+        <Card className="max-w-md mx-auto" data-aos="zoom-in" data-aos-delay="100">
           <CardHeader className="text-center">
             <div className="h-16 w-16 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4">
               <Check className="h-8 w-8 text-green-500" />
@@ -290,7 +296,7 @@ export function PricingPage() {
 
   // Founder view - show animated pricing plans
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" data-aos="fade-up">
       {/* Current Subscription Status */}
       {subscription && subscription.plan !== 'free_founder' && (
         <Card className="bg-primary/5 border-primary/20">
@@ -304,7 +310,7 @@ export function PricingPage() {
                 <p className="text-sm text-muted-foreground">
                   Status: <span className="capitalize">{subscription.status}</span>
                   {subscription.currentPeriodEnd && (
-                    <> · Renews: {new Date(subscription.currentPeriodEnd).toLocaleDateString()}</>
+                    <> · Renews: {DateTime.fromISO(subscription.currentPeriodEnd).toLocaleString(DateTime.DATE_MED)}</>
                   )}
                 </p>
               </div>

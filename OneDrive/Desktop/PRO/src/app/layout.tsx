@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { BeamBackground } from "@/components/ui/beam-background";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { AOSProvider } from "@/components/providers/aos-provider";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -47,9 +48,11 @@ export default function RootLayout({
         className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased bg-transparent text-foreground`}
       >
         <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
-          <BeamBackground />
-          {children}
-          <Toaster />
+          <AOSProvider>
+            <BeamBackground />
+            {children}
+            <Toaster />
+          </AOSProvider>
         </GoogleOAuthProvider>
       </body>
     </html>
