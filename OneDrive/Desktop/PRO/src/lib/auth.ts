@@ -161,8 +161,8 @@ export async function authenticateUser(
   const user = await User.findOne({ email: email.toLowerCase() });
   if (!user) return null;
 
-  // If the user registered via Google, they won't have a password hash
-  if (user.authProvider === 'google' || !user.passwordHash) {
+  // If the user has no password hash, they can only login via Google
+  if (!user.passwordHash) {
     return null;
   }
 

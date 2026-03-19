@@ -101,6 +101,7 @@ async function main() {
           passwordHash,
           name: account.name,
           role: account.role,
+          authProvider: 'local',
           verificationLevel: account.role === 'talent' ? 5 : account.role === 'founder' ? 3 : 3, // Max levels
           trustScore: 100,
           kycStatus: 'verified',
