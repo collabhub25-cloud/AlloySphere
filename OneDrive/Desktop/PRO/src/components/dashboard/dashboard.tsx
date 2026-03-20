@@ -174,24 +174,45 @@ export function Dashboard({ onLogout }: DashboardProps) {
   const verificationBadge = getVerificationBadge(user.verificationLevel);
 
   const renderContent = () => {
+    // Common tabs across all roles
     if (activeTab === 'search') return <SearchPage />;
     if (activeTab === 'messages') return <MessagingPage />;
     if (activeTab === 'profile') return <ProfilePage profileId={viewProfileId} />;
     if (activeTab === 'alliances') return <AlliancePage />;
     if (activeTab === 'settings') return <SettingsPage />;
     if (activeTab === 'subscription') return <PricingPage />;
-    if (activeTab === 'trust-score') return <ProfilePage profileId={viewProfileId} />;
 
-    // Handle role-specific dashboards with new designs
+    // Role-specific content rendering
     switch (user.role) {
       case 'founder':
+        // Founder-specific tabs that show in their dashboard
+        if (activeTab === 'startups' || activeTab === 'applications' || 
+            activeTab === 'milestones' || activeTab === 'agreements' || 
+            activeTab === 'payments' || activeTab === 'investors') {
+          return <FounderDashboardNew key={activeTab} />;
+        }
         return <FounderDashboardNew />;
+        
       case 'talent':
+        // Talent-specific tabs
+        if (activeTab === 'applications' || activeTab === 'projects' || 
+            activeTab === 'milestones' || activeTab === 'agreements' || 
+            activeTab === 'earnings') {
+          return <TalentDashboardNew key={activeTab} />;
+        }
         return <TalentDashboardNew />;
+        
       case 'investor':
+        // Investor-specific tabs
+        if (activeTab === 'dealflow' || activeTab === 'portfolio' || 
+            activeTab === 'investments') {
+          return <InvestorDashboardNew key={activeTab} />;
+        }
         return <InvestorDashboardNew />;
+        
       case 'admin':
         return <AdminDashboard activeTab={activeTab} />;
+        
       default:
         return <AccessDenied reason="Invalid user role. Please contact support." />;
     }

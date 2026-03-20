@@ -58,21 +58,24 @@ export function FounderDashboardNew() {
     try {
       setLoading(true);
       
-      // Fetch multiple endpoints in parallel
+      // Fetch multiple endpoints in parallel - using correct API paths
       const [startupsRes, applicationsRes, milestonesRes, agreementsRes] = await Promise.all([
-        apiFetch('/api/startups/my'),
-        apiFetch('/api/applications/founder'),
+        apiFetch('/api/startups'),
+        apiFetch('/api/applications/received'),
         apiFetch('/api/milestones'),
         apiFetch('/api/agreements'),
       ]);
 
-      const startups = startupsRes.ok ? await startupsRes.json() : [];
+      const startupsData = startupsRes.ok ? await startupsRes.json() : { startups: [] };
       const applications = applicationsRes.ok ? await applicationsRes.json() : [];
       const milestones = milestonesRes.ok ? await milestonesRes.json() : [];
       const agreements = agreementsRes.ok ? await agreementsRes.json() : [];
 
-      const startup = startups[0] || null;
-      const pendingApps = applications.filter((a: any) => a.status === 'pending');
+      const startups = startupsData.startups || startupsData || [];
+      const startup = Array.isArray(startups) ? startups[0] : startups;
+      const appList = Array.isArray(applications) ? applications : applications.applications || [];
+      
+      const pendingApps = appList.filter((a: any) => a.status === 'pending');
       const activeMilestones = milestones.filter((m: any) => m.status === 'in_progress' || m.status === 'pending');
       const completedMilestones = milestones.filter((m: any) => m.status === 'completed');
       const pendingAgreements = agreements.filter((a: any) => a.status === 'pending');
@@ -83,13 +86,13 @@ export function FounderDashboardNew() {
 
       setData({
         startup,
-        applications,
+        applications: appList,
         milestones,
         agreements,
         funding: null,
         activities: [],
         stats: {
-          totalApplications: applications.length,
+          totalApplications: appList.length,
           pendingApplications: pendingApps.length,
           activeMilestones: activeMilestones.length,
           completedMilestones: completedMilestones.length,

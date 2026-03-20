@@ -55,15 +55,16 @@ export function TalentDashboardNew() {
       setLoading(true);
       
       const [applicationsRes, milestonesRes, agreementsRes] = await Promise.all([
-        apiFetch('/api/applications/talent'),
+        apiFetch('/api/applications'),
         apiFetch('/api/milestones'),
         apiFetch('/api/agreements'),
       ]);
 
-      const applications = applicationsRes.ok ? await applicationsRes.json() : [];
+      const applicationsData = applicationsRes.ok ? await applicationsRes.json() : { applications: [] };
       const milestones = milestonesRes.ok ? await milestonesRes.json() : [];
       const agreements = agreementsRes.ok ? await agreementsRes.json() : [];
 
+      const applications = Array.isArray(applicationsData) ? applicationsData : applicationsData.applications || [];
       const pendingApps = applications.filter((a: any) => a.status === 'pending');
       const acceptedApps = applications.filter((a: any) => a.status === 'accepted');
       const activeMilestones = milestones.filter((m: any) => m.status === 'in_progress');

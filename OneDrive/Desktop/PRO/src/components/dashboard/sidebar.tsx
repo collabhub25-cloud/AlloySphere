@@ -12,7 +12,7 @@ import {
   LayoutDashboard, Search, Building2, Users, Target, FileText,
   CreditCard, TrendingUp, MessageSquare, Shield, Settings,
   LogOut, ChevronLeft, Briefcase, Handshake, DollarSign,
-  AlertTriangle, BarChart3, Wallet, FolderKanban
+  AlertTriangle, BarChart3, Wallet
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -47,12 +47,9 @@ const getNavigation = (role: string) => {
       ],
       finance: [
         { id: 'payments', label: 'Payments', icon: CreditCard },
-        { id: 'investors', label: 'Investors', icon: TrendingUp },
       ],
       communication: [
         { id: 'messages', label: 'Messages', icon: MessageSquare, countKey: 'messages' },
-        { id: 'profile', label: 'My Profile', icon: Shield },
-        { id: 'settings', label: 'Settings', icon: Settings },
       ],
     },
     talent: {
@@ -62,7 +59,6 @@ const getNavigation = (role: string) => {
       ],
       workspace: [
         { id: 'applications', label: 'My Applications', icon: Briefcase, countKey: 'applications' },
-        { id: 'projects', label: 'Projects', icon: FolderKanban },
         { id: 'milestones', label: 'Milestones', icon: Target },
         { id: 'agreements', label: 'Agreements', icon: FileText, countKey: 'agreements' },
       ],
@@ -71,8 +67,6 @@ const getNavigation = (role: string) => {
       ],
       communication: [
         { id: 'messages', label: 'Messages', icon: MessageSquare, countKey: 'messages' },
-        { id: 'profile', label: 'My Profile', icon: Shield },
-        { id: 'settings', label: 'Settings', icon: Settings },
       ],
     },
     investor: {
@@ -90,8 +84,6 @@ const getNavigation = (role: string) => {
       ],
       communication: [
         { id: 'messages', label: 'Messages', icon: MessageSquare, countKey: 'messages' },
-        { id: 'profile', label: 'My Profile', icon: Shield },
-        { id: 'settings', label: 'Settings', icon: Settings },
       ],
     },
     admin: {
@@ -215,6 +207,20 @@ export function DashboardSidebar({ onLogout, onTabChange, activeTab, counts = {}
 
       {/* User Section */}
       <div className="border-t border-border/30 p-2">
+        {/* Settings */}
+        <button
+          onClick={() => onTabChange('settings')}
+          className={`flex items-center gap-3 w-full p-2 rounded-lg transition-all mb-1 ${
+            activeTab === 'settings' 
+              ? 'bg-primary/10 text-primary' 
+              : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+          }`}
+          data-testid="sidebar-settings"
+        >
+          <Settings className="h-4 w-4" />
+          {!collapsed && <span className="text-sm">Settings</span>}
+        </button>
+
         {/* User Profile */}
         <button
           onClick={() => onTabChange('profile')}

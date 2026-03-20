@@ -1,71 +1,54 @@
-# CollabHub/AlloySphere - Production-Ready Dashboard Implementation
+# CollabHub/AlloySphere - Dashboard Refinements
 
-## Problem Statement
-1. Production security implementation ✅
-2. Google-only auth ✅
-3. Fix talent apply issue ✅
-4. Remove Performance Overview ✅
-5. Profile photo upload ✅
-6. Modern dashboard UI redesign ✅
-7. Talent & Investor dashboards ✅
-8. Settings page ✅ (already existed)
+## Issues Fixed (Session 5)
 
-## Implementation Summary (Jan 2026)
+### 1. Sidebar Navigation Not Working
+- Fixed: `renderContent()` in dashboard.tsx now handles all tab IDs
+- Added proper tab routing for: startups, applications, milestones, agreements, payments, investors, dealflow, portfolio, earnings
 
-### Security (Session 1)
-- CSRF Protection with Double Submit Cookie
-- Account Lockout (progressive)
-- Security Audit Logging
-- JWT hardening (fail-fast in production)
-- Input sanitization (XSS/MongoDB injection)
+### 2. Removed Duplicate Sidebar Items
+- Removed: My Profile, Settings from nav sections
+- Moved: Settings button to user section at bottom
+- Profile accessible via clicking user avatar
 
-### Auth & UX (Session 2-3)
-- Google-only authentication
-- Profile photo upload API
-- Talent apply fix
+### 3. Fixed API Endpoints
+- Founder: `/api/startups` and `/api/applications/received`
+- Talent: `/api/applications` 
+- Investor: `/api/startups` for deal flow
 
-### Dashboard Redesign (Session 4)
-Files Created:
-- `/src/components/dashboard/sidebar.tsx` - Modern section-based sidebar
-- `/src/components/dashboard/founder-dashboard-new.tsx` - Complete founder dashboard
-- `/src/components/dashboard/talent-dashboard-new.tsx` - Complete talent dashboard
-- `/src/components/dashboard/investor-dashboard-new.tsx` - Complete investor dashboard
+### Sidebar Structure (Final)
+**Founder:**
+- Overview: Dashboard, Discover
+- Workspace: My Startup, Applications, Milestones, Agreements
+- Finance: Payments
+- Communication: Messages
+- Bottom: Settings, User Profile, Collapse, Logout
 
-Features:
-- Role-based sidebar navigation
-- Quick action cards
-- Stats cards with progress indicators
-- Milestone tracker with filters
-- Activity feed
-- Applications/Deal flow tables
-- Trust score display
-- Greeting based on time of day
+**Talent:**
+- Overview: Dashboard, Discover
+- Workspace: My Applications, Milestones, Agreements
+- Finance: Earnings
+- Communication: Messages
+- Bottom: Settings, User Profile, Collapse, Logout
 
-### API Endpoints Used
-- GET /api/startups/my - Founder startups
-- GET /api/applications/founder - Founder's received applications
-- GET /api/applications/talent - Talent's sent applications
-- GET /api/milestones - User milestones
-- GET /api/agreements - User agreements
-- GET /api/investments/portfolio - Investor portfolio
-- GET /api/investments/dealflow - Investor deal flow
-- GET /api/alliances - User alliances
-
-## Production Checklist
-- [x] Security modules implemented
-- [x] Google-only authentication
-- [x] Modern dashboard UI for all 3 roles
-- [x] Sidebar with role-based navigation
-- [x] Settings page available
-- [x] Profile page with photo upload
-- [ ] Set production JWT_SECRET
-- [ ] Configure Google OAuth for production
-- [ ] Deploy to production environment
+**Investor:**
+- Overview: Dashboard, Discover
+- Workspace: Deal Flow, Portfolio, Alliances
+- Finance: Investments
+- Communication: Messages
+- Bottom: Settings, User Profile, Collapse, Logout
 
 ## Files Modified
-- dashboard.tsx - Integrated new sidebar and dashboards
-- role-signup-page.tsx - Google-only, fixed SSR
-- login/page.tsx - Google-only
-- search-page.tsx - Fixed apply button
-- talent-dashboard.tsx - Removed performance overview
-- profile-page.tsx - Added avatar upload
+- `/src/components/dashboard/dashboard.tsx` - Fixed renderContent
+- `/src/components/dashboard/sidebar.tsx` - Simplified navigation
+- `/src/components/dashboard/founder-dashboard-new.tsx` - Fixed API paths
+- `/src/components/dashboard/talent-dashboard-new.tsx` - Fixed API paths
+- `/src/components/dashboard/investor-dashboard-new.tsx` - Fixed API paths
+
+## Production Status
+- [x] Security implemented
+- [x] Google-only auth
+- [x] Modern dashboard UI
+- [x] Sidebar navigation working
+- [x] API endpoints synced
+- [ ] Final testing on production

@@ -50,30 +50,28 @@ export function InvestorDashboardNew() {
     try {
       setLoading(true);
       
-      const [portfolioRes, dealflowRes, alliancesRes] = await Promise.all([
-        apiFetch('/api/investments/portfolio'),
-        apiFetch('/api/investments/dealflow'),
+      const [startupsRes, alliancesRes] = await Promise.all([
+        apiFetch('/api/startups'),
         apiFetch('/api/alliances'),
       ]);
 
-      const portfolio = portfolioRes.ok ? await portfolioRes.json() : [];
-      const dealflow = dealflowRes.ok ? await dealflowRes.json() : [];
+      const startupsData = startupsRes.ok ? await startupsRes.json() : { startups: [] };
       const alliances = alliancesRes.ok ? await alliancesRes.json() : [];
 
-      const totalInvested = portfolio.reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
-      const watchlist = dealflow.filter((d: any) => d.status === 'watching');
+      const startups = startupsData.startups || startupsData || [];
+      const dealflow = Array.isArray(startups) ? startups.slice(0, 10) : [];
 
       setData({
-        portfolio: Array.isArray(portfolio) ? portfolio : [],
-        dealflow: Array.isArray(dealflow) ? dealflow : [],
-        alliances: Array.isArray(alliances) ? alliances : [],
+        portfolio: [],
+        dealflow,
+        alliances: Array.isArray(alliances) ? alliances : alliances.alliances || [],
         stats: {
-          totalInvested,
-          portfolioCount: Array.isArray(portfolio) ? portfolio.length : 0,
-          dealflowCount: Array.isArray(dealflow) ? dealflow.length : 0,
-          watchlistCount: watchlist.length,
-          alliancesCount: Array.isArray(alliances) ? alliances.length : 0,
-          avgTicketSize: portfolio.length > 0 ? totalInvested / portfolio.length : 0,
+          totalInvested: 0,
+          portfolioCount: 0,
+          dealflowCount: dealflow.length,
+          watchlistCount: 0,
+          alliancesCount: Array.isArray(alliances) ? alliances.length : (alliances.alliances?.length || 0),
+          avgTicketSize: 0,
         },
       });
     } catch (error) {
