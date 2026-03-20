@@ -41,15 +41,14 @@ const getNavigation = (role: string) => {
       ],
       workspace: [
         { id: 'startups', label: 'My Startup', icon: Building2 },
-        { id: 'applications', label: 'Applications', icon: Users, countKey: 'applications' },
         { id: 'milestones', label: 'Milestones', icon: Target },
-        { id: 'agreements', label: 'Agreements', icon: FileText, countKey: 'agreements' },
       ],
       finance: [
         { id: 'payments', label: 'Payments', icon: CreditCard },
       ],
       communication: [
         { id: 'messages', label: 'Messages', icon: MessageSquare, countKey: 'messages' },
+        { id: 'alliances', label: 'Alliances', icon: Handshake },
       ],
     },
     talent: {
@@ -67,6 +66,7 @@ const getNavigation = (role: string) => {
       ],
       communication: [
         { id: 'messages', label: 'Messages', icon: MessageSquare, countKey: 'messages' },
+        { id: 'alliances', label: 'Alliances', icon: Handshake },
       ],
     },
     investor: {
@@ -77,13 +77,13 @@ const getNavigation = (role: string) => {
       workspace: [
         { id: 'dealflow', label: 'Deal Flow', icon: DollarSign },
         { id: 'portfolio', label: 'Portfolio', icon: Building2 },
-        { id: 'alliances', label: 'Alliances', icon: Handshake },
       ],
       finance: [
         { id: 'investments', label: 'Investments', icon: TrendingUp },
       ],
       communication: [
         { id: 'messages', label: 'Messages', icon: MessageSquare, countKey: 'messages' },
+        { id: 'alliances', label: 'Alliances', icon: Handshake },
       ],
     },
     admin: {
