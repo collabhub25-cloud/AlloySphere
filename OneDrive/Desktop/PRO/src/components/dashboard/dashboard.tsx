@@ -18,11 +18,11 @@ import {
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import Image from "next/image";
-import KycDashboard from '@/components/kyc/kyc-dashboard';
-import { FounderDashboard } from './founder-dashboard';
+import { FounderDashboardNew } from './founder-dashboard-new';
 import { TalentDashboard } from './talent-dashboard';
 import { InvestorDashboard } from './investor-dashboard';
 import { AdminDashboard } from './admin-dashboard';
+import { DashboardSidebar } from './sidebar';
 import { Logo } from '@/components/ui/logo';
 import { TrustScoreIcon } from '@/components/ui/trust-score-icon';
 import AgreementsDashboardWithBoundary from '@/components/agreements/agreements-dashboard';
@@ -180,12 +180,15 @@ export function Dashboard({ onLogout }: DashboardProps) {
     if (activeTab === 'alliances') return <AlliancePage />;
     if (activeTab === 'settings') return <SettingsPage />;
     if (activeTab === 'subscription') return <PricingPage />;
+    if (activeTab === 'trust-score') return <ProfilePage profileId={viewProfileId} />;
 
     // Handle role-specific dashboards
     // SECURITY FIX: Return AccessDenied for unknown roles instead of defaulting to Founder
     switch (user.role) {
       case 'founder':
-        return <FounderDashboard activeTab={activeTab} />;
+        // Use new founder dashboard for main dashboard view
+        if (activeTab === 'dashboard') return <FounderDashboardNew />;
+        return <FounderDashboardNew />;
       case 'talent':
         return <TalentDashboard activeTab={activeTab} />;
       case 'investor':
@@ -215,196 +218,55 @@ export function Dashboard({ onLogout }: DashboardProps) {
       <div className={`flex min-h-screen w-full relative`}>
         <div className="flex w-full bg-transparent text-foreground min-h-screen relative z-10">
 
-          {/* Sidebar — 3D Glass Design */}
-          <nav
-            className={`sticky top-0 h-screen shrink-0 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] ${sidebarOpen ? 'w-64' : 'w-16'
-              } flex flex-col relative overflow-hidden bg-white/5 dark:bg-black/20 backdrop-blur-2xl border-r border-white/10 dark:border-white/5`}
-          >
-            {/* Shiny animated border on right edge */}
-            <div className="sidebar-shiny-border" />
-
-            {/* Title Section */}
-            <div className="mb-6 border-b border-border/40 pb-4 pl-1">
-              <div className="flex cursor-pointer items-center justify-between rounded-xl p-2 transition-all duration-200 hover:bg-white/10 dark:hover:bg-white/5 group">
-                <div className="flex items-center gap-3">
-                  {/* Logo — Interconnected Spheres */}
-                  <div
-                    className="grid size-10 shrink-0 place-content-center rounded-xl bg-gradient-to-br from-indigo-600 to-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-transform duration-300 group-hover:scale-[1.05]"
-                  >
-                    <Logo size={24} className="text-white drop-shadow-md" />
-                  </div>
-                  {sidebarOpen && (
-                    <div className={`transition-all duration-300 whitespace-nowrap ${sidebarOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2'}`}>
-                      <div className="flex items-center gap-2">
-                        <div>
-                          <span className="block text-sm font-bold text-sidebar-foreground tracking-tight">
-                            AlloySphere
-                          </span>
-                          <span className="block text-xs text-muted-foreground capitalize">
-                            {user.role} Portal
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                {sidebarOpen && (
-                  <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-300 group-hover:rotate-180" />
-                )}
-              </div>
-            </div>
-
-            {/* Navigation Options — Clean flat design */}
-            <div className="space-y-0.5 mb-8 flex-1 overflow-y-auto custom-scrollbar pr-1 pl-1">
-              {navItems.map((item) => {
-                const isSelected = activeTab === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveTab(item.id)}
-                    title={!sidebarOpen ? item.label : undefined}
-                    className={`relative flex h-10 w-full items-center rounded-lg transition-all duration-200 ${isSelected
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground hover:bg-white/10 dark:hover:bg-white/5"
-                      }`}
-                  >
-                    <div className="grid h-full w-12 place-content-center shrink-0">
-                      <item.icon className="h-[18px] w-[18px]" />
-                    </div>
-                    {sidebarOpen && (
-                      <span className={`text-small font-medium transition-all duration-200 whitespace-nowrap ${sidebarOpen ? 'opacity-100' : 'opacity-0'}`}>
-                        {item.label}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Bottom Actions */}
-            {sidebarOpen && (
-              <div className="border-t border-border/40 pt-4 pb-12 space-y-0.5 pl-1">
-                {user.role === 'founder' && (userPlan === 'free' || userPlan === 'free_founder') && (
-                  <div className="mb-2 p-3 rounded-lg border border-white/10 dark:border-white/5 bg-white/5 dark:bg-black/20 backdrop-blur-md">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Sparkles className="h-4 w-4 text-primary" />
-                      <span className="text-small font-medium">Upgrade plan</span>
-                    </div>
-                    <Button size="sm" variant="default" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-xs" onClick={handleUpgradeClick}>
-                      View plans
-                    </Button>
-                  </div>
-                )}
-
-                <div className="px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Account
-                </div>
-
-                <button
-                  onClick={handleProfileClick}
-                  className={`relative flex h-10 w-full items-center rounded-lg transition-all duration-200 ${activeTab === 'profile'
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-gray-50"
-                    }`}
-                >
-                  <div className="grid h-full w-12 place-content-center shrink-0">
-                    <Avatar className="h-5 w-5">
-                      <AvatarImage src={user.avatar} />
-                      <AvatarFallback className="bg-primary/10 text-primary text-caption">
-                        {getInitials(user.name)}
-                      </AvatarFallback>
-                    </Avatar>
-                  </div>
-                  <div className="flex-1 min-w-0 text-left">
-                    <span className="text-small font-medium block truncate">{user.name}</span>
-                  </div>
-                </button>
-
-                <button
-                  onClick={onLogout}
-                  className="relative flex h-10 w-full items-center rounded-lg transition-all duration-200 text-muted-foreground hover:bg-red-50 hover:text-red-600"
-                >
-                  <div className="grid h-full w-12 place-content-center shrink-0">
-                    <LogOut className="h-4 w-4" />
-                  </div>
-                  <span className="text-small font-medium">Sign Out</span>
-                </button>
-              </div>
-            )}
-
-            {!sidebarOpen && (
-              <div className="pb-12 space-y-0.5">
-                <button onClick={handleProfileClick} title="Profile" className="relative flex h-10 w-full items-center justify-center rounded-lg transition-all duration-200 text-muted-foreground hover:text-foreground hover:bg-gray-50">
-                  <Avatar className="h-5 w-5">
-                    <AvatarImage src={user.avatar} />
-                    <AvatarFallback className="bg-primary/10 text-primary text-caption">
-                      {getInitials(user.name)}
-                    </AvatarFallback>
-                  </Avatar>
-                </button>
-                <button onClick={onLogout} title="Sign Out" className="relative flex h-10 w-full items-center justify-center rounded-lg transition-all duration-200 text-muted-foreground hover:bg-red-50 hover:text-red-600">
-                  <LogOut className="h-4 w-4" />
-                </button>
-              </div>
-            )}
-
-            {/* Toggle Close */}
-            <button
-              onClick={toggleSidebar}
-              className="absolute bottom-0 left-0 right-0 border-t border-border/40 transition-all duration-200 hover:bg-gray-50 z-10 bg-white"
-            >
-              <div className="flex items-center p-3">
-                <div className="grid size-10 place-content-center shrink-0">
-                  <ChevronsRight
-                    className={`h-4 w-4 transition-transform duration-300 text-muted-foreground ${sidebarOpen ? "rotate-180" : ""
-                      }`}
-                  />
-                </div>
-                {sidebarOpen && (
-                  <span className="text-small font-medium text-muted-foreground">
-                    Collapse Sidebar
-                  </span>
-                )}
-              </div>
-            </button>
-          </nav>
+          {/* New Modern Sidebar */}
+          <DashboardSidebar 
+            onLogout={onLogout}
+            onTabChange={setActiveTab}
+            activeTab={activeTab}
+            counts={{
+              applications: 0, // These would be fetched from API
+              agreements: 0,
+              messages: 0,
+            }}
+          />
 
           {/* Main Content Area */}
           <div className="flex-1 flex flex-col h-screen overflow-hidden">
-            <header className="flex items-center justify-between px-6 py-4 bg-background/80 backdrop-blur-md border-b border-border z-10 sticky top-0">
+            <header className="flex items-center justify-between px-6 py-3 bg-background/80 backdrop-blur-md border-b border-border/50 z-10 sticky top-0">
               <div>
-                <h1 className="text-2xl font-bold text-foreground hidden md:block">
-                  {navItems.find(item => item.id === activeTab)?.label || 'Dashboard'}
+                <h1 className="text-lg font-semibold text-foreground capitalize">
+                  {user.role} Dashboard
                 </h1>
+                <p className="text-xs text-muted-foreground">
+                  AlloySphere · {new Date().toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                </p>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
+                {/* Search Button */}
                 <button
-                  onClick={handleProfileClick}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100/50 backdrop-blur-sm rounded-full hover:bg-gray-200/50 transition-colors border border-gray-200/50"
+                  onClick={() => setActiveTab('search')}
+                  className="flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground bg-muted/50 hover:bg-muted rounded-lg transition-colors"
                 >
-                  <TrustScoreIcon size={16} />
-                  <span className="text-sm font-semibold text-foreground">{user.trustScore}</span>
+                  <Search className="h-4 w-4" />
+                  <span className="hidden md:inline">Discover Talent</span>
                 </button>
 
                 {/* Notifications */}
-                <div className="relative">
-                  <NotificationDropdown />
-                </div>
-
-                {/* Theme toggle removed — light mode only */}
+                <NotificationDropdown />
 
                 {/* Avatar Top Right */}
-                <button onClick={handleProfileClick} className="h-10 w-10 rounded-lg overflow-hidden border border-border shadow-sm ml-2 relative">
+                <button onClick={handleProfileClick} className="h-9 w-9 rounded-full overflow-hidden border-2 border-primary/20 hover:border-primary/40 transition-colors">
                   {user.avatar ? (
                     <Image
                       src={user.avatar}
                       alt={user.name || "User"}
-                      fill
-                      className="object-cover"
+                      width={36}
+                      height={36}
+                      className="object-cover h-full w-full"
                     />
                   ) : (
-                    <Avatar className="h-full w-full rounded-none">
-                      <AvatarFallback className="bg-primary/10 text-primary rounded-none h-full w-full">
+                    <Avatar className="h-full w-full">
+                      <AvatarFallback className="bg-primary/10 text-primary text-sm">
                         {getInitials(user.name)}
                       </AvatarFallback>
                     </Avatar>
