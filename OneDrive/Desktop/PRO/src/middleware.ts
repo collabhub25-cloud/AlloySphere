@@ -1,18 +1,41 @@
 /**
  * Production Security Middleware
- * Global auth enforcement, security headers, CORS, rate limiting, and role-based page guards
+ * Global auth enforcement, security headers, CORS, rate limiting, CSRF protection, and role-based page guards
+ * 
+ * Security Features:
+ * - JWT-based authentication via httpOnly cookies
+ * - CSRF protection (Double Submit Cookie pattern)
+ * - Rate limiting with IP-based tracking
+ * - Security headers (CSP, HSTS, X-Frame-Options, etc.)
+ * - Request ID tracking for debugging
+ * - Role-based access control (RBAC)
  */
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 
 // ============================================
 // CONFIGURATION
 // ============================================
 
-const JWT_SECRET = process.env.JWT_SECRET || 'AlloySphere-dev-secret-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET;
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+
+// CRITICAL: Fail fast if JWT_SECRET is not set in production
+if (IS_PRODUCTION && !JWT_SECRET) {
+  throw new Error('FATAL: JWT_SECRET environment variable must be set in production!');
+}
+
+// Use a default only in development
+const EFFECTIVE_JWT_SECRET = JWT_SECRET || 'AlloySphere-dev-secret-change-in-production';
+
+// CSRF Configuration
+const CSRF_COOKIE_NAME = '_csrf_token';
+const CSRF_HEADER_NAME = 'x-csrf-token';
+const CSRF_TOKEN_LENGTH = 32;
+const CSRF_TOKEN_MAX_AGE = 24 * 60 * 60; // 24 hours
 
 /** Routes that do NOT require authentication */
 const PUBLIC_ROUTES = new Set([
@@ -27,6 +50,7 @@ const PUBLIC_ROUTES = new Set([
   '/api/auth/google',
   '/api/auth/google/callback',
   '/api/health',
+  '/api/csrf-token',
 ]);
 
 /** Route prefixes that are public */
@@ -38,6 +62,21 @@ const PUBLIC_PREFIXES = [
 const ADMIN_ROUTES = [
   '/api/admin/',
 ];
+
+/** Routes exempt from CSRF protection */
+const CSRF_EXEMPT_ROUTES = new Set([
+  '/api/auth/login',
+  '/api/auth/register',
+  '/api/auth/google',
+  '/api/auth/google/callback',
+  '/api/auth/refresh',
+  '/api/auth/logout',
+  '/api/health',
+  '/api/csrf-token',
+]);
+
+/** Methods that require CSRF protection */
+const CSRF_PROTECTED_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
 /** Public page routes (no auth needed) */
 const PUBLIC_PAGES = new Set([
@@ -71,10 +110,79 @@ const SECURITY_HEADERS: Record<string, string> = {
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
   'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://checkout.razorpay.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://lh3.googleusercontent.com https://avatars.githubusercontent.com; connect-src 'self' https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com https://api.openai.com https://generativelanguage.googleapis.com https://livelog.razorpay.com; frame-src 'self' https://accounts.google.com https://api.razorpay.com;",
+  'X-Request-Id': '', // Will be set dynamically
 };
 
 if (IS_PRODUCTION) {
   SECURITY_HEADERS['Strict-Transport-Security'] = 'max-age=63072000; includeSubDomains; preload';
+}
+
+// ============================================
+// CSRF HELPERS
+// ============================================
+
+function generateCsrfToken(): string {
+  return crypto.randomBytes(CSRF_TOKEN_LENGTH).toString('hex');
+}
+
+function setCsrfCookie(response: NextResponse, token: string): void {
+  response.cookies.set(CSRF_COOKIE_NAME, token, {
+    httpOnly: false, // Must be readable by JS to send in header
+    secure: IS_PRODUCTION,
+    sameSite: 'strict',
+    path: '/',
+    maxAge: CSRF_TOKEN_MAX_AGE,
+  });
+}
+
+function validateCsrfToken(request: NextRequest): { valid: boolean; error?: string } {
+  const cookieToken = request.cookies.get(CSRF_COOKIE_NAME)?.value;
+  const headerToken = request.headers.get(CSRF_HEADER_NAME);
+
+  if (!cookieToken) {
+    return { valid: false, error: 'CSRF cookie missing' };
+  }
+
+  if (!headerToken) {
+    return { valid: false, error: 'CSRF header missing' };
+  }
+
+  try {
+    const cookieBuffer = Buffer.from(cookieToken, 'hex');
+    const headerBuffer = Buffer.from(headerToken, 'hex');
+
+    if (cookieBuffer.length !== headerBuffer.length) {
+      return { valid: false, error: 'CSRF token length mismatch' };
+    }
+
+    if (!crypto.timingSafeEqual(cookieBuffer, headerBuffer)) {
+      return { valid: false, error: 'CSRF token mismatch' };
+    }
+
+    return { valid: true };
+  } catch {
+    return { valid: false, error: 'Invalid CSRF token format' };
+  }
+}
+
+function requiresCsrfProtection(method: string, pathname: string): boolean {
+  if (!CSRF_PROTECTED_METHODS.has(method)) {
+    return false;
+  }
+
+  if (CSRF_EXEMPT_ROUTES.has(pathname)) {
+    return false;
+  }
+
+  if (pathname.startsWith('/api/webhooks/')) {
+    return false;
+  }
+
+  return true;
+}
+
+function generateRequestId(): string {
+  return `req_${Date.now().toString(36)}_${crypto.randomBytes(4).toString('hex')}`;
 }
 
 // ============================================
@@ -161,11 +269,24 @@ function getDashboardRole(pathname: string): string | null {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const method = request.method;
+
+  // Generate request ID for tracing
+  const requestId = generateRequestId();
 
   // --- Security headers on all responses ---
   const response = NextResponse.next();
   for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
-    response.headers.set(key, value);
+    if (key !== 'X-Request-Id') {
+      response.headers.set(key, value);
+    }
+  }
+  response.headers.set('X-Request-Id', requestId);
+
+  // --- Ensure CSRF token cookie exists for browser clients ---
+  if (!request.cookies.get(CSRF_COOKIE_NAME)?.value) {
+    const csrfToken = generateCsrfToken();
+    setCsrfCookie(response, csrfToken);
   }
 
   // --- Static / public pages pass through ---
@@ -182,7 +303,7 @@ export async function middleware(request: NextRequest) {
     }
 
     try {
-      const decoded = jwt.verify(accessToken, JWT_SECRET) as { userId: string; email: string; role: string };
+      const decoded = jwt.verify(accessToken, EFFECTIVE_JWT_SECRET) as { userId: string; email: string; role: string };
       const requiredRole = getDashboardRole(pathname);
 
       if (requiredRole && decoded.role !== requiredRole) {
@@ -200,12 +321,30 @@ export async function middleware(request: NextRequest) {
   const ip = getClientIp(request);
   if (!checkRateLimit(ip)) {
     return NextResponse.json(
-      { error: 'Too many requests. Please slow down.' },
+      { error: 'Too many requests. Please slow down.', requestId },
       {
         status: 429,
-        headers: { 'Retry-After': '60', ...SECURITY_HEADERS },
+        headers: { 'Retry-After': '60', 'X-Request-Id': requestId, ...SECURITY_HEADERS },
       }
     );
+  }
+
+  // --- CSRF Protection for state-changing requests ---
+  if (requiresCsrfProtection(method, pathname)) {
+    const csrfValidation = validateCsrfToken(request);
+    if (!csrfValidation.valid) {
+      return NextResponse.json(
+        { 
+          error: 'CSRF validation failed', 
+          details: IS_PRODUCTION ? undefined : csrfValidation.error,
+          requestId 
+        },
+        { 
+          status: 403, 
+          headers: { 'X-Request-Id': requestId, ...SECURITY_HEADERS } 
+        }
+      );
+    }
   }
 
   // --- Public routes skip auth ---
@@ -214,7 +353,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // --- GET /api/startups is public (browse without login) ---
-  if (pathname === '/api/startups' && request.method === 'GET') {
+  if (pathname === '/api/startups' && method === 'GET') {
     return response;
   }
 
@@ -225,27 +364,27 @@ export async function middleware(request: NextRequest) {
 
   if (!accessToken) {
     return NextResponse.json(
-      { error: 'Authentication required' },
-      { status: 401, headers: SECURITY_HEADERS }
+      { error: 'Authentication required', requestId },
+      { status: 401, headers: { 'X-Request-Id': requestId, ...SECURITY_HEADERS } }
     );
   }
 
   // Verify access token
   let decoded: { userId: string; email: string; role: string };
   try {
-    decoded = jwt.verify(accessToken, JWT_SECRET) as typeof decoded;
+    decoded = jwt.verify(accessToken, EFFECTIVE_JWT_SECRET) as typeof decoded;
   } catch {
     return NextResponse.json(
-      { error: 'Invalid or expired token' },
-      { status: 401, headers: SECURITY_HEADERS }
+      { error: 'Invalid or expired token', requestId },
+      { status: 401, headers: { 'X-Request-Id': requestId, ...SECURITY_HEADERS } }
     );
   }
 
   // --- RBAC: Admin route protection ---
   if (isAdminRoute(pathname) && decoded.role !== 'admin') {
     return NextResponse.json(
-      { error: 'Insufficient permissions' },
-      { status: 403, headers: SECURITY_HEADERS }
+      { error: 'Insufficient permissions', requestId },
+      { status: 403, headers: { 'X-Request-Id': requestId, ...SECURITY_HEADERS } }
     );
   }
 
@@ -254,6 +393,7 @@ export async function middleware(request: NextRequest) {
   requestHeaders.set('x-user-id', decoded.userId);
   requestHeaders.set('x-user-email', decoded.email);
   requestHeaders.set('x-user-role', decoded.role);
+  requestHeaders.set('x-request-id', requestId);
 
   return NextResponse.next({
     request: {

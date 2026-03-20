@@ -6,16 +6,29 @@ import { User, IUser } from './models';
 // ============================================
 // SECRETS — from environment, never hardcoded
 // ============================================
-const JWT_SECRET = process.env.JWT_SECRET || 'AlloySphere-dev-secret-change-in-production';
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || JWT_SECRET + '-refresh';
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 const ACCESS_TOKEN_EXPIRES = '15m';
 const REFRESH_TOKEN_EXPIRES = '7d';
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
-if (IS_PRODUCTION && !process.env.JWT_SECRET) {
-  console.error('FATAL: JWT_SECRET not set in production environment!');
+// CRITICAL: Fail fast if secrets are not set in production
+if (IS_PRODUCTION) {
+  if (!JWT_SECRET) {
+    throw new Error('FATAL: JWT_SECRET must be set in production environment!');
+  }
+  if (JWT_SECRET.length < 32) {
+    throw new Error('FATAL: JWT_SECRET must be at least 32 characters for security!');
+  }
+  if (JWT_SECRET.includes('dev-secret') || JWT_SECRET.includes('placeholder')) {
+    throw new Error('FATAL: JWT_SECRET contains insecure development value!');
+  }
 }
+
+// Use defaults only in development
+const EFFECTIVE_JWT_SECRET = JWT_SECRET || 'AlloySphere-dev-secret-change-in-production';
+const EFFECTIVE_REFRESH_SECRET = JWT_REFRESH_SECRET || EFFECTIVE_JWT_SECRET + '-refresh';
 
 // ============================================
 // TOKEN PAYLOAD
@@ -43,11 +56,11 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 // TOKEN GENERATION
 // ============================================
 export function generateAccessToken(payload: Omit<TokenPayload, 'iat' | 'exp'>): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRES });
+  return jwt.sign(payload, EFFECTIVE_JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRES });
 }
 
 export function generateRefreshToken(payload: Omit<TokenPayload, 'iat' | 'exp'>): string {
-  return jwt.sign(payload, JWT_REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRES });
+  return jwt.sign(payload, EFFECTIVE_REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRES });
 }
 
 // ============================================
@@ -55,7 +68,7 @@ export function generateRefreshToken(payload: Omit<TokenPayload, 'iat' | 'exp'>)
 // ============================================
 export function verifyAccessToken(token: string): TokenPayload | null {
   try {
-    return jwt.verify(token, JWT_SECRET) as TokenPayload;
+    return jwt.verify(token, EFFECTIVE_JWT_SECRET) as TokenPayload;
   } catch {
     return null;
   }
@@ -63,7 +76,7 @@ export function verifyAccessToken(token: string): TokenPayload | null {
 
 export function verifyRefreshToken(token: string): TokenPayload | null {
   try {
-    return jwt.verify(token, JWT_REFRESH_SECRET) as TokenPayload;
+    return jwt.verify(token, EFFECTIVE_REFRESH_SECRET) as TokenPayload;
   } catch {
     return null;
   }

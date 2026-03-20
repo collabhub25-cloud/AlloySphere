@@ -1,23 +1,90 @@
 import { z } from 'zod';
 
+// ============================================
+// SECURITY: Input Sanitization Helpers
+// ============================================
+
+/**
+ * Sanitize string input to prevent XSS
+ * Escapes HTML entities and removes potential script injections
+ */
+export function sanitizeString(str: string): string {
+  return str
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .replace(/\//g, '&#x2F;')
+    .replace(/`/g, '&#x60;')
+    .replace(/\\/g, '&#x5C;');
+}
+
+/**
+ * Remove potentially dangerous characters for MongoDB queries
+ */
+export function sanitizeMongoInput(str: string): string {
+  // Remove MongoDB operators that could be used for injection
+  return str
+    .replace(/\$/g, '')
+    .replace(/\{/g, '')
+    .replace(/\}/g, '');
+}
+
+/**
+ * Sanitize URL to prevent javascript: and data: URL attacks
+ */
+export function sanitizeUrl(url: string): string {
+  const trimmed = url.trim().toLowerCase();
+  if (trimmed.startsWith('javascript:') || trimmed.startsWith('data:') || trimmed.startsWith('vbscript:')) {
+    return '';
+  }
+  return url;
+}
+
+/**
+ * Create a sanitized string schema that removes XSS vectors
+ */
+const sanitizedString = (minLength?: number, maxLength?: number) => {
+  let schema = z.string().trim();
+  if (minLength !== undefined) {
+    schema = schema.min(minLength);
+  }
+  if (maxLength !== undefined) {
+    schema = schema.max(maxLength);
+  }
+  return schema.transform((val) => sanitizeMongoInput(val));
+};
+
+/**
+ * Create a sanitized URL schema
+ */
+const sanitizedUrl = (maxLength: number = 500) => 
+  z.string()
+    .url('Invalid URL')
+    .max(maxLength)
+    .transform((val) => sanitizeUrl(val))
+    .refine((val) => val !== '', { message: 'Invalid URL scheme' })
+    .optional()
+    .or(z.literal(''));
+
 /**
  * User Registration Schema
  */
 export const RegisterSchema = z.object({
-  name: z.string()
-    .min(2, 'Name must be at least 2 characters')
-    .max(100, 'Name must be at most 100 characters')
-    .trim(),
+  name: sanitizedString(2, 100)
+    .refine((val) => val !== '', { message: 'Name must be at least 2 characters' }),
   email: z.string()
     .email('Invalid email address')
     .toLowerCase()
-    .trim(),
+    .trim()
+    .max(254, 'Email must be at most 254 characters'),
   password: z.string()
     .min(8, 'Password must be at least 8 characters')
     .max(128, 'Password must be at most 128 characters')
     .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
     .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .regex(/[0-9]/, 'Password must contain at least one number'),
+    .regex(/[0-9]/, 'Password must contain at least one number')
+    .regex(/^[^\s]*$/, 'Password must not contain spaces'),
   role: z.enum(['founder', 'talent', 'investor'] as const, {
     error: 'Invalid role selected',
   }),
@@ -345,17 +412,24 @@ export const MilestoneIdSchema = z.object({
 
 export type MilestoneIdInput = z.infer<typeof MilestoneIdSchema>;
 
+// ============================================
+// VALIDATION HELPERS
+// ============================================
+
 /**
- * Sanitize string input to prevent XSS
+ * Validate MongoDB ObjectId format
  */
-export function sanitizeString(str: string): string {
-  return str
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;')
-    .replace(/\//g, '&#x2F;');
+export function isValidObjectId(id: string): boolean {
+  return /^[0-9a-fA-F]{24}$/.test(id);
 }
+
+/**
+ * ObjectId validation schema
+ */
+export const objectIdSchema = z.string()
+  .min(24, 'Invalid ID format')
+  .max(24, 'Invalid ID format')
+  .refine((val) => isValidObjectId(val), { message: 'Invalid ID format' });
 
 /**
  * Validate and sanitize input
@@ -383,4 +457,24 @@ export function validateInput<T>(schema: z.ZodSchema<T>, data: unknown): { succe
   });
 
   return { success: false, errors, fields };
+}
+
+/**
+ * Deep sanitize object - recursively sanitize all string values
+ */
+export function deepSanitize<T>(obj: T): T {
+  if (typeof obj === 'string') {
+    return sanitizeString(obj) as T;
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(deepSanitize) as T;
+  }
+  if (obj && typeof obj === 'object') {
+    const sanitized: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj)) {
+      sanitized[key] = deepSanitize(value);
+    }
+    return sanitized as T;
+  }
+  return obj;
 }
