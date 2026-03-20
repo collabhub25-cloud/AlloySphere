@@ -1,13 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2, ArrowRight } from 'lucide-react';
 import { Logo } from '@/components/ui/logo';
-import { useAuthStore } from '@/store';
-import { toast } from 'sonner';
-import AnoAI from '@/components/ui/animated-shader-background';
+import dynamic from 'next/dynamic';
+
+// Dynamically import shader background to prevent SSR issues
+const AnoAI = dynamic(() => import('@/components/ui/animated-shader-background'), {
+    ssr: false,
+    loading: () => null,
+});
 
 interface RoleSignupPageProps {
     role: 'founder' | 'investor' | 'talent';
@@ -23,8 +26,6 @@ const roleMeta: Record<string, { emoji: string; color: string }> = {
 };
 
 export function RoleSignupPage({ role, title, subtitle }: RoleSignupPageProps) {
-    const router = useRouter();
-    const { login } = useAuthStore();
     const [isLoading, setIsLoading] = useState(false);
 
     const meta = roleMeta[role] || roleMeta.founder;
@@ -54,7 +55,7 @@ export function RoleSignupPage({ role, title, subtitle }: RoleSignupPageProps) {
                 </div>
             </header>
 
-            <main className="flex-1 flex items-center justify-center px-6 py-12 relative">
+            <main className="flex-1 flex items-center justify-center px-6 py-12 relative signup-bg">
                 <AnoAI />
 
                 <div className="w-full max-w-sm relative z-10">

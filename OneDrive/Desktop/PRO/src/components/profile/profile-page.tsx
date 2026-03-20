@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft, Mail, MapPin, ExternalLink, Briefcase,
   Building2, TrendingUp, Star, Shield, FileText, ShieldCheck, CreditCard, DollarSign,
   MessageSquare, Loader2, Download, Github, Linkedin, Globe, Users,
-  Edit, Save, X, Plus, BadgeCheck, Sparkles
+  Edit, Save, X, Plus, BadgeCheck, Sparkles, Camera, Upload, Trash2
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -92,6 +92,85 @@ export function ProfilePage({ profileId }: ProfilePageProps) {
     skills: '',
     experience: '',
   });
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      toast.error('Invalid file type. Please upload JPEG, PNG, GIF, or WebP.');
+      return;
+    }
+
+    // Validate file size (2MB max)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image too large. Maximum size is 2MB.');
+      return;
+    }
+
+    setUploadingAvatar(true);
+
+    try {
+      // Convert to base64
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const base64 = event.target?.result as string;
+        
+        const response = await apiFetch('/api/users/avatar', {
+          method: 'POST',
+          body: JSON.stringify({ image: base64 }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          setProfile(prev => prev ? { ...prev, avatar: data.avatar } : null);
+          if (user) {
+            setUser({ ...user, avatar: data.avatar });
+          }
+          toast.success('Profile photo updated!');
+        } else {
+          toast.error(data.error || 'Failed to upload image');
+        }
+        setUploadingAvatar(false);
+      };
+      reader.onerror = () => {
+        toast.error('Failed to read image file');
+        setUploadingAvatar(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      toast.error('Failed to upload image');
+      setUploadingAvatar(false);
+    }
+  };
+
+  const handleRemoveAvatar = async () => {
+    setUploadingAvatar(true);
+    try {
+      const response = await apiFetch('/api/users/avatar', {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setProfile(prev => prev ? { ...prev, avatar: undefined } : null);
+        if (user) {
+          setUser({ ...user, avatar: undefined });
+        }
+        toast.success('Profile photo removed');
+      } else {
+        const data = await response.json();
+        toast.error(data.error || 'Failed to remove image');
+      }
+    } catch (error) {
+      toast.error('Failed to remove image');
+    }
+    setUploadingAvatar(false);
+  };
 
   const fetchProfile = useCallback(async () => {
 
@@ -270,7 +349,7 @@ export function ProfilePage({ profileId }: ProfilePageProps) {
 
         <CardContent className="p-6 relative z-10">
           <div className="flex flex-col md:flex-row items-start gap-6">
-            {/* Avatar with 3D effect */}
+            {/* Avatar with 3D effect and upload option */}
             <div className="relative group">
               <div
                 className="absolute -inset-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"
@@ -285,6 +364,43 @@ export function ProfilePage({ profileId }: ProfilePageProps) {
                   {getInitials(profile.name)}
                 </AvatarFallback>
               </Avatar>
+              
+              {/* Upload overlay for own profile */}
+              {isOwnProfile && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                    onChange={handleAvatarUpload}
+                    className="hidden"
+                    data-testid="avatar-upload-input"
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingAvatar}
+                    className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                    data-testid="avatar-upload-button"
+                  >
+                    {uploadingAvatar ? (
+                      <Loader2 className="h-6 w-6 text-white animate-spin" />
+                    ) : (
+                      <Camera className="h-6 w-6 text-white" />
+                    )}
+                  </button>
+                  {profile.avatar && (
+                    <button
+                      onClick={handleRemoveAvatar}
+                      disabled={uploadingAvatar}
+                      className="absolute -bottom-1 -right-1 h-7 w-7 rounded-full bg-destructive text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/90"
+                      title="Remove photo"
+                      data-testid="avatar-remove-button"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="flex-1 space-y-3">
