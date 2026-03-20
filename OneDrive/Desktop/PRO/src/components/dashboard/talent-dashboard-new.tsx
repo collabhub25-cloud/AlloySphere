@@ -65,26 +65,29 @@ export function TalentDashboardNew() {
       const agreements = agreementsRes.ok ? await agreementsRes.json() : [];
 
       const applications = Array.isArray(applicationsData) ? applicationsData : applicationsData.applications || [];
+      const milestoneList = Array.isArray(milestones) ? milestones : milestones.milestones || [];
+      const agreementList = Array.isArray(agreements) ? agreements : agreements.agreements || [];
+
       const pendingApps = applications.filter((a: any) => a.status === 'pending');
       const acceptedApps = applications.filter((a: any) => a.status === 'accepted');
-      const activeMilestones = milestones.filter((m: any) => m.status === 'in_progress');
-      const completedMilestones = milestones.filter((m: any) => m.status === 'completed');
-      const pendingAgreements = agreements.filter((a: any) => a.status === 'pending');
+      const activeMilestones = milestoneList.filter((m: any) => m.status === 'in_progress');
+      const completedMilestones = milestoneList.filter((m: any) => m.status === 'completed');
+      const pendingAgreements = agreementList.filter((a: any) => a.status === 'pending');
 
       const totalEarnings = completedMilestones.reduce((sum: number, m: any) => sum + (m.amount || 0), 0);
       const pendingEarnings = activeMilestones.reduce((sum: number, m: any) => sum + (m.amount || 0), 0);
 
       setData({
         applications,
-        milestones,
-        agreements,
+        milestones: milestoneList,
+        agreements: agreementList,
         stats: {
           totalApplications: applications.length,
           pendingApplications: pendingApps.length,
           acceptedApplications: acceptedApps.length,
           activeMilestones: activeMilestones.length,
           completedMilestones: completedMilestones.length,
-          totalMilestones: milestones.length,
+          totalMilestones: milestoneList.length,
           totalEarnings,
           pendingEarnings,
           pendingAgreements: pendingAgreements.length,

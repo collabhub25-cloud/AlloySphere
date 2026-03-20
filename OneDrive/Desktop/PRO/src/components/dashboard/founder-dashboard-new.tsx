@@ -74,11 +74,13 @@ export function FounderDashboardNew() {
       const startups = startupsData.startups || startupsData || [];
       const startup = Array.isArray(startups) ? startups[0] : startups;
       const appList = Array.isArray(applications) ? applications : applications.applications || [];
+      const milestoneList = Array.isArray(milestones) ? milestones : milestones.milestones || [];
+      const agreementList = Array.isArray(agreements) ? agreements : agreements.agreements || [];
       
       const pendingApps = appList.filter((a: any) => a.status === 'pending');
-      const activeMilestones = milestones.filter((m: any) => m.status === 'in_progress' || m.status === 'pending');
-      const completedMilestones = milestones.filter((m: any) => m.status === 'completed');
-      const pendingAgreements = agreements.filter((a: any) => a.status === 'pending');
+      const activeMilestones = milestoneList.filter((m: any) => m.status === 'in_progress' || m.status === 'pending');
+      const completedMilestones = milestoneList.filter((m: any) => m.status === 'completed');
+      const pendingAgreements = agreementList.filter((a: any) => a.status === 'pending');
 
       // Calculate team slots
       const rolesNeeded = startup?.rolesNeeded?.length || 0;
@@ -87,8 +89,8 @@ export function FounderDashboardNew() {
       setData({
         startup,
         applications: appList,
-        milestones,
-        agreements,
+        milestones: milestoneList,
+        agreements: agreementList,
         funding: null,
         activities: [],
         stats: {
@@ -96,7 +98,7 @@ export function FounderDashboardNew() {
           pendingApplications: pendingApps.length,
           activeMilestones: activeMilestones.length,
           completedMilestones: completedMilestones.length,
-          totalMilestones: milestones.length,
+          totalMilestones: milestoneList.length,
           pendingAgreements: pendingAgreements.length,
           teamSlotsFilled: teamMembers,
           totalTeamSlots: rolesNeeded + teamMembers,
