@@ -831,7 +831,7 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
               <p className="text-muted-foreground text-center mb-4">
                 Create your first startup to start building your team
               </p>
-              <InteractiveHoverButton text="Create Startup" onClick={() => setShowCreateStartup(true)} className="w-40" />
+              <InteractiveHoverButton text="Create Startup" onClick={() => setShowCreateStartup(true)} disabled={(user?.verificationLevel || 0) < 1} className="w-40" />
             </CardContent>
           </Card>
         ) : (

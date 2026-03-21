@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
-import { User, Verification, Startup, Investor } from '@/lib/models';
+import { User, Verification, Startup, Investor, Alliance, Application, Agreement, Milestone, Notification, Message } from '@/lib/models';
 import { verifyAccessToken, extractTokenFromCookies } from '@/lib/auth';
 
 // GET /api/users/me - Get current user's full profile
@@ -135,6 +135,59 @@ export async function PATCH(request: NextRequest) {
     console.error('Error updating profile:', error);
     return NextResponse.json(
       { error: 'Failed to update profile' },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE /api/users/me - Delete current user's account and all associated data
+export async function DELETE(request: NextRequest) {
+  try {
+    const token = extractTokenFromCookies(request);
+
+    if (!token) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const decoded = verifyAccessToken(token);
+    if (!decoded) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+
+    await connectDB();
+
+    const userId = decoded.userId;
+
+    // Delete all associated data in parallel
+    await Promise.all([
+      Startup.deleteMany({ founderId: userId }),
+      Application.deleteMany({ talentId: userId }),
+      Alliance.deleteMany({ $or: [{ requesterId: userId }, { receiverId: userId }] }),
+      Agreement.deleteMany({ $or: [{ 'parties.userId': userId }] }),
+      Milestone.deleteMany({ assignedTo: userId }),
+      Notification.deleteMany({ userId }),
+      Verification.deleteMany({ userId }),
+      Message.deleteMany({ $or: [{ senderId: userId }, { receiverId: userId }] }),
+      Investor.deleteMany({ userId }),
+    ]);
+
+    // Delete the user
+    await User.findByIdAndDelete(userId);
+
+    // Clear auth cookies
+    const response = NextResponse.json({
+      success: true,
+      message: 'Account deleted successfully',
+    });
+
+    response.cookies.set('accessToken', '', { maxAge: 0, path: '/' });
+    response.cookies.set('refreshToken', '', { maxAge: 0, path: '/' });
+
+    return response;
+  } catch (error) {
+    console.error('Error deleting account:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete account' },
       { status: 500 }
     );
   }

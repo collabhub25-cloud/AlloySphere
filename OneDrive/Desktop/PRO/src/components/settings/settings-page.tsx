@@ -32,9 +32,14 @@ import { AlloySphereVerifiedBadge } from '@/components/ui/alloysphere-verified-b
 export function SettingsPage() {
     const { user, updateUser, logout } = useAuthStore();
     const [loading, setLoading] = useState(false);
-    const [passwordLoading, setPasswordLoading] = useState(false);
     const [startups, setStartups] = useState<any[]>([]);
     const [startupsLoading, setStartupsLoading] = useState(false);
+
+    // Helper to read CSRF token from cookie
+    const getCsrfToken = () => {
+        const match = document.cookie.match(/(?:^|; )_csrf_token=([^;]*)/);
+        return match ? decodeURIComponent(match[1]) : '';
+    };
 
     // Profile settings state
     const [profile, setProfile] = useState({
@@ -43,12 +48,7 @@ export function SettingsPage() {
         skills: user?.skills?.join(', ') || ''
     });
 
-    // Password state
-    const [passwords, setPasswords] = useState({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-    });
+
 
     // Notification preferences
     const [notifications, setNotifications] = useState({
@@ -86,7 +86,10 @@ export function SettingsPage() {
             const res = await fetch('/api/users/me', {
                 method: 'PATCH',
                 credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-csrf-token': getCsrfToken(),
+                },
                 body: JSON.stringify({
                     name: profile.name,
                     bio: profile.bio,
@@ -110,41 +113,15 @@ export function SettingsPage() {
         }
     };
 
-    const handlePasswordChange = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (passwords.newPassword !== passwords.confirmPassword) {
-            toast.error('New passwords do not match');
-            return;
-        }
 
-        setPasswordLoading(true);
-        try {
-            const res = await fetch('/api/auth/change-password', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    currentPassword: passwords.currentPassword,
-                    newPassword: passwords.newPassword
-                })
-            });
-
-            if (!res.ok) {
-                const data = await res.json();
-                throw new Error(data.error || 'Failed to change password');
-            }
-
-            toast.success('Password changed successfully');
-            setPasswords({ currentPassword: '', newPassword: '', confirmPassword: '' });
-        } catch (err: any) {
-            toast.error(err.message);
-        } finally {
-            setPasswordLoading(false);
-        }
-    };
 
     const handleLogoutAll = async () => {
         try {
-            const res = await fetch('/api/auth/logout-all', { method: 'POST' });
+            const res = await fetch('/api/auth/logout-all', {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'x-csrf-token': getCsrfToken() },
+            });
             if (!res.ok) throw new Error('Failed to logout');
             toast.success('Logged out of all sessions');
             logout();
@@ -155,7 +132,11 @@ export function SettingsPage() {
 
     const handleDeleteAccount = async () => {
         try {
-            const res = await fetch('/api/auth/me', { method: 'DELETE' });
+            const res = await fetch('/api/users/me', {
+                method: 'DELETE',
+                credentials: 'include',
+                headers: { 'x-csrf-token': getCsrfToken() },
+            });
             if (!res.ok) throw new Error('Failed to delete account');
             logout();
         } catch (err) {
@@ -247,47 +228,8 @@ export function SettingsPage() {
                         <div className="space-y-2">
                             <Label>Email Address</Label>
                             <Input value={user?.email || ''} disabled className="bg-muted" />
-                            <p className="text-xs text-muted-foreground">Email address cannot be changed directly.</p>
+                            <p className="text-xs text-muted-foreground">Signed in with Google. Email address cannot be changed.</p>
                         </div>
-
-                        <Separator />
-
-                        <form onSubmit={handlePasswordChange} className="space-y-4">
-                            <h3 className="text-sm font-medium">Change Password</h3>
-                            <div className="space-y-2">
-                                <Input
-                                    type="password"
-                                    placeholder="Current Password"
-                                    value={passwords.currentPassword}
-                                    onChange={(e) => setPasswords({ ...passwords, currentPassword: e.target.value })}
-                                    required
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Input
-                                    type="password"
-                                    placeholder="New Password"
-                                    value={passwords.newPassword}
-                                    onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
-                                    required
-                                    pattern=".{8,}"
-                                    title="Password must be at least 8 characters"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Input
-                                    type="password"
-                                    placeholder="Confirm New Password"
-                                    value={passwords.confirmPassword}
-                                    onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
-                                    required
-                                />
-                            </div>
-                            <Button type="submit" variant="secondary" disabled={passwordLoading}>
-                                {passwordLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Update Password
-                            </Button>
-                        </form>
                     </CardContent>
                 </Card>
 

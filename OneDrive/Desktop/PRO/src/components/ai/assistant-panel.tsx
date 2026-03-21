@@ -58,9 +58,16 @@ export function AssistantPanel() {
         setIsLoading(true);
 
         try {
+            // Read CSRF token from cookie
+            const csrfMatch = document.cookie.match(/(?:^|; )_csrf_token=([^;]*)/);
+            const csrfToken = csrfMatch ? decodeURIComponent(csrfMatch[1]) : '';
+
             const response = await fetch('/api/ai/assistant', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-csrf-token': csrfToken,
+                },
                 credentials: 'include',
                 body: JSON.stringify({ message: msg }),
             });
