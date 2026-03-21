@@ -354,24 +354,56 @@ export async function middleware(request: NextRequest) {
   }
 
   // ============================================
-  // AUTH ENFORCEMENT — cookie-based JWT
+  // AUTH ENFORCEMENT — cookie-based JWT with auto-refresh
   // ============================================
-  const accessToken = request.cookies.get('accessToken')?.value;
+  let accessToken = request.cookies.get('accessToken')?.value;
+  const refreshToken = request.cookies.get('refreshToken')?.value;
 
-  if (!accessToken) {
-    return NextResponse.json(
-      { error: 'Authentication required', requestId },
-      { status: 401, headers: { 'X-Request-Id': requestId, ...SECURITY_HEADERS } }
-    );
+  // Try to verify the access token
+  let decoded: { userId: string; email: string; role: string } | null = null;
+  let needsTokenRefresh = false;
+
+  if (accessToken) {
+    try {
+      decoded = jwt.verify(accessToken, EFFECTIVE_JWT_SECRET) as unknown as typeof decoded;
+    } catch {
+      // Access token invalid/expired — try refresh
+      decoded = null;
+      needsTokenRefresh = true;
+    }
+  } else {
+    needsTokenRefresh = true;
   }
 
-  // Verify access token
-  let decoded: { userId: string; email: string; role: string };
-  try {
-    decoded = jwt.verify(accessToken, EFFECTIVE_JWT_SECRET) as typeof decoded;
-  } catch {
+  // If access token is missing or expired, try to refresh using refresh token
+  if (!decoded && refreshToken) {
+    try {
+      const EFFECTIVE_REFRESH_SECRET = (process.env.JWT_REFRESH_SECRET) || EFFECTIVE_JWT_SECRET + '-refresh';
+      const refreshDecoded = jwt.verify(refreshToken, EFFECTIVE_REFRESH_SECRET) as { userId: string; email: string; role: string };
+
+      // Generate a new access token
+      decoded = {
+        userId: refreshDecoded.userId,
+        email: refreshDecoded.email,
+        role: refreshDecoded.role,
+      };
+
+      accessToken = jwt.sign(
+        { userId: decoded.userId, email: decoded.email, role: decoded.role },
+        EFFECTIVE_JWT_SECRET,
+        { expiresIn: '15m' }
+      );
+
+      needsTokenRefresh = true;
+    } catch {
+      // Refresh token also invalid — user must re-login
+      decoded = null;
+    }
+  }
+
+  if (!decoded) {
     return NextResponse.json(
-      { error: 'Invalid or expired token', requestId },
+      { error: 'Authentication required', requestId },
       { status: 401, headers: { 'X-Request-Id': requestId, ...SECURITY_HEADERS } }
     );
   }
@@ -391,11 +423,24 @@ export async function middleware(request: NextRequest) {
   requestHeaders.set('x-user-role', decoded.role);
   requestHeaders.set('x-request-id', requestId);
 
-  return NextResponse.next({
+  const nextResponse = NextResponse.next({
     request: {
       headers: requestHeaders,
     },
   });
+
+  // If we refreshed the token, set the new access token cookie on the response
+  if (needsTokenRefresh && accessToken) {
+    nextResponse.cookies.set('accessToken', accessToken, {
+      httpOnly: true,
+      secure: IS_PRODUCTION,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 15 * 60, // 15 minutes
+    });
+  }
+
+  return nextResponse;
 }
 
 // ============================================
