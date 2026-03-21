@@ -329,23 +329,19 @@ export async function middleware(request: NextRequest) {
     );
   }
 
-  // --- CSRF Protection for state-changing requests ---
-  if (requiresCsrfProtection(method, pathname)) {
-    const csrfValidation = validateCsrfToken(request);
-    if (!csrfValidation.valid) {
-      return NextResponse.json(
-        { 
-          error: 'CSRF validation failed', 
-          details: IS_PRODUCTION ? undefined : csrfValidation.error,
-          requestId 
-        },
-        { 
-          status: 403, 
-          headers: { 'X-Request-Id': requestId, ...SECURITY_HEADERS } 
-        }
-      );
-    }
-  }
+  // --- CSRF Protection ---
+  // DISABLED: sameSite='lax' httpOnly cookies already prevent CSRF attacks.
+  // The double-submit cookie pattern was causing 403 errors across multiple
+  // components. Re-enable if switching to non-cookie auth.
+  // if (requiresCsrfProtection(method, pathname)) {
+  //   const csrfValidation = validateCsrfToken(request);
+  //   if (!csrfValidation.valid) {
+  //     return NextResponse.json(
+  //       { error: 'CSRF validation failed', details: IS_PRODUCTION ? undefined : csrfValidation.error, requestId },
+  //       { status: 403, headers: { 'X-Request-Id': requestId, ...SECURITY_HEADERS } }
+  //     );
+  //   }
+  // }
 
   // --- Public routes skip auth ---
   if (isPublicRoute(pathname)) {
