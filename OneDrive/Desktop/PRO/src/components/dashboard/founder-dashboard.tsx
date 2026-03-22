@@ -344,7 +344,12 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
           fundingStage: 'pre-seed',
         });
       } else {
-        toast.error(data.error || 'Failed to create startup');
+        if (data.details && Array.isArray(data.details) && data.details.length > 0) {
+          const firstError = typeof data.details[0] === 'string' ? data.details[0] : data.details[0].message;
+          toast.error(firstError || data.error || 'Validation failed');
+        } else {
+          toast.error(data.error || 'Failed to create startup');
+        }
       }
     } catch {
       toast.error('Something went wrong');
@@ -526,7 +531,7 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
         </div>
 
         {/* Premium Stat Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
           {[
             { label: 'Startups', value: startups.length, icon: '🏢', gradient: 'rgba(0,0,0,0.03)' },
             { label: 'Team Members', value: totalTeamMembers, icon: '👥', gradient: 'rgba(0,0,0,0.03)' },
@@ -774,14 +779,17 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="industry">Industry *</Label>
-                <Input
-                  id="industry"
-                  value={newStartup.industry}
-                  onChange={(e) => setNewStartup({ ...newStartup, industry: e.target.value })}
-                  placeholder="e.g., SaaS, FinTech, AI/ML"
-                  required
-                />
+                <Label>Industry *</Label>
+                <Select value={newStartup.industry} onValueChange={(v) => setNewStartup({ ...newStartup, industry: v })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select industry" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {['Technology', 'Healthcare', 'Finance', 'E-commerce', 'Education', 'Real Estate', 'Food & Beverage', 'Travel', 'Entertainment', 'Manufacturing', 'Other'].map((ind) => (
+                      <SelectItem key={ind} value={ind}>{ind}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setShowCreateStartup(false)}>
@@ -958,14 +966,17 @@ export function FounderDashboard({ activeTab }: FounderDashboardProps) {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="industry2">Industry *</Label>
-                <Input
-                  id="industry2"
-                  value={newStartup.industry}
-                  onChange={(e) => setNewStartup({ ...newStartup, industry: e.target.value })}
-                  placeholder="e.g., SaaS, FinTech, AI/ML"
-                  required
-                />
+                <Label>Industry *</Label>
+                <Select value={newStartup.industry} onValueChange={(v) => setNewStartup({ ...newStartup, industry: v })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select industry" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {['Technology', 'Healthcare', 'Finance', 'E-commerce', 'Education', 'Real Estate', 'Food & Beverage', 'Travel', 'Entertainment', 'Manufacturing', 'Other'].map((ind) => (
+                      <SelectItem key={ind} value={ind}>{ind}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setShowCreateStartup(false)}>

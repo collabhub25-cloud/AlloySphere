@@ -179,11 +179,21 @@ export function DashboardSidebar({ onLogout, onTabChange, activeTab, counts = {}
   const navigation = getNavigation(user.role);
 
   return (
-    <nav
-      className={`sticky top-0 h-screen shrink-0 transition-all duration-300 ease-out ${
-        collapsed ? 'w-16' : 'w-56'
-      } flex flex-col bg-card/50 dark:bg-card/30 backdrop-blur-xl border-r border-border/50`}
-    >
+    <>
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={toggleSidebar}
+        />
+      )}
+      <nav
+        className={`fixed md:sticky top-0 h-screen shrink-0 transition-all duration-300 ease-out z-50 ${
+          collapsed ? 'w-16' : 'w-56'
+        } ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+        } flex flex-col bg-card/95 dark:bg-card/90 md:bg-card/50 md:dark:bg-card/30 backdrop-blur-xl border-r border-border/50`}
+      >
       {/* Logo Section */}
       <div className="p-3 border-b border-border/30">
         <div className="flex items-center gap-3">
@@ -278,5 +288,6 @@ export function DashboardSidebar({ onLogout, onTabChange, activeTab, counts = {}
         </div>
       </div>
     </nav>
+    </>
   );
 }

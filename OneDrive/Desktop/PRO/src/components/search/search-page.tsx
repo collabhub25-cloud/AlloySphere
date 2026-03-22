@@ -448,7 +448,7 @@ export function SearchPage() {
                               </div>
                             )}
                           </div>
-                          <div className="flex flex-col gap-2">
+                          <div className="flex flex-col gap-2" onClick={(e) => e.stopPropagation()}>
 
                             {/* Apply button for Talent viewing Startups */}
                             {activeTab === 'startups' && isTalent && user?._id !== result.founderId?._id && (
