@@ -221,7 +221,7 @@ export type StartupUpdateInput = z.infer<typeof StartupUpdateSchema>;
  */
 export const CreateMilestoneSchema = z.object({
   startupId: z.string().min(1, 'Startup ID is required'),
-  assignedTo: z.string().min(1, 'Assignee is required'),
+  assignedTo: z.string().min(1, 'Assignee is required').optional(),
   title: z.string()
     .min(2, 'Title must be at least 2 characters')
     .max(200, 'Title must be at most 200 characters'),

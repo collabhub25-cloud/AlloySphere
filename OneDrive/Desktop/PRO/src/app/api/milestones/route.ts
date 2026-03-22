@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
     const { startupId, assignedTo, title, description, amount, dueDate } = body;
 
     // Validation
-    if (!startupId || !assignedTo || !title || !description || !amount || !dueDate) {
+    if (!startupId || !title || !description || !amount || !dueDate) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -134,19 +134,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify assigned user exists
-    const assignedUser = await User.findById(assignedTo);
-    if (!assignedUser) {
-      return NextResponse.json(
-        { error: 'Assigned user not found' },
-        { status: 404 }
-      );
+    // Verify assigned user exists ONLY if assignedTo is provided
+    if (assignedTo) {
+      const assignedUser = await User.findById(assignedTo);
+      if (!assignedUser) {
+        return NextResponse.json(
+          { error: 'Assigned user not found' },
+          { status: 404 }
+        );
+      }
     }
 
-    // Create milestone
-    const milestone = await Milestone.create({
+    const milestoneData: any = {
       startupId,
-      assignedTo,
       title: title.trim(),
       description: description.trim(),
       amount,
@@ -155,7 +155,14 @@ export async function POST(request: NextRequest) {
       escrowStatus: 'unfunded',
       createdAt: new Date(),
       updatedAt: new Date(),
-    });
+    };
+    
+    if (assignedTo) {
+      milestoneData.assignedTo = assignedTo;
+    }
+
+    // Create milestone
+    const milestone = await Milestone.create(milestoneData);
 
     await milestone.populate([
       { path: 'startupId', select: 'name industry stage' },

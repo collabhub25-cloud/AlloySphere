@@ -103,10 +103,15 @@ export function CreateStartupModal({ onSuccess }: CreateStartupModalProps) {
           fundingAmount: '',
           website: '',
         });
+        setFieldErrors({});
         onSuccess?.();
       } else {
-        if (data.details && Array.isArray(data.details) && data.details.length > 0) {
-          toast.error(data.details[0].message || 'Validation failed');
+        if (data.fields && Object.keys(data.fields).length > 0) {
+          setFieldErrors(data.fields);
+          toast.error('Please fix the highlighted fields');
+        } else if (data.details && Array.isArray(data.details) && data.details.length > 0) {
+          const firstError = typeof data.details[0] === 'string' ? data.details[0] : data.details[0].message;
+          toast.error(firstError || 'Validation failed');
         } else {
           toast.error(data.error || 'Failed to create startup');
         }
@@ -156,10 +161,12 @@ export function CreateStartupModal({ onSuccess }: CreateStartupModalProps) {
             <Textarea
               id="vision"
               placeholder="What's your startup's vision?"
+              className={fieldErrors.vision ? "border-red-500" : ""}
               value={formData.vision}
               onChange={(e) => setFormData({ ...formData, vision: e.target.value })}
               rows={2}
             />
+            {fieldErrors.vision && <p className="text-xs text-red-500 mt-1">{fieldErrors.vision}</p>}
           </div>
 
           <div className="space-y-2">
@@ -167,10 +174,12 @@ export function CreateStartupModal({ onSuccess }: CreateStartupModalProps) {
             <Textarea
               id="description"
               placeholder="Describe your startup in detail"
+              className={fieldErrors.description ? "border-red-500" : ""}
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={4}
             />
+            {fieldErrors.description && <p className="text-xs text-red-500 mt-1">{fieldErrors.description}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -186,12 +195,13 @@ export function CreateStartupModal({ onSuccess }: CreateStartupModalProps) {
                   ))}
                 </SelectContent>
               </Select>
+              {fieldErrors.stage && <p className="text-xs text-red-500 mt-1">{fieldErrors.stage}</p>}
             </div>
 
             <div className="space-y-2">
               <Label>Funding Stage *</Label>
               <Select value={formData.fundingStage} onValueChange={(v) => setFormData({ ...formData, fundingStage: v })}>
-                <SelectTrigger className={fieldErrors.stage ? "border-red-500" : ""}>
+                <SelectTrigger className={fieldErrors.fundingStage ? "border-red-500" : ""}>
                   <SelectValue placeholder="Select funding stage" />
                 </SelectTrigger>
                 <SelectContent>
@@ -200,6 +210,7 @@ export function CreateStartupModal({ onSuccess }: CreateStartupModalProps) {
                   ))}
                 </SelectContent>
               </Select>
+              {fieldErrors.fundingStage && <p className="text-xs text-red-500 mt-1">{fieldErrors.fundingStage}</p>}
             </div>
           </div>
 
@@ -207,7 +218,7 @@ export function CreateStartupModal({ onSuccess }: CreateStartupModalProps) {
             <div className="space-y-2">
               <Label>Industry *</Label>
               <Select value={formData.industry} onValueChange={(v) => setFormData({ ...formData, industry: v })}>
-                <SelectTrigger className={fieldErrors.stage ? "border-red-500" : ""}>
+                <SelectTrigger className={fieldErrors.industry ? "border-red-500" : ""}>
                   <SelectValue placeholder="Select industry" />
                 </SelectTrigger>
                 <SelectContent>
@@ -216,6 +227,7 @@ export function CreateStartupModal({ onSuccess }: CreateStartupModalProps) {
                   ))}
                 </SelectContent>
               </Select>
+              {fieldErrors.industry && <p className="text-xs text-red-500 mt-1">{fieldErrors.industry}</p>}
             </div>
 
             <div className="space-y-2">

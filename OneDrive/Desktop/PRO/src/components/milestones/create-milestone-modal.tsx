@@ -39,11 +39,9 @@ export function CreateMilestoneModal({ startupId, onSuccess }: CreateMilestoneMo
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [startups, setStartups] = useState<Startup[]>([]);
-  const [talents, setTalents] = useState<Talent[]>([]);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     startupId: startupId || '',
-    assignedTo: '',
     title: '',
     description: '',
     amount: '',
@@ -60,13 +58,6 @@ export function CreateMilestoneModal({ startupId, onSuccess }: CreateMilestoneMo
           if (startupsRes.ok) {
             const data = await startupsRes.json();
             setStartups(data.startups || []);
-          }
-
-          // Fetch available talents
-          const talentsRes = await apiFetch('/api/search/talents?limit=50');
-          if (talentsRes.ok) {
-            const data = await talentsRes.json();
-            setTalents(data.talents || []);
           }
         } catch (error) {
           console.error('Error fetching data:', error);
@@ -85,7 +76,7 @@ export function CreateMilestoneModal({ startupId, onSuccess }: CreateMilestoneMo
       return;
     }
 
-    if (!formData.startupId || !formData.assignedTo || !formData.title || !formData.description || !formData.amount || !formData.dueDate) {
+    if (!formData.startupId || !formData.title || !formData.description || !formData.amount || !formData.dueDate) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -95,7 +86,6 @@ export function CreateMilestoneModal({ startupId, onSuccess }: CreateMilestoneMo
     try {
       const response = await apiPost('/api/milestones', {
           startupId: formData.startupId,
-          assignedTo: formData.assignedTo,
           title: formData.title,
           description: formData.description,
           amount: parseFloat(formData.amount),
@@ -109,7 +99,6 @@ export function CreateMilestoneModal({ startupId, onSuccess }: CreateMilestoneMo
         setOpen(false);
         setFormData({
           startupId: startupId || '',
-          assignedTo: '',
           title: '',
           description: '',
           amount: '',
@@ -142,7 +131,7 @@ export function CreateMilestoneModal({ startupId, onSuccess }: CreateMilestoneMo
             Create New Milestone
           </DialogTitle>
           <DialogDescription>
-            Define a milestone with payment amount and assignee
+            Define an open milestone with an estimated amount
           </DialogDescription>
         </DialogHeader>
         
@@ -160,25 +149,6 @@ export function CreateMilestoneModal({ startupId, onSuccess }: CreateMilestoneMo
               <SelectContent>
                 {startups.map((s) => (
                   <SelectItem key={s._id} value={s._id}>{s.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Assign To *</Label>
-            <Select 
-              value={formData.assignedTo} 
-              onValueChange={(v) => setFormData({ ...formData, assignedTo: v })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select talent" />
-              </SelectTrigger>
-              <SelectContent>
-                {talents.map((t) => (
-                  <SelectItem key={t._id} value={t._id}>
-                    {t.name} ({t.email})
-                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -209,7 +179,7 @@ export function CreateMilestoneModal({ startupId, onSuccess }: CreateMilestoneMo
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="amount">Amount ($) *</Label>
+              <Label htmlFor="amount">Estimated Amount ($) *</Label>
               <Input
                 id="amount"
                 type="number"
@@ -222,7 +192,7 @@ export function CreateMilestoneModal({ startupId, onSuccess }: CreateMilestoneMo
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="dueDate">Due Date *</Label>
+              <Label htmlFor="dueDate">Estimated Time (Date) *</Label>
               <Input
                 id="dueDate"
                 type="date"

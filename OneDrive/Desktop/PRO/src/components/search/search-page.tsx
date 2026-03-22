@@ -349,7 +349,17 @@ export function SearchPage() {
               ) : (
                 <div className="space-y-4">
                   {results.map((result) => (
-                    <Card key={result._id} className="hover:shadow-md transition-shadow">
+                    <Card
+                      key={result._id}
+                      className="hover:shadow-md transition-shadow cursor-pointer"
+                      onClick={() => {
+                        if (activeTab === 'startups') {
+                          router.push(`/startup/${result._id}`);
+                        } else {
+                          viewProfile(result._id);
+                        }
+                      }}
+                    >
                       <CardContent className="p-6">
                         <div className="flex items-start gap-4">
                           <Avatar className="h-12 w-12">
@@ -439,19 +449,6 @@ export function SearchPage() {
                             )}
                           </div>
                           <div className="flex flex-col gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                if (activeTab === 'startups') {
-                                  router.push(`/startup/${result._id}`);
-                                } else {
-                                  viewProfile(result._id);
-                                }
-                              }}
-                            >
-                              View Profile
-                            </Button>
 
                             {/* Apply button for Talent viewing Startups */}
                             {activeTab === 'startups' && isTalent && user?._id !== result.founderId?._id && (

@@ -44,7 +44,7 @@ const getNavigation = (role: string) => {
         { id: 'milestones', label: 'Milestones', icon: Target },
       ],
       finance: [
-        { id: 'payments', label: 'Payments', icon: CreditCard },
+        { id: 'payments', label: 'Funding', icon: CreditCard },
       ],
       communication: [
         { id: 'messages', label: 'Messages', icon: MessageSquare, countKey: 'messages' },

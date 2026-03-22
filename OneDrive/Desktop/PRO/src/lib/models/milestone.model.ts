@@ -8,7 +8,7 @@ export type PaymentStatus = 'pending' | 'marked_paid' | 'confirmed' | 'disputed'
 
 export interface IMilestone extends Document {
     startupId: mongoose.Types.ObjectId;
-    assignedTo: mongoose.Types.ObjectId;
+    assignedTo?: mongoose.Types.ObjectId;
     agreementId?: mongoose.Types.ObjectId;
     title: string;
     description: string;
@@ -36,7 +36,7 @@ export interface IMilestone extends Document {
 const MilestoneSchema = new Schema<IMilestone>(
     {
         startupId: { type: Schema.Types.ObjectId, ref: 'Startup', required: true },
-        assignedTo: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+        assignedTo: { type: Schema.Types.ObjectId, ref: 'User' },
         agreementId: { type: Schema.Types.ObjectId, ref: 'Agreement' },
         title: { type: String, required: true },
         description: { type: String, required: true },
